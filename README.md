@@ -4,5 +4,5 @@ A DCS bullseye map generator primarily designed for the Mirage 2000C based on a 
 
 ## Example
 <p align="center">
-  <img width="600" src="https://github.com/user-attachments/assets/8e049c97-d000-4b2b-b08b-dd2390dbff0c">
+  <img width="600" src="https://github.com/user-attachments/assets/7d3d37c6-5de4-4d04-84b6-6308da52e800">
 </p>
