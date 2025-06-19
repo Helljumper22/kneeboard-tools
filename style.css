@@ -13,20 +13,49 @@ body {
       display: flex;
       flex-direction: column;
       width: 500px;
-      padding: 20px;
       background: #2b2b2b;
       border-right: 1px solid #444;
       box-sizing: border-box;
       overflow-y: auto;
 
-      .sidebar-title {
-        font-size: 20px;
-        margin-bottom: 20px;
+      .sidebar-header {
+        position: sticky;
+        top: 0;
+        background: #2b2b2b;
+        padding: 20px;
+        border-bottom: 1px solid #444;
+        z-index: 10;
+
+        .sidebar-title {
+          width: 100%;
+          text-align: center;
+          font-size: 20px;
+          margin-bottom: 20px;
+        }
+
+        .header-buttons {
+          margin-top: 10px;
+          display: flex;
+          gap: 10px;
+
+          button {
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+
+            &:hover {
+              background: #555;
+            }
+          }
+        }
       }
 
       .input-fields-container {
-        width: 100%;
-        margin-top: 20px;
+        padding: 20px;
         text-align: left;
         display: inline-block;
 
@@ -51,7 +80,7 @@ body {
 
             label {
               display: inline-block;
-              width: 120px;
+              width: 150px;
               font-size: 14px;
               margin-bottom: 5px;
             }
@@ -63,8 +92,36 @@ body {
               font-size: 14px;
               margin-bottom: 10px;
 
-              &[type="checkbox"] {
+              &[type=checkbox] {
                 width: 146px;
+              }
+
+              &[type="range"] {
+                cursor: pointer;
+                height: 16px;
+                padding: 0 5px;
+                border-radius: 1px;
+                border: 1px solid rgb(118, 118, 118);
+                background: white;
+                outline: none;
+                appearance: none;
+
+                &::-webkit-slider-thumb {
+                  cursor: pointer;
+                  appearance: none;
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 50%;
+                  background: #005CC8;
+                }
+
+                &::-moz-range-thumb {
+                  cursor: pointer;
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 50%;
+                  background: #005CC8;
+                }
               }
             }
 
@@ -73,20 +130,56 @@ body {
             }
           }
 
-          .area-points-subcontainer {
-            max-height: 200px;
+          .area-points-subcontainer,
+          .borders-subcontainer,
+          .rings-subcontainer {
+            max-height: 307px;
             overflow-y: auto;
             border: 1px solid #444;
             padding: 10px;
             background: #1e1e1e;
 
-            .area-point {
-              margin-bottom: 10px;
-            }
+            .area-point,
+            .border,
+            .ring {
+              display: flex;
+              flex-direction: column;
+              position: relative;
+              padding-right: 20px;
 
-            .area-point:not(:first-child) {
-              padding-top: 10px;
-              border-top: 1px solid white;
+              .delete-area-point-button,
+              .delete-border-button,
+              .delete-ring-button {
+                position: absolute;
+                padding: 4px 10px;
+                margin: 0;
+                top: 0px;
+                right: 5px;
+              }
+
+              .delete-area-point-button {
+                height: 111px;
+              }
+
+              .delete-border-button {
+                height: 191px;
+              }
+
+              .delete-ring-button {
+                height: 151px;
+              }
+
+              &:not(:first-child) {
+                padding-top: 10px;
+                margin-top: 10px;
+                border-top: 1px solid white;
+
+                .delete-area-point-button,
+                .delete-border-button,
+                .delete-ring-button {
+                  margin-top: 10px;
+                }
+              }
             }
           }
 

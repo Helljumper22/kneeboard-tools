@@ -10,107 +10,89 @@
   <script src="./jquery-3.7.1.min.js"></script>
   <script src="./main.js"></script>
   <script src="./draw-utils.js"></script>
+  <script src="./utils.js"></script>
 </head>
 
 <body>
   <div class="container">
     <div class="sidebar">
-      <h1 class="sidebar-title">DCS Bullseye Map Generator</h1>
+      <header class="sidebar-header">
+        <h1 class="sidebar-title">DCS Bullseye Map Generator</h1>
+        <div class="header-buttons">
+          <button class="download-map-button">Download map</button>
+          <button class="reset-fields-button">Reset fields</button>
+        </div>
+      </header>
       <div class="input-fields-container">
+
+        <!-- Bullseye -->
         <fieldset class="cap-fields">
           <legend class="cap-fields-title">Bullseye options</legend>
           <div class="field">
-            <label>Display bullseye:</label>
+            <label>Display bullseye</label>
             <input type="checkbox" class="display-bullseye update-field" checked />
           </div>
           <div class="field">
-            <label>Limit bullseye to area:</label>
+            <label>Limit bullseye to area</label>
             <input type="checkbox" class="limit-bullseye-to-area update-field" checked />
           </div>
           <div class="field">
-            <label>Bullseye name:</label>
+            <label>Bullseye name</label>
             <input type="text" class="bullseye-name update-field" />
           </div>
           <div class="field">
-            <label>Ring range (NM):</label>
-            <input type="number" class="rings-range update-field" />
+            <label>Name position</label>
+            <input type="range" class="bullseye-name-angle update-field" min="0" max="360" />
           </div>
           <div class="field">
-            <label>Line angles* (°):</label>
-            <input type="number" class="lines-angle update-field" />
+            <label>Ring range (nm)</label>
+            <input type="number" class="rings-range update-field" value="20" />
           </div>
-
           <div class="field">
-            <label>Half angle lines:</label>
+            <label>Ring range position</label>
+            <input type="range" class="ring-range-angle update-field" min="0" max="360" />
+          </div>
+          <div class="field">
+            <label>Line angles* (°)</label>
+            <input type="number" class="lines-angle update-field" value="30" />
+          </div>
+          <div class="field">
+            <label>Half angle lines</label>
             <input type="checkbox" class="half-angle-lines update-field" checked />
           </div>
           <span class="asterisk-text">* Rounded to closest divider of 90.</span>
         </fieldset>
 
+        <!-- Cap point -->
         <fieldset class="cap-fields">
           <legend class="cap-fields-title">CAP Parameters</legend>
-          <!--<div class="field">
-            <label>Point name:</label>
+          <div class="field">
+            <label>Point name</label>
             <input type="text" class="cap-point-name update-field" />
           </div>
           <div class="field">
-            <label>CAP name:</label>
+            <label>CAP name</label>
             <input type="text" class="cap-name update-field" />
           </div>
           <div class="field">
-            <label>Azimuth (°):</label>
+            <label>Azimuth (°)</label>
             <input type="number" class="cap-azimuth update-field" />
           </div>
           <div class="field">
-            <label>Distance (NM):</label>
+            <label>Distance (nm)</label>
             <input type="number" class="cap-distance update-field" />
           </div>
           <div class="field">
-            <label>Length (NM):</label>
+            <label>Length (nm)</label>
             <input type="number" class="cap-length update-field" />
           </div>
           <div class="field">
-            <label>Width (NM):</label>
+            <label>Width (nm)</label>
             <input type="number" class="cap-width update-field" />
           </div>
           <div class="field">
-            <label>Orientation (°):</label>
+            <label>Orientation (°)</label>
             <input type="number" class="cap-orientation update-field" />
-          </div>
-          <div class="field">
-            <label>Side</label>
-            <select class="cap-side update-field">
-              <option value="1" selected>Left</option>
-              <option value="0">Right</option>
-            </select>
-          </div>-->
-          <div class="field">
-            <label>Point name:</label>
-            <input type="text" class="cap-point-name update-field" value="16" />
-          </div>
-          <div class="field">
-            <label>CAP name:</label>
-            <input type="text" class="cap-name update-field" value="CAP PW1" />
-          </div>
-          <div class="field">
-            <label>Azimuth (°):</label>
-            <input type="number" class="cap-azimuth update-field" value="230" />
-          </div>
-          <div class="field">
-            <label>Distance (NM):</label>
-            <input type="number" class="cap-distance update-field" value="61" />
-          </div>
-          <div class="field">
-            <label>Length (NM):</label>
-            <input type="number" class="cap-length update-field" value="20" />
-          </div>
-          <div class="field">
-            <label>Width (NM):</label>
-            <input type="number" class="cap-width update-field" value="5" />
-          </div>
-          <div class="field">
-            <label>Orientation* (°):</label>
-            <input type="number" class="cap-orientation update-field" value="36" />
           </div>
           <div class="field">
             <label>Side</label>
@@ -122,112 +104,86 @@
           <span class="asterisk-text">* Use true heading.</span>
         </fieldset>
 
+        <!-- Area points -->
         <fieldset class="area-points-fields">
           <legend class="area-points-title">Area Points</legend>
-          <div class="area-points-subcontainer">
-            <!--<div class="area-point">
+          <div class="area-points-subcontainer element-container">
+            <div class="area-point element">
               <div class="field">
-                <label>Name:</label>
+                <label>Name</label>
                 <input type="text" class="area-point-name update-field" />
               </div>
               <div class="field">
-                <label>Azimuth (°):</label>
+                <label>Azimuth (°)</label>
                 <input type="number" class="area-point-azimuth update-field" />
               </div>
               <div class="field">
-                <label>Distance (NM):</label>
+                <label>Distance (nm)</label>
                 <input type="number" class="area-point-distance update-field" />
               </div>
-            </div>-->
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="13" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="330" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="34" />
-              </div>
-            </div>
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="13" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="100" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="30" />
-              </div>
-            </div>
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="19" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="180" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="39" />
-              </div>
-            </div>
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="14" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="204" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="84" />
-              </div>
-            </div>
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="15" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="246" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="92" />
-              </div>
-            </div>
-            <div class="area-point">
-              <div class="field">
-                <label>Name:</label>
-                <input type="text" class="area-point-name update-field" value="18" />
-              </div>
-              <div class="field">
-                <label>Azimuth (°):</label>
-                <input type="number" class="area-point-azimuth update-field" value="266" />
-              </div>
-              <div class="field">
-                <label>Distance (NM):</label>
-                <input type="number" class="area-point-distance update-field" value="51" />
-              </div>
+              <button class="delete-area-point-button">-</button>
             </div>
           </div>
           <button class="add-area-point-button">Add Area Point</button>
         </fieldset>
 
-        <button class="download-map-button">Download map</button>
+        <!-- Borders -->
+        <fieldset class="borders-fields">
+          <legend class="borders-title">Borders</legend>
+          <div class="borders-subcontainer element-container">
+            <div class="border element">
+              <div class="field">
+                <label>Name</label>
+                <input type="text" class="border-name update-field" />
+              </div>
+              <div class="field">
+                <label>Start azimuth (°)</label>
+                <input type="number" class="border-start-azimuth update-field" />
+              </div>
+              <div class="field">
+                <label>Start distance (nm)</label>
+                <input type="number" class="border-start-distance update-field" />
+              </div>
+              <div class="field">
+                <label>End azimuth (°)</label>
+                <input type="number" class="border-end-azimuth update-field" />
+              </div>
+              <div class="field">
+                <label>End distance (nm)</label>
+                <input type="number" class="border-end-distance update-field" />
+              </div>
+              <button class="delete-border-button">-</button>
+            </div>
+          </div>
+          <button class="add-border-button">Add Border</button>
+        </fieldset>
+
+        <!-- Rings -->
+        <fieldset class="rings-fields">
+          <legend class="rings-title">Rings</legend>
+          <div class="rings-subcontainer element-container">
+            <div class="ring element">
+              <div class="field">
+                <label>Name</label>
+                <input type="text" class="ring-name update-field" />
+              </div>
+              <div class="field">
+                <label>Azimuth (°)</label>
+                <input type="number" class="ring-azimuth update-field" />
+              </div>
+              <div class="field">
+                <label>Distance (nm)</label>
+                <input type="number" class="ring-distance update-field" />
+              </div>
+              <div class="field">
+                <label>Radius (nm)</label>
+                <input type="number" class="ring-radius update-field" />
+              </div>
+              <button class="delete-ring-button">-</button>
+            </div>
+          </div>
+          <button class="add-ring-button">Add Ring</button>
+        </fieldset>
       </div>
     </div>
     <div class="map-container">

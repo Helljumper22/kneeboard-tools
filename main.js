@@ -1,142 +1,89 @@
 defaultBullseyeRingsRange = 20;
 defaultBullseyeLinesAngle = 30;
 
+bullseyeDataKey = 'bullseye-data';
+capPointDataKey = 'cap-point-data';
+areaPointsDataKey = 'area-points-data';
+bordersDataKey = 'borders-data';
+ringsDataKey = 'rings-data';
 
 class BullseyeMapGenerator {
   constructor() {
+    this.utils = new Utils();
     this.drawUtils = new DrawUtils();
 
-    this.cap = {}; // Cap point
-    this.areaPoints = []; // List of area points
+    // Bullseye
+    this.bullseye = {};
 
-    this.displayBullseye = true;
-    this.bullseyeName = '';
-    this.limitBullseyeToArea = true;
-    this.ringsRange = 0;
-    this.linesAngle = 0;
-    this.halfAnglesLines = true;
+    this.capPoint = {};
+    this.areaPoints = [];
+    this.borders = [];
+    this.rings = [];
 
     this.furthestPoint = 0;
     this.furthestPointMargin = 1.2;
-    this.defaultScale = 100; // Default scale (width in NM)
+    this.defaultScale = 100;
 
-    this.initDownloadButton();
-    $('.update-field').on('input', () => this.updateMap());
-    this.initAddAreaPoint();
-    this.updateMap(); // Initial map rendering
-  }
+    this.getData();
 
-  initDownloadButton() {
     $('.download-map-button').on('click', () => {
       const link = document.createElement('a');
       link.download = 'bullseye_map.png';
       link.href = $('.map-canvas')[0].toDataURL('image/png');
       link.click();
     });
-  }
 
-  initAddAreaPoint() {
-    // Add event listener to the "Add Area Point" button
-    $('.add-area-point-button').on('click', () => {
-      const newPoint = $('.area-point').first().clone(); // Clone the first area point
-      newPoint.find('input').val(''); // Clear input values
-      $('.area-points-subcontainer').append(newPoint); // Add the cloned point to the container
+    $('.reset-fields-button').on('click', () => {
+      if (window.confirm('Are you sure ? All data will be lost.')) {
+        $('input[type=text].update-field').val('');
+        $('input[type=number].update-field').val('');
 
-      // Add input listeners to the new area point
-      newPoint.find('.update-field').on('input', () => this.updateMap());
-    });
-  }
+        $('.display-bullseye').prop('checked', true);
+        $('.limit-bullseye-to-area').prop('checked', true);
+        $('.half-angle-lines').prop('checked', true);
 
-  getInputParameters() {
-    this.displayBullseye = $('.display-bullseye').is(':checked');
-    this.limitBullseyeToArea = $('.limit-bullseye-to-area').is(':checked');
-    this.bullseyeName = $('.bullseye-name').val();
-    this.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
-    this.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
-    this.halfAnglesLines = $('.half-angle-lines').is(':checked');
+        $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
+        $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
 
-    // Get values from CAP input fields
-    const capPointName = $('.cap-point-name').val();
-    const capName = $('.cap-name').val();
-    const capDistance = parseFloat($('.cap-distance').val());
-    const capAzimuth = parseFloat($('.cap-azimuth').val());
-    const racetrackLength = parseFloat($('.cap-length').val());
-    const racetrackWidth = parseFloat($('.cap-width').val());
-    const racetrackOrientation = parseFloat($('.cap-orientation').val());
-    const racetrackSide = parseInt($('.cap-side').val());
+        $('.cap-side').val(1);
 
-    // Update CAP parameters if valid, otherwise set to null
-    this.cap = {
-      pointName: capPointName,
-      name: capName,
-      distance: isNaN(capDistance) ? null : capDistance,
-      azimuth: isNaN(capAzimuth) ? null : capAzimuth,
-      length: isNaN(racetrackLength) ? null : racetrackLength,
-      width: isNaN(racetrackWidth) ? null : racetrackWidth,
-      orientation: isNaN(racetrackOrientation) ? null : racetrackOrientation,
-      leftSide: racetrackSide == 1,
-    };
+        $('.area-point:not(:first)').remove();
+        $('.border:not(:first)').remove();
+        $('.ring:not(:first)').remove();
 
-    const angleToCap = (this.cap.azimuth - 90) * Math.PI / 180;
-    this.cap.x = this.cap.distance * Math.cos(angleToCap);
-    this.cap.y = this.cap.distance * Math.sin(angleToCap);
-
-    this.cap.corners = [];
-    this.cap.corners.push({
-      x: this.cap.x + ((this.cap.width / 2) * Math.cos((this.cap.orientation - 90) * Math.PI / 180)),
-      y: this.cap.y - ((this.cap.width / 2) * Math.cos(this.cap.orientation * Math.PI / 180))
-    });
-
-    this.cap.corners.push({
-      x: this.cap.corners[0].x - (this.cap.length * Math.cos((this.cap.orientation - 90) * Math.PI / 180)),
-      y: this.cap.corners[0].y + (this.cap.length * Math.cos(this.cap.orientation * Math.PI / 180))
-    });
-
-    let thirdCornerX, thirdCornerY, fourthCornerX, fourthCornerY;
-    if (this.cap.leftSide) {
-      this.cap.corners.push({
-        x: this.cap.corners[0].x - (this.cap.length * Math.cos((this.cap.orientation - 90) * Math.PI / 180)) - (this.cap.width * Math.cos(this.cap.orientation * Math.PI / 180)),
-        y: this.cap.corners[0].y + (this.cap.length * Math.cos(this.cap.orientation * Math.PI / 180)) - (this.cap.width * Math.cos((this.cap.orientation - 90) * Math.PI / 180))
-      });
-
-      this.cap.corners.push({
-        x: this.cap.corners[0].x - (this.cap.width * Math.cos(this.cap.orientation * Math.PI / 180)),
-        y: this.cap.corners[0].y - (this.cap.width * Math.cos((this.cap.orientation - 90) * Math.PI / 180))
-      });
-    } else {
-      this.cap.corners.push({
-        x: this.cap.corners[0].x - (this.cap.length * Math.cos((this.cap.orientation - 90) * Math.PI / 180)) + (this.cap.width * Math.cos(this.cap.orientation * Math.PI / 180)),
-        y: this.cap.corners[0].y + (this.cap.length * Math.cos(this.cap.orientation * Math.PI / 180)) + (this.cap.width * Math.cos((this.cap.orientation - 90) * Math.PI / 180))
-      });
-
-      this.cap.corners.push({
-        x: this.cap.corners[0].x + (this.cap.width * Math.cos(this.cap.orientation * Math.PI / 180)),
-        y: this.cap.corners[0].y + (this.cap.width * Math.cos((this.cap.orientation - 90) * Math.PI / 180))
-      });
-    }
-
-    // Get values from area points
-    this.areaPoints = [];
-    $('.area-point').each((index, element) => {
-      const name = $(element).find('.area-point-name').val();
-      const azimuth = parseFloat($(element).find('.area-point-azimuth').val());
-      const distance = parseFloat($(element).find('.area-point-distance').val());
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        this.areaPoints.push({ name, azimuth, distance });
+        this.updateMap();
       }
     });
 
-    this.areaPoints.map((point, index) => {
-      const angleRad = (point.azimuth - 90) * Math.PI / 180; // Convert azimuth to canvas coordinates
-      this.areaPoints[index].x = point.distance * Math.cos(angleRad); // Convert distance to x-coordinate
-      this.areaPoints[index].y = point.distance * Math.sin(angleRad); // Convert distance to y-coordinate
+    $('.add-area-point-button, .add-border-button, .add-ring-button').on('click', (event) => {
+      const elementContainer = $(event.target).siblings('.element-container').first();
+      const newPoint = $(elementContainer).find('.element').first().clone();
+      newPoint.find('input').val('');
+      $(elementContainer).append(newPoint);
+
+      newPoint.find('.update-field').on('input', () => this.updateMap());
+
+      newPoint.find('button').on('click', (event) => this.deleteElement(event));
     });
+
+    $('.delete-area-point-button, .delete-border-button, .delete-ring-button').on('click', (event) => this.deleteElement(event));
+
+    $('.update-field').on('input', () => this.updateMap());
+
+    this.updateMap();
+  }
+
+  deleteElement(event) {
+    if ($(event.target).closest('.element-container').find('.element').length > 1) {
+      $(event.target).closest('.element').remove();
+    } else {
+      $(event.target).closest('.element').find('.update-field').val('');
+    }
+
+    this.updateMap();
   }
 
   updateMap() {
-    console.log('updateMap');
-
     this.furthestPoint = 0;
 
     this.getInputParameters();
@@ -153,28 +100,161 @@ class BullseyeMapGenerator {
     // Draw area points
     this.runAreaPoints();
 
+    // Draw borders
+    this.runBorders();
+
+    // Draw rings
+    this.runRings();
+
     // Draw bullseye
-    if (this.displayBullseye) this.runBullseye();
+    if (this.bullseye.display) this.runBullseye();
 
     this.drawUtils.drawBackground('white');
+
+    this.saveData();
+  }
+
+  getInputParameters() {
+    // Bullseye
+    this.bullseye.display = $('.display-bullseye').is(':checked');
+    this.bullseye.limitToArea = $('.limit-bullseye-to-area').is(':checked');
+    this.bullseye.name = $('.bullseye-name').val();
+    this.bullseye.nameAngle = parseInt($('.bullseye-name-angle').val());
+    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
+    this.bullseye.ringsRangeAngle = parseInt($('.ring-range-angle').val())
+    this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
+    this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
+
+    const capPointName = $('.cap-point-name').val();
+    const capName = $('.cap-name').val();
+    const capDistance = parseFloat($('.cap-distance').val());
+    const capAzimuth = parseFloat($('.cap-azimuth').val());
+    const racetrackLength = parseFloat($('.cap-length').val());
+    const racetrackWidth = parseFloat($('.cap-width').val());
+    const racetrackOrientation = parseFloat($('.cap-orientation').val());
+    const racetrackSide = parseInt($('.cap-side').val());
+
+    // CAP point
+    this.capPoint = {
+      pointName: capPointName,
+      name: capName,
+      distance: isNaN(capDistance) ? null : capDistance,
+      azimuth: isNaN(capAzimuth) ? null : capAzimuth,
+      length: isNaN(racetrackLength) ? null : racetrackLength,
+      width: isNaN(racetrackWidth) ? null : racetrackWidth,
+      orientation: isNaN(racetrackOrientation) ? null : racetrackOrientation,
+      leftSide: racetrackSide == 1,
+    };
+
+    const angleToCap = (this.capPoint.azimuth - 90) * Math.PI / 180;
+    this.capPoint.x = this.capPoint.distance * Math.cos(angleToCap);
+    this.capPoint.y = this.capPoint.distance * Math.sin(angleToCap);
+
+    this.capPoint.corners = [];
+    this.capPoint.corners.push({
+      x: this.capPoint.x + ((this.capPoint.width / 2) * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180)),
+      y: this.capPoint.y - ((this.capPoint.width / 2) * Math.cos(this.capPoint.orientation * Math.PI / 180))
+    });
+
+    this.capPoint.corners.push({
+      x: this.capPoint.corners[0].x - (this.capPoint.length * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180)),
+      y: this.capPoint.corners[0].y + (this.capPoint.length * Math.cos(this.capPoint.orientation * Math.PI / 180))
+    });
+
+    if (this.capPoint.leftSide) {
+      this.capPoint.corners.push({
+        x: this.capPoint.corners[0].x - (this.capPoint.length * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180)) - (this.capPoint.width * Math.cos(this.capPoint.orientation * Math.PI / 180)),
+        y: this.capPoint.corners[0].y + (this.capPoint.length * Math.cos(this.capPoint.orientation * Math.PI / 180)) - (this.capPoint.width * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180))
+      });
+
+      this.capPoint.corners.push({
+        x: this.capPoint.corners[0].x - (this.capPoint.width * Math.cos(this.capPoint.orientation * Math.PI / 180)),
+        y: this.capPoint.corners[0].y - (this.capPoint.width * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180))
+      });
+    } else {
+      this.capPoint.corners.push({
+        x: this.capPoint.corners[0].x - (this.capPoint.length * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180)) + (this.capPoint.width * Math.cos(this.capPoint.orientation * Math.PI / 180)),
+        y: this.capPoint.corners[0].y + (this.capPoint.length * Math.cos(this.capPoint.orientation * Math.PI / 180)) + (this.capPoint.width * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180))
+      });
+
+      this.capPoint.corners.push({
+        x: this.capPoint.corners[0].x + (this.capPoint.width * Math.cos(this.capPoint.orientation * Math.PI / 180)),
+        y: this.capPoint.corners[0].y + (this.capPoint.width * Math.cos((this.capPoint.orientation - 90) * Math.PI / 180))
+      });
+    }
+
+    // Area points
+    this.areaPoints = [];
+    $('.area-point').each((index, element) => {
+      const name = $(element).find('.area-point-name').val();
+      const azimuth = parseFloat($(element).find('.area-point-azimuth').val());
+      const distance = parseFloat($(element).find('.area-point-distance').val());
+
+      if (!isNaN(azimuth) && !isNaN(distance)) {
+        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const x = distance * Math.cos(angleRad);
+        const y = distance * Math.sin(angleRad);
+
+        this.areaPoints.push({ name, azimuth, distance, x, y });
+      }
+    });
+
+    // Borders
+    this.borders = [];
+    $('.border').each((index, element) => {
+      const name = $(element).find('.border-name').val();
+      const startAzimuth = parseFloat($(element).find('.border-start-azimuth').val());
+      const startDistance = parseFloat($(element).find('.border-start-distance').val());
+      const endAzimuth = parseFloat($(element).find('.border-end-azimuth').val());
+      const endDistance = parseFloat($(element).find('.border-end-distance').val());
+
+      if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
+        const startAngleRad = (startAzimuth - 90) * Math.PI / 180;
+        const startX = startDistance * Math.cos(startAngleRad);
+        const startY = startDistance * Math.sin(startAngleRad);
+
+        const endAngleRad = (endAzimuth - 90) * Math.PI / 180;
+        const endX = endDistance * Math.cos(endAngleRad);
+        const endY = endDistance * Math.sin(endAngleRad);
+
+        this.borders.push({ name, startAzimuth, startDistance, endAzimuth, endDistance, startX, startY, endX, endY });
+      }
+    });
+
+    // Rings
+    this.rings = [];
+    $('.ring').each((index, element) => {
+      const name = $(element).find('.ring-name').val();
+      const azimuth = parseFloat($(element).find('.ring-azimuth').val());
+      const distance = parseFloat($(element).find('.ring-distance').val());
+      const radius = parseFloat($(element).find('.ring-radius').val());
+
+      if (!isNaN(azimuth) && !isNaN(distance)) {
+        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const x = distance * Math.cos(angleRad);
+        const y = distance * Math.sin(angleRad);
+
+        this.rings.push({ name, azimuth, distance, radius, x, y });
+      }
+    });
   }
 
   runScale() {
     // Determine the furthest graphic distance
-    this.furthestPoint = this.defaultScale;
+    this.furthestPoint = 0;
 
     // Initialize bounding box variables
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
 
     // Include CAP point and racetrack in bounding box
-    if (this.cap.azimuth !== null && this.cap.distance !== null) {
-      minX = Math.min(minX, this.cap.x);
-      maxX = Math.max(maxX, this.cap.x);
-      minY = Math.min(minY, this.cap.y);
-      maxY = Math.max(maxY, this.cap.y);
+    if (this.capPoint.azimuth !== null && this.capPoint.distance !== null) {
+      minX = Math.min(minX, this.capPoint.x);
+      maxX = Math.max(maxX, this.capPoint.x);
+      minY = Math.min(minY, this.capPoint.y);
+      maxY = Math.max(maxY, this.capPoint.y);
 
-      if (this.cap.length !== null && this.cap.width !== null && this.cap.orientation !== null) {
-        this.cap.corners.forEach((corner) => {
+      if (this.capPoint.length !== null && this.capPoint.width !== null && this.capPoint.orientation !== null) {
+        this.capPoint.corners.forEach((corner) => {
           minX = Math.min(minX, corner.x);
           maxX = Math.max(maxX, corner.x);
           minY = Math.min(minY, corner.y);
@@ -210,20 +290,20 @@ class BullseyeMapGenerator {
 
   runCapPoint() {
     // Check for valid CAP parameters
-    if (this.cap.azimuth != null && this.cap.distance != null) {
-      const angleToCap = (this.cap.azimuth - 90) * Math.PI / 180;
-      const capX = this.cap.distance * Math.cos(angleToCap);
-      const capY = this.cap.distance * Math.sin(angleToCap);
+    if (this.capPoint.azimuth != null && this.capPoint.distance != null) {
+      const angleToCap = (this.capPoint.azimuth - 90) * Math.PI / 180;
+      const capX = this.capPoint.distance * Math.cos(angleToCap);
+      const capY = this.capPoint.distance * Math.sin(angleToCap);
 
-      if (this.cap.length != null && this.cap.width != null && this.cap.orientation != null) {
+      if (this.capPoint.length != null && this.capPoint.width != null && this.capPoint.orientation != null) {
         // Draw CAP racetrack.
-        this.drawUtils.drawRacetrack(capX, capY, this.cap.length, this.cap.width, this.cap.orientation, this.cap.leftSide, 'black')
+        this.drawUtils.drawRacetrack(capX, capY, this.capPoint.length, this.capPoint.width, this.capPoint.orientation, this.capPoint.leftSide, 'black')
 
 
-        if (this.cap.name != '') {
-          const { x: capNameX, y: capNameY } = this.getCenter(this.cap.corners);
+        if (this.capPoint.name != '') {
+          const { x: capNameX, y: capNameY } = this.utils.getCenter(this.capPoint.corners);
 
-          let capNameAngle = (this.cap.orientation + 90);
+          let capNameAngle = (this.capPoint.orientation + 90);
           if (capNameAngle >= 270) {
             capNameAngle -= 180;
           } else if (capNameAngle >= 90) {
@@ -231,39 +311,18 @@ class BullseyeMapGenerator {
           }
 
           // Draw CAP name.
-          this.drawUtils.drawText(capNameX, capNameY, this.cap.name, 0, 0, capNameAngle * Math.PI / 180, 10);
+          this.drawUtils.drawText(capNameX, capNameY, this.capPoint.name, 0, 0, capNameAngle * Math.PI / 180, 10);
         }
       }
 
-      if (this.cap.pointName != '') {
+      if (this.capPoint.pointName != '') {
         // Draw CAP point name.
-        this.drawUtils.drawFamedText(capX, capY, this.cap.pointName);
+        this.drawUtils.drawFamedText(capX, capY, this.capPoint.pointName);
       }
     }
   }
 
   runAreaPoints() {
-    // Draw each point and its name
-    this.areaPoints.forEach((point, index) => {
-      if (point.name != '') {
-        let farthestAngle = 0;
-        if (this.areaPoints.length > 1) {
-          // Determine the angle for placing the name
-          const prevPoint = this.areaPoints[(index - 1 + this.areaPoints.length) % this.areaPoints.length];
-          const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length];
-
-          const angleToPrev = Math.atan2(prevPoint.y - point.y, prevPoint.x - point.x);
-          const angleToNext = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x);
-
-          // Find the angle farthest from the previous and next points
-          farthestAngle = this.getFarthestAngle(angleToPrev, angleToNext);
-        }
-
-        // Draw the name
-        this.drawUtils.drawFamedText(point.x, point.y, point.name, 7, farthestAngle);
-      }
-    });
-
     if (this.areaPoints.length > 1) {
       // Draw lines between points to form a polygon
       for (let i = 0; i < this.areaPoints.length; i++) {
@@ -273,39 +332,91 @@ class BullseyeMapGenerator {
         this.drawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3);
       }
     }
+
+    this.areaPoints.forEach((point) => {
+      if (point.name != '') this.drawUtils.drawFamedText(point.x, point.y, point.name);
+    });
+  }
+
+  runBorders() {
+    this.drawUtils.setToBackground();
+    if (this.bullseye.limitToArea) this.drawUtils.clipCanevas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+
+    this.borders.forEach((border) => {
+      this.drawUtils.drawBorder(border.startX, border.startY, border.endX, border.endY, 'black', 3);
+    });
+
+    this.drawUtils.unclipCanevas();
+    this.drawUtils.setToForeground();
+  }
+
+  runRings() {
+    this.drawUtils.setToBackground();
+    if (this.bullseye.limitToArea) this.drawUtils.clipCanevas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+
+    this.rings.forEach((ring) => {
+      this.drawUtils.drawRing(ring.x, ring.y, ring.radius, 'black', 2);
+    });
+
+    this.drawUtils.unclipCanevas();
+    this.drawUtils.setToForeground();
+
+    this.rings.forEach((ring) => {
+      if (ring.name != '') this.drawUtils.drawFamedText(ring.x, ring.y, ring.name);
+    });
   }
 
   runBullseye() {
     this.drawUtils.setToBackground();
-    if (this.limitBullseyeToArea) this.drawUtils.clipCanevas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+    if (this.bullseye.limitToArea) this.drawUtils.clipCanevas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
 
     // Draw bullseye dot
     this.drawUtils.drawBullseye(0, 0, 'black');
 
     const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
-    const ringCount = Math.ceil(maxRadius / this.ringsRange); // Calculate how many rings to draw
-
-    // Draw rings
-    for (let i = 1; i <= ringCount + 1; i++) {
-      const radius = i * this.ringsRange;
-      this.drawUtils.drawRing(0, 0, '#555', radius); // Draw each ring
-    }
+    const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
 
     // Draw cardinal lines
-    const linesAngle = this.halfAnglesLines ? this.getClosestDivisorTo90(this.linesAngle) / 2 : this.getClosestDivisorTo90(this.linesAngle);
+    const linesAngle = this.bullseye.halfAnglesLines ? this.utils.getClosestDivisorTo90(this.bullseye.linesAngle) / 2 : this.utils.getClosestDivisorTo90(this.bullseye.linesAngle);
 
     let dashed = false;
     for (let angle = 0; angle < 180; angle += linesAngle) {
       const angleRad = angle * Math.PI / 180;
       this.drawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
 
-      if (this.halfAnglesLines) {
+      if (this.bullseye.halfAnglesLines) {
         dashed = !dashed;
       }
     }
 
+    // Draw rings
+    for (let i = 1; i <= ringCount + 1; i++) {
+      const radius = i * this.bullseye.ringsRange;
+      this.drawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
+
+      this.drawUtils.setToForeground();
+
+      const ringsRangeAngle = Math.round(this.bullseye.ringsRangeAngle / linesAngle) * linesAngle;
+
+      const angleRad = (ringsRangeAngle - 90) * Math.PI / 180;
+      const ringTextX = radius * Math.cos(angleRad);
+      const ringTextY = radius * Math.sin(angleRad);
+
+      this.drawUtils.drawText(ringTextX, ringTextY, radius, 10, angleRad);
+
+      this.drawUtils.setToBackground();
+    }
+
     this.drawUtils.unclipCanevas();
     this.drawUtils.setToForeground();
+
+    if (this.bullseye.name != '') {
+      // Draw bullseye name
+      const angleRad = (this.bullseye.nameAngle - 90) * Math.PI / 180;
+      const textX = (maxRadius + 0.5) * Math.cos(angleRad);
+      const textY = (maxRadius + 0.5) * Math.sin(angleRad);
+      this.drawUtils.drawText(0, 0, this.bullseye.name, 30, angleRad);
+    }
 
     const displayedAngles = [];
     let displayText = true;
@@ -315,115 +426,118 @@ class BullseyeMapGenerator {
 
         // Calculate intersection points with area point lines
         this.areaPoints.forEach((point, index) => {
-          const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length]; // Wrap around to the first point
+          const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length];
 
-          const intersection = this.getIntersectionWithLine(
-            { x: 0, y: 0, angle: angleRad }, // Bullseye line
-            { start: point, end: nextPoint } // Area point line
-          );
+          const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: angleRad }, { start: point, end: nextPoint });
 
           if (intersection) {
             const textAngle = (angle + 90) % 360;
             if (!displayedAngles.includes(textAngle)) {
-              this.drawUtils.drawText(intersection.x, intersection.y, `${textAngle}°`, 4.5, angle * Math.PI / 180);
+              this.drawUtils.drawText(intersection.x, intersection.y, `${textAngle}°`, 20, angle * Math.PI / 180);
+
               displayedAngles.push(textAngle);
             }
           }
         });
       }
 
-      if (this.halfAnglesLines) {
+      if (this.bullseye.halfAnglesLines) {
         displayText = !displayText;
       }
     }
   }
 
-  getFarthestAngle(angleToPrev, angleToNext) {
-    // Normalize angles to the range [-π, π]
-    angleToPrev = ((angleToPrev + Math.PI) % (2 * Math.PI)) - Math.PI;
-    angleToNext = ((angleToNext + Math.PI) % (2 * Math.PI)) - Math.PI;
-
-    // Calculate the midpoint angle between the previous and next points
-    let midpointAngle = (angleToPrev + angleToNext) / 2;
-
-    // If the angles are on opposite sides of the circle, adjust the midpoint
-    if (Math.abs(angleToNext - angleToPrev) > Math.PI) {
-      midpointAngle += Math.PI;
+  getData() {
+    // Bullseye
+    const bullseyeData = JSON.parse(localStorage.getItem(bullseyeDataKey));
+    if (bullseyeData) {
+      $('.display-bullseye').prop('checked', bullseyeData.display);
+      $('.limit-bullseye-to-area').prop('checked', bullseyeData.limitToArea);
+      $('.bullseye-name').val(bullseyeData.name);
+      $('.bullseye-name-angle').val(bullseyeData.nameAngle);
+      $('.rings-range').val(bullseyeData.ringsRange);
+      $('.ring-range-angle').val(bullseyeData.ringsRangeAngle)
+      $('.lines-angle').val(bullseyeData.linesAngle);
+      $('.half-angle-lines').prop('checked', bullseyeData.halfAnglesLines);
     }
 
-    // Normalize the midpoint angle to the range [-π, π]
-    midpointAngle = ((midpointAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+    // Cap point
+    const capPointData = JSON.parse(localStorage.getItem(capPointDataKey));
+    if (capPointData) {
+      $('.cap-point-name').val(capPointData.pointName);
+      $('.cap-name').val(capPointData.name);
+      $('.cap-distance').val(capPointData.distance);
+      $('.cap-azimuth').val(capPointData.azimuth);
+      $('.cap-length').val(capPointData.length);
+      $('.cap-width').val(capPointData.width);
+      $('.cap-orientation').val(capPointData.orientation);
+      $('.cap-side').val(capPointData.leftSide ? 1 : 0).change();
+    }
 
-    // Add 180 degrees (π radians) to find the farthest angle
-    const farthestAngle = midpointAngle + Math.PI;
+    // Area points
+    const areaPointsData = JSON.parse(localStorage.getItem(areaPointsDataKey));
+    if (areaPointsData) {
+      areaPointsData.forEach((areaPointData, index) => {
+        let areaPointElement;
+        if (index == 0) {
+          areaPointElement = $('.area-point').first();
+        } else {
+          areaPointElement = $('.area-point').first().clone();
+          $('.area-points-subcontainer').append(areaPointElement);
+        }
 
-    // Normalize the farthest angle to the range [-π, π]
-    return ((farthestAngle + Math.PI) % (2 * Math.PI)) - Math.PI;
+        areaPointElement.find('.area-point-name').val(areaPointData.name);
+        areaPointElement.find('.area-point-azimuth').val(areaPointData.azimuth);
+        areaPointElement.find('.area-point-distance').val(areaPointData.distance);
+      });
+    }
+
+    // Borders
+    const bordersData = JSON.parse(localStorage.getItem(bordersDataKey));
+    if (bordersData) {
+      bordersData.forEach((borderData, index) => {
+        let borderElement;
+        if (index == 0) {
+          borderElement = $('.border').first();
+        } else {
+          borderElement = $('.border').first().clone();
+          $('.borders-subcontainer').append(borderElement);
+        }
+
+        borderElement.find('.border-name').val(borderData.name);
+        borderElement.find('.border-start-azimuth').val(borderData.startAzimuth);
+        borderElement.find('.border-start-distance').val(borderData.startDistance);
+        borderElement.find('.border-end-azimuth').val(borderData.endAzimuth);
+        borderElement.find('.border-end-distance').val(borderData.endDistance);
+      });
+    }
+
+    // Rings
+    const ringsData = JSON.parse(localStorage.getItem(ringsDataKey));
+    if (ringsData) {
+      ringsData.forEach((ringData, index) => {
+        let ringElement;
+        if (index == 0) {
+          ringElement = $('.ring').first();
+        } else {
+          ringElement = $('.ring').first().clone();
+          $('.rings-subcontainer').append(ringElement);
+        }
+
+        ringElement.find('.ring-name').val(ringData.name);
+        ringElement.find('.ring-azimuth').val(ringData.azimuth);
+        ringElement.find('.ring-distance').val(ringData.distance);
+        ringElement.find('.ring-radius').val(ringData.radius);
+      });
+    }
   }
 
-  getClosestDivisorTo90(number) {
-    const divisors = [1, 2, 3, 5, 6, 9, 10, 15, 18, 30, 45, 90];
-    let closest = divisors[0];
-    let minDiff = Math.abs(number - closest);
-
-    for (const d of divisors) {
-      const diff = Math.abs(number - d);
-      if (diff < minDiff) {
-        closest = d;
-        minDiff = diff;
-      }
-    }
-
-    return closest;
-  }
-
-  getIntersectionWithLine(line, segment) {
-    const { x: x1, y: y1, angle } = line;
-    const { start, end } = segment;
-
-    const x2 = x1 + Math.cos(angle); // Extend the bullseye line infinitely
-    const y2 = y1 + Math.sin(angle);
-
-    const x3 = start.x;
-    const y3 = start.y;
-    const x4 = end.x;
-    const y4 = end.y;
-
-    const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    if (denom === 0) return null; // Lines are parallel, no intersection
-
-    const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
-    const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
-
-    if (t >= 0 && u >= 0 && u <= 1) {
-      // Intersection point is within the segment
-      const intersectionX = x1 + t * (x2 - x1);
-      const intersectionY = y1 + t * (y2 - y1);
-      return { x: intersectionX, y: intersectionY };
-    }
-
-    return null; // No valid intersection
-  }
-
-  getCenter(points) {
-    if (points.length === 0) {
-      return { x: 0, y: 0 };
-    }
-
-    let sumX = 0;
-    let sumY = 0;
-
-    // Sum up all x and y coordinates
-    points.forEach((point) => {
-      sumX += point.x;
-      sumY += point.y;
-    });
-
-    // Calculate the average of x and y coordinates
-    const centerX = sumX / points.length;
-    const centerY = sumY / points.length;
-
-    return { x: centerX, y: centerY };
+  saveData() {
+    localStorage.setItem(bullseyeDataKey, JSON.stringify(this.bullseye));
+    localStorage.setItem(capPointDataKey, JSON.stringify(this.capPoint));
+    localStorage.setItem(areaPointsDataKey, JSON.stringify(this.areaPoints));
+    localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));
+    localStorage.setItem(ringsDataKey, JSON.stringify(this.rings));
   }
 }
 

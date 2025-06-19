@@ -93,7 +93,7 @@ class DrawUtils {
     this.ctx.lineWidth = 1;
 
     this.ctx.beginPath();
-    this.ctx.arc(xPx, yPx, radius / 1.75, 0, 2 * Math.PI);
+    this.ctx.arc(xPx, yPx, radius / 2, 0, 2 * Math.PI);
     this.ctx.fill();
 
     this.ctx.beginPath();
@@ -123,6 +123,53 @@ class DrawUtils {
     this.ctx.moveTo(startXPx, startYPx);
     this.ctx.lineTo(endXPx, endYPx);
     this.ctx.stroke();
+  }
+
+  drawBorder(startX, startY, endX, endY, color, strokeWidth = 1, crossSpacing = 40, crossSize = 15) {
+    const startXPx = (startX * this.nmToPixels) + this.centerX;
+    const startYPx = (startY * this.nmToPixels) + this.centerY;
+    const endXPx = (endX * this.nmToPixels) + this.centerX;
+    const endYPx = (endY * this.nmToPixels) + this.centerY;
+
+    const ctx = this.ctx;
+
+    // Draw the main border line
+    ctx.strokeStyle = color;
+    ctx.lineWidth = strokeWidth;
+
+    ctx.beginPath();
+    ctx.moveTo(startXPx, startYPx);
+    ctx.lineTo(endXPx, endYPx);
+    ctx.stroke();
+
+    // Calculate the angle of the line
+    const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+
+    // Calculate the length of the line
+    const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
+
+    // Draw crosses along the line
+    for (let i = crossSpacing; i < lineLength; i += crossSpacing) {
+      const crossX = startXPx + i * Math.cos(angle);
+      const crossY = startYPx + i * Math.sin(angle);
+
+      ctx.save();
+      ctx.translate(crossX, crossY);
+      ctx.rotate(angle + Math.PI / 4);
+
+      // Draw the cross
+      ctx.strokeStyle = color;
+      ctx.lineWidth = strokeWidth;
+
+      ctx.beginPath();
+      ctx.moveTo(-crossSize / 2, 0);
+      ctx.lineTo(crossSize / 2, 0);
+      ctx.moveTo(0, -crossSize / 2);
+      ctx.lineTo(0, crossSize / 2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
   }
 
   drawInfiniteLine(x, y, angle, color, isDashed = false) {
@@ -162,13 +209,13 @@ class DrawUtils {
     ctx.setLineDash([]);
   }
 
-  drawRing(x, y, color, radius) {
+  drawRing(x, y, radius, color, strokeWidth = 1) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
     const radiusPx = radius * this.nmToPixels
 
     this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = 1;
+    this.ctx.lineWidth = strokeWidth;
 
     this.ctx.beginPath();
     this.ctx.arc(xPx, yPx, radiusPx, 0, 2 * Math.PI);
@@ -180,8 +227,8 @@ class DrawUtils {
     let yPx = (y * this.nmToPixels) + this.centerY;
 
     // Apply offset distance and angle
-    xPx += offsetDistance * this.nmToPixels * Math.cos(offsetAngle);
-    yPx += offsetDistance * this.nmToPixels * Math.sin(offsetAngle);
+    xPx += offsetDistance * Math.cos(offsetAngle);
+    yPx += offsetDistance * Math.sin(offsetAngle);
 
     const ctx = this.ctx;
 
@@ -228,14 +275,14 @@ class DrawUtils {
     const boxWidth = textWidth + padding * 2;
     const boxHeight = textHeight + padding * 2;
 
-    xPx += offsetDistance * this.nmToPixels * Math.cos(offsetAngle);
-    yPx += offsetDistance * this.nmToPixels * Math.sin(offsetAngle);
+    xPx += offsetDistance * Math.cos(offsetAngle);
+    yPx += offsetDistance * Math.sin(offsetAngle);
 
     // Draw white background rectangle
     this.ctx.fillStyle = "white";
     this.ctx.fillRect(xPx - textWidth / 2, yPx - textHeight / 2, boxWidth, boxHeight);
 
-    // Draw black border
+    // Draw black line
     this.ctx.strokeStyle = "black";
     this.ctx.lineWidth = 1;
     this.ctx.strokeRect(xPx - textWidth / 2, yPx - textHeight / 2, boxWidth, boxHeight);
