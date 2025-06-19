@@ -97,14 +97,19 @@ class BullseyeMapGenerator {
       }
     });
 
-    $('.delete-area-point-button, .delete-border-button, .delete-ring-button').on('click', (event) => this.deleteElement(event));
+    $('.delete-cap-point-button, .delete-area-point-button, .delete-border-button, .delete-ring-button').on('click', (event) => this.deleteElement(event));
 
     $('.update-field').on('input', () => this.updateMap());
+
+    $('.toggle-fieldset').on('click', function () {
+      $(this).closest('fieldset').toggleClass('collapsed');
+    });
 
     this.updateMap();
   }
 
   deleteElement(event) {
+    console.log('ici')
     if ($(event.target).closest('.element-container').find('.element').length > 1) {
       $(event.target).closest('.element').remove();
     } else {
@@ -517,7 +522,7 @@ class BullseyeMapGenerator {
             capPointElement = $('.cap-point').first();
           } else {
             capPointElement = $('.cap-point').first().clone();
-            $('.cap-points-subcontainer').append(capPointElement);
+            $('.cap-points-container').append(capPointElement);
 
             const colorPicker = capPointElement.find('.color-picker');
             if (colorPicker) {
@@ -566,7 +571,7 @@ class BullseyeMapGenerator {
             areaPointElement = $('.area-point').first();
           } else {
             areaPointElement = $('.area-point').first().clone();
-            $('.area-points-subcontainer').append(areaPointElement);
+            $('.area-points-container').append(areaPointElement);
           }
 
           $(areaPointElement).find('.area-point-name').val(areaPointData.name);
@@ -595,7 +600,7 @@ class BullseyeMapGenerator {
             borderElement = $('.border').first();
           } else {
             borderElement = $('.border').first().clone();
-            $('.borders-subcontainer').append(borderElement);
+            $('.borders-container').append(borderElement);
 
             const colorPicker = borderElement.find('.color-picker');
             if (colorPicker) {
@@ -638,7 +643,7 @@ class BullseyeMapGenerator {
             ringElement = $('.ring').first();
           } else {
             ringElement = $('.ring').first().clone();
-            $('.rings-subcontainer').append(ringElement);
+            $('.rings-container').append(ringElement);
 
             const colorPicker = ringElement.find('.color-picker');
             if (colorPicker) {
