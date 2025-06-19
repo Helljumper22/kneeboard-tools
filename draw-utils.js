@@ -64,12 +64,8 @@ class DrawUtils {
   }
 
   drawBackground(color) {
-    this.setToBackground();
-
     this.ctx.fillStyle = color;
     this.ctx.fillRect(0, 0, this.width, this.height);
-
-    this.setToForeground();
   }
 
   drawPoint(x, y, color, radius = 5) {
@@ -148,10 +144,19 @@ class DrawUtils {
     // Calculate the length of the line
     const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
 
+    // If the line is shorter than half the crossSpacing, don't draw any crosses
+    if (lineLength < crossSpacing / 2) {
+      return;
+    }
+
+    // Calculate the starting point for crosses (middle of the line)
+    const middleX = startXPx + (endXPx - startXPx) / 2;
+    const middleY = startYPx + (endYPx - startYPx) / 2;
+
     // Draw crosses along the line
-    for (let i = crossSpacing; i < lineLength; i += crossSpacing) {
-      const crossX = startXPx + i * Math.cos(angle);
-      const crossY = startYPx + i * Math.sin(angle);
+    for (let i = -Math.floor(lineLength / (2 * crossSpacing)) * crossSpacing; i <= Math.floor(lineLength / (2 * crossSpacing)) * crossSpacing; i += crossSpacing) {
+      const crossX = middleX + i * Math.cos(angle);
+      const crossY = middleY + i * Math.sin(angle);
 
       ctx.save();
       ctx.translate(crossX, crossY);
@@ -249,13 +254,23 @@ class DrawUtils {
     const textWidth = metrics.width;
     const textHeight = fontSize;
 
-    // Draw white background rectangle
-    ctx.fillStyle = "white";
-    ctx.fillRect((-textWidth / 2) - 1, (-textHeight / 2) - 1, textWidth, textHeight);
+    if (this.ctx.globalCompositeOperation == 'destination-over') {
+      // Draw the text
+      ctx.fillStyle = 'black';
+      ctx.fillText(text, 0, 0);
 
-    // Draw the text
-    ctx.fillStyle = 'black';
-    ctx.fillText(text, 0, 0);
+      // Draw white background rectangle
+      ctx.fillStyle = "red";
+      ctx.fillRect((-textWidth / 2), (-textHeight / 2) - 1, textWidth, textHeight);
+    } else {
+      // Draw white background rectangle
+      ctx.fillStyle = "white";
+      ctx.fillRect((-textWidth / 2), (-textHeight / 2) - 1, textWidth, textHeight);
+
+      // Draw the text
+      ctx.fillStyle = 'black';
+      ctx.fillText(text, 0, 0);
+    }
 
     // Restore the canvas state
     ctx.restore();

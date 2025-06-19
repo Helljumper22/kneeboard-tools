@@ -60,6 +60,8 @@ body {
         display: inline-block;
 
         fieldset {
+          display: flex;
+          flex-direction: column;
           width: 100%;
           border: 1px solid #444;
           padding: 10px;
@@ -69,6 +71,7 @@ body {
 
           .field {
             display: flex;
+            height: 40px;
             align-items: center;
             justify-content: center;
 
@@ -82,7 +85,6 @@ body {
               display: inline-block;
               width: 150px;
               font-size: 14px;
-              margin-bottom: 5px;
             }
 
             input,
@@ -90,7 +92,7 @@ body {
               width: 140px;
               padding: 5px;
               font-size: 14px;
-              margin-bottom: 10px;
+              margin: 5px 0;
 
               &[type=checkbox] {
                 width: 146px;
@@ -128,33 +130,64 @@ body {
             select {
               width: 154px;
             }
+
+            .color-picker {
+              width: 155px;
+              height: 30px;
+              margin: 5px 0;
+              border-radius: 1px;
+            }
           }
 
+          .cap-points-subcontainer,
           .area-points-subcontainer,
           .borders-subcontainer,
           .rings-subcontainer {
-            max-height: 307px;
+            max-height: 400px;
             overflow-y: auto;
             border: 1px solid #444;
             padding: 10px;
             background: #1e1e1e;
 
+            .cap-point,
             .area-point,
             .border,
             .ring {
               display: flex;
               flex-direction: column;
               position: relative;
-              padding-right: 20px;
+              padding: 10px 20px;
+              background-color: #1e1e1e;
 
-              .delete-area-point-button,
-              .delete-border-button,
-              .delete-ring-button {
+              .drag-handle {
+                position: absolute;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                top: 5px;
+                height: 111px;
+                margin: 0;
+                left: 5px;
+                width: 25px;
+                cursor: grab;
+                font-size: 16px;
+                color: #ccc;
+                user-select: none;
+                background-color: #2b2b2b;
+                border-radius: 4px;
+              }
+
+              .delete-button {
                 position: absolute;
                 padding: 4px 10px;
                 margin: 0;
-                top: 0px;
+                top: 5px;
                 right: 5px;
+              }
+
+              .delete-cap-point-button {
+                height: 351px;
               }
 
               .delete-area-point-button {
@@ -162,29 +195,49 @@ body {
               }
 
               .delete-border-button {
-                height: 191px;
+                height: 231px;
               }
 
               .delete-ring-button {
-                height: 151px;
+                height: 191px;
+              }
+
+              &:first-child {
+                padding-top: 0;
+              }
+
+              &:last-child {
+                padding-bottom: 0;
               }
 
               &:not(:first-child) {
-                padding-top: 10px;
-                margin-top: 10px;
+                padding: 10px 20px;
                 border-top: 1px solid white;
 
-                .delete-area-point-button,
-                .delete-border-button,
-                .delete-ring-button {
+                .delete-button,
+                .drag-handle {
                   margin-top: 10px;
                 }
+
+              }
+
+              &:not(:last-child) {
+                border-bottom: 1px solid white;
+              }
+
+              &.dragged {
+                border: 0px;
               }
             }
           }
 
           .asterisk-text {
+            margin-top: 10px;
             font-size: small;
+          }
+
+          .add-button {
+            width: 150px;
           }
         }
 

@@ -6,8 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DCS Bullseye Map Generator</title>
 
+  <link rel="stylesheet" href="./libs/jquery-ui.min.css">
+
   <link rel="stylesheet" href="./style.css">
-  <script src="./jquery-3.7.1.min.js"></script>
+
+  <script src="./libs/jquery-3.7.1.min.js"></script>
+  <script src="./libs/jquery-ui.min.js"></script>
+  <script src="./libs/jscolor.min.js"></script>
+
   <script src="./main.js"></script>
   <script src="./draw-utils.js"></script>
   <script src="./utils.js"></script>
@@ -66,49 +72,60 @@
         <!-- Cap point -->
         <fieldset class="cap-fields">
           <legend class="cap-fields-title">CAP Parameters</legend>
-          <div class="field">
-            <label>Point name</label>
-            <input type="text" class="cap-point-name update-field" />
-          </div>
-          <div class="field">
-            <label>CAP name</label>
-            <input type="text" class="cap-name update-field" />
-          </div>
-          <div class="field">
-            <label>Azimuth (°)</label>
-            <input type="number" class="cap-azimuth update-field" />
-          </div>
-          <div class="field">
-            <label>Distance (nm)</label>
-            <input type="number" class="cap-distance update-field" />
-          </div>
-          <div class="field">
-            <label>Length (nm)</label>
-            <input type="number" class="cap-length update-field" />
-          </div>
-          <div class="field">
-            <label>Width (nm)</label>
-            <input type="number" class="cap-width update-field" />
-          </div>
-          <div class="field">
-            <label>Orientation* (°)</label>
-            <input type="number" class="cap-orientation update-field" />
-          </div>
-          <div class="field">
-            <label>Side</label>
-            <select class="cap-side update-field">
-              <option value="1" selected>Left</option>
-              <option value="0">Right</option>
-            </select>
+          <div class="cap-points-subcontainer element-container">
+            <div class="cap-point element">
+              <div class="field">
+                <label>Point name</label>
+                <input type="text" class="cap-point-name update-field" />
+              </div>
+              <div class="field">
+                <label>CAP name</label>
+                <input type="text" class="cap-name update-field" />
+              </div>
+              <div class="field">
+                <label>Azimuth (°)</label>
+                <input type="number" class="cap-point-azimuth update-field" />
+              </div>
+              <div class="field">
+                <label>Distance (nm)</label>
+                <input type="number" class="cap-point-distance update-field" />
+              </div>
+              <div class="field">
+                <label>Length (nm)</label>
+                <input type="number" class="cap-length update-field" />
+              </div>
+              <div class="field">
+                <label>Width (nm)</label>
+                <input type="number" class="cap-width update-field" />
+              </div>
+              <div class="field">
+                <label>Orientation* (°)</label>
+                <input type="number" class="cap-orientation update-field" />
+              </div>
+              <div class="field">
+                <label>Side</label>
+                <select class="cap-side update-field">
+                  <option value="1" selected>Left</option>
+                  <option value="0">Right</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Color</label>
+                <button class="cap-color color-picker update-field"></button>
+              </div>
+              <button class="delete-cap-point-button delete-button">-</button>
+            </div>
           </div>
           <span class="asterisk-text">* Use true heading.</span>
+          <button class="add-cap-point-button add-button">Add CAP Point</button>
         </fieldset>
 
         <!-- Area points -->
         <fieldset class="area-points-fields">
           <legend class="area-points-title">Area Points</legend>
-          <div class="area-points-subcontainer element-container">
+          <div class="area-points-subcontainer element-container sortable-container">
             <div class="area-point element">
+              <div class="drag-handle" title="Drag to reorder">☰</div>
               <div class="field">
                 <label>Name</label>
                 <input type="text" class="area-point-name update-field" />
@@ -121,10 +138,10 @@
                 <label>Distance (nm)</label>
                 <input type="number" class="area-point-distance update-field" />
               </div>
-              <button class="delete-area-point-button">-</button>
+              <button class="delete-area-point-button delete-button">-</button>
             </div>
           </div>
-          <button class="add-area-point-button">Add Area Point</button>
+          <button class="add-area-point-button add-button">Add Area Point</button>
         </fieldset>
 
         <!-- Borders -->
@@ -152,10 +169,14 @@
                 <label>End distance (nm)</label>
                 <input type="number" class="border-end-distance update-field" />
               </div>
-              <button class="delete-border-button">-</button>
+              <div class="field">
+                <label>Color</label>
+                <button class="border-color color-picker update-field"></button>
+              </div>
+              <button class="delete-border-button delete-button">-</button>
             </div>
           </div>
-          <button class="add-border-button">Add Border</button>
+          <button class="add-border-button add-button">Add Border</button>
         </fieldset>
 
         <!-- Rings -->
@@ -179,10 +200,14 @@
                 <label>Radius (nm)</label>
                 <input type="number" class="ring-radius update-field" />
               </div>
-              <button class="delete-ring-button">-</button>
+              <div class="field">
+                <label>Color</label>
+                <button class="ring-color color-picker update-field"></button>
+              </div>
+              <button class="delete-ring-button delete-button">-</button>
             </div>
           </div>
-          <button class="add-ring-button">Add Ring</button>
+          <button class="add-ring-button add-button">Add Ring</button>
         </fieldset>
       </div>
     </div>
