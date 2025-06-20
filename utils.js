@@ -115,7 +115,10 @@ class Utils {
             // Intersection point is within the segment
             const intersectionX = x1 + t * (x2 - x1);
             const intersectionY = y1 + t * (y2 - y1);
-            return { x: intersectionX, y: intersectionY };
+            const intersectionAzimuth = Math.atan2(intersectionX, intersectionY);
+            const intersectionDistance = Math.sqrt(intersectionX * intersectionX + intersectionY * intersectionY);
+
+            return { x: intersectionX, y: intersectionY, azimuth: intersectionAzimuth < 0 ? intersectionAzimuth + (Math.PI * 2) : intersectionAzimuth, distance: intersectionDistance };
         }
 
         return null; // No valid intersection

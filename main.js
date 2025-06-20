@@ -6,13 +6,13 @@ capPointsDataKey = 'cap-points-data';
 areaPointsDataKey = 'area-points-data';
 bordersDataKey = 'borders-data';
 ringsDataKey = 'rings-data';
+fieldsetsDataKey = 'fieldsets-data';
 
 class BullseyeMapGenerator {
   constructor() {
     this.utils = new Utils();
     this.drawUtils = new DrawUtils();
 
-    // Bullseye
     this.bullseye = {};
 
     this.capPoints = [];
@@ -63,21 +63,7 @@ class BullseyeMapGenerator {
 
     $('.reset-fields-button').on('click', () => {
       if (window.confirm('Are you sure ? All data will be lost.')) {
-        $('input[type=text].update-field').val('');
-        $('input[type=number].update-field').val('');
-
-        $('.display-bullseye').prop('checked', true);
-        $('.limit-bullseye-to-area').prop('checked', true);
-        $('.half-angle-lines').prop('checked', true);
-
-        $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-        $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
-
-        $('.cap-side').val(1);
-
-        $('.area-point:not(:first)').remove();
-        $('.border:not(:first)').remove();
-        $('.ring:not(:first)').remove();
+        this.resetFields();
 
         this.updateMap();
       }
@@ -100,33 +86,68 @@ class BullseyeMapGenerator {
       }
     });
 
-    $('.add-cap-point-button, .add-area-point-button, .add-border-button, .add-ring-button').on('click', (event) => {
-      const elementContainer = $(event.target).siblings('.element-container').first();
-      const newPoint = $(elementContainer).find('.element').first().clone();
-      newPoint.find('input').val('');
-      $(elementContainer).append(newPoint);
+    $('.add-button').on('click', (event) => this.addElement(event));
 
-      newPoint.find('.update-field').on('input', () => this.updateMap());
-      newPoint.find('.delete-button').on('click', (event) => this.deleteElement(event));
-
-      const colorPicker = newPoint.find('.color-picker');
-      if (colorPicker) {
-        new JSColor(colorPicker[0], {
-          value: '#000000',
-          onInput: () => this.updateMap()
-        });
-      }
-    });
-
-    $('.delete-cap-point-button, .delete-area-point-button, .delete-border-button, .delete-ring-button').on('click', (event) => this.deleteElement(event));
+    $('.delete-button').on('click', (event) => this.deleteElement(event));
 
     $('.update-field').on('input', () => this.updateMap());
 
-    $('.toggle-fieldset').on('click', function () {
-      $(this).closest('fieldset').toggleClass('collapsed');
+
+    this.fieldsetsData = [];
+    $('fieldset').each((index, element) => {
+      this.fieldsetsData.push({
+        id: $(element).attr('id'),
+        collapsed: $(element).hasClass('collapsed')
+      })
+    });
+
+    $('.toggle-fieldset').on('click', (event) => {
+      const fieldset = $(event.target).closest('fieldset');
+      fieldset.toggleClass('collapsed');
+
+      const fieldsetData = this.fieldsetsData.find((fieldsetData) => fieldsetData.id == $(fieldset).attr('id'))
+      fieldsetData.collapsed = $(fieldset).hasClass('collapsed');
+
+      localStorage.setItem(fieldsetsDataKey, JSON.stringify(this.fieldsetsData));
     });
 
     this.updateMap();
+  }
+
+  resetFields() {
+    $('input[type=text].update-field').val('');
+    $('input[type=number].update-field').val('');
+
+    $('.display-bullseye').prop('checked', true);
+    $('.limit-bullseye-to-area').prop('checked', true);
+    $('.half-angle-lines').prop('checked', true);
+
+    $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
+    $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
+
+    $('.cap-side').val(1);
+
+    $('.area-point:not(:first)').remove();
+    $('.border:not(:first)').remove();
+    $('.ring:not(:first)').remove();
+  }
+
+  addElement(event) {
+    const elementContainer = $(event.target).siblings('.element-container').first();
+    const newPoint = $(elementContainer).find('.element').first().clone();
+    newPoint.find('input').val('');
+    $(elementContainer).append(newPoint);
+
+    newPoint.find('.update-field').on('input', () => this.updateMap());
+    newPoint.find('.delete-button').on('click', (event) => this.deleteElement(event));
+
+    const colorPicker = newPoint.find('.color-picker');
+    if (colorPicker.length > 0) {
+      new JSColor(colorPicker[0], {
+        value: '#000000',
+        onInput: () => this.updateMap()
+      });
+    }
   }
 
   deleteElement(event) {
@@ -395,20 +416,27 @@ class BullseyeMapGenerator {
         const angleRad = angle * Math.PI / 180;
 
         // Calculate intersection points with area point lines
+        const intersections = [];
         this.areaPoints.forEach((point, index) => {
           const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length];
 
           const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: angleRad }, { start: point, end: nextPoint });
 
           if (intersection) {
-            const textAngle = (angle + 90) % 360;
-            if (!displayedAngles.includes(textAngle)) {
-              this.drawUtils.drawText(intersection.x, intersection.y, `${textAngle}°`, 20, angle * Math.PI / 180);
-
-              displayedAngles.push(textAngle);
-            }
+            intersections.push(intersection);
           }
         });
+
+        if (intersections.length > 0) {
+          const farthestIntersection = intersections.reduce((a, b) => a.distance > b.distance ? a : b);
+
+          const textAngle = (angle + 90) % 360;
+          if (!displayedAngles.includes(textAngle)) {
+            this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 20, angle * Math.PI / 180);
+
+            displayedAngles.push(textAngle);
+          }
+        }
       }
 
       if (this.bullseye.halfAnglesLines) {
@@ -693,6 +721,27 @@ class BullseyeMapGenerator {
 
       rings.remove();
     }
+
+    // Collapse fieldsets
+    try {
+      const fieldsetsData = JSON.parse(localStorage.getItem(fieldsetsDataKey));
+
+      if (fieldsetsData) {
+        fieldsetsData.forEach((fieldsetData) => {
+          const fieldset = $(`fieldset#${fieldsetData.id}`);
+          const subcontainer = $(fieldset).find('.fieldset-subcontainer');
+
+          $(fieldset).css('transition', 'none')
+          $(subcontainer).css('transition', 'none');
+
+          $(fieldset).toggleClass('collapsed', fieldsetData.collapsed);
+
+          $(fieldset)[0].offsetHeight;
+          $(fieldset).css('transition', '');
+          $(subcontainer).css('transition', '');
+        });
+      }
+    } catch (error) { }
   }
 
   saveData() {
