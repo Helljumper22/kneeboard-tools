@@ -13,8 +13,17 @@ class DrawUtils {
     this.nmToPixels = (this.width / 2) / this.defaultScale;
   }
 
-  clearCanevas() {
+  clearCanvas() {
     this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+
+  getCanvasCorners(padding = 0) {
+    return [
+      { x: (-this.centerX + padding) / this.nmToPixels, y: (-this.centerY + padding) / this.nmToPixels },
+      { x: (this.width - this.centerX - padding) / this.nmToPixels, y: (-this.centerY + padding) / this.nmToPixels },
+      { x: (this.width - this.centerX - padding) / this.nmToPixels, y: (this.height - this.centerY - padding) / this.nmToPixels },
+      { x: (-this.centerX + padding) / this.nmToPixels, y: (this.height - this.centerY - padding) / this.nmToPixels },
+    ];
   }
 
   setScale(furthestPoint) {
@@ -36,7 +45,7 @@ class DrawUtils {
     this.ctx.globalCompositeOperation = 'source-over';
   }
 
-  clipCanevas(points) {
+  clipCanvas(points) {
     if (points.length < 3) {
       return;
     }
@@ -59,7 +68,7 @@ class DrawUtils {
     this.ctx.clip();
   }
 
-  unclipCanevas() {
+  unclipCanvas() {
     this.ctx.restore();
   }
 
@@ -260,7 +269,7 @@ class DrawUtils {
       ctx.fillText(text, 0, 0);
 
       // Draw white background rectangle
-      ctx.fillStyle = "red";
+      ctx.fillStyle = "white";
       ctx.fillRect((-textWidth / 2), (-textHeight / 2) - 1, textWidth, textHeight);
     } else {
       // Draw white background rectangle
@@ -311,7 +320,7 @@ class DrawUtils {
     /*
         const racetrackX = capX - ((6 / this.drawUtils.nmToPixels) * Math.cos((this.cap.orientation + 90) * Math.PI / 180));
         const racetrackY = capY - ((6 / this.drawUtils.nmToPixels) * Math.cos((this.cap.orientation) * Math.PI / 180));;
-
+   
         console.log(((6 / this.drawUtils.nmToPixels) * Math.max(0.0, Math.cos((this.cap.orientation + 90) * Math.PI / 180))))*/
 
     const nmToPx = this.nmToPixels;
@@ -362,4 +371,58 @@ class DrawUtils {
     ctx.restore();
   }
 
+  drawGate(x, y, length, angle, color) {
+    const lengthPx = length;
+    const widthPx = (length / 2.5);
+    const obliquePx = (length / 3);
+
+    const halfLength = lengthPx / 2;
+    const halfWidth = widthPx / 2;
+
+    const angleRad = angle * Math.PI / 180;
+
+    // Calculate the center position in pixels
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    // Save the canvas state
+    this.ctx.save();
+
+    // Translate and rotate the canvas
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(angleRad);
+
+    // Draw the white background
+    this.ctx.fillStyle = "white";
+    this.ctx.fillRect(-halfWidth, -halfLength, widthPx, lengthPx);
+
+    // Draw the parallel lines
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = '2';
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(-halfWidth, -halfLength); // Left parallel line start
+    this.ctx.lineTo(-halfWidth, halfLength); // Left parallel line end
+
+    this.ctx.moveTo(halfWidth, -halfLength); // Right parallel line start
+    this.ctx.lineTo(halfWidth, halfLength); // Right parallel line end
+
+    // Draw the oblique lines at both ends
+    this.ctx.moveTo(-halfWidth, -halfLength); // Top left oblique line start
+    this.ctx.lineTo(-halfWidth - obliquePx, -halfLength - obliquePx); // Top left oblique line end
+
+    this.ctx.moveTo(-halfWidth, halfLength); // Bottom left oblique line start
+    this.ctx.lineTo(-halfWidth - obliquePx, halfLength + obliquePx); // Bottom left oblique line end
+
+    this.ctx.moveTo(halfWidth, -halfLength); // Top right oblique line start
+    this.ctx.lineTo(halfWidth + obliquePx, -halfLength - obliquePx); // Top right oblique line end
+
+    this.ctx.moveTo(halfWidth, halfLength); // Bottom right oblique line start
+    this.ctx.lineTo(halfWidth + obliquePx, halfLength + obliquePx); // Bottom right oblique line end
+
+    this.ctx.stroke();
+
+    // Restore the canvas state
+    this.ctx.restore();
+  }
 }

@@ -199,10 +199,7 @@ body {
               background: #1e1e1e;
               transition: opacity 0.3s ease;
 
-              .cap-point,
-              .area-point,
-              .border,
-              .ring {
+              .element {
                 display: flex;
                 flex-direction: column;
                 position: relative;
@@ -250,6 +247,10 @@ body {
 
                 .delete-ring-button {
                   height: 191px;
+                }
+
+                .delete-gate-button {
+                  height: 231px;
                 }
 
                 &:first-child {

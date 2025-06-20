@@ -144,4 +144,30 @@ class Utils {
 
         return { x: centerX, y: centerY };
     }
+
+    isPointWithinArea(point, areaPoints) {
+        if (areaPoints.length < 3) {
+            // A polygon must have at least 3 points
+            return false;
+        }
+
+        let isInside = false;
+        const { x, y } = point;
+
+        // Iterate through each edge of the polygon
+        for (let i = 0, j = areaPoints.length - 1; i < areaPoints.length; j = i++) {
+            const xi = areaPoints[i].x, yi = areaPoints[i].y;
+            const xj = areaPoints[j].x, yj = areaPoints[j].y;
+
+            // Check if the point is within the vertical bounds of the edge
+            const intersect = ((yi > y) !== (yj > y)) &&
+                (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+
+            if (intersect) {
+                isInside = !isInside;
+            }
+        }
+
+        return isInside;
+    }
 }

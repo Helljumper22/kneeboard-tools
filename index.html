@@ -240,6 +240,46 @@
             <button class="add-ring-button add-button">Add Ring</button>
           </div>
         </fieldset>
+
+        <!-- Gates -->
+        <fieldset id="gates-fields" class="collapsed">
+          <div class="fieldset-header">
+            <span class="fieldset-title">Gates</span>
+            <button class="toggle-fieldset">▼</button>
+          </div>
+          <div class="fieldset-subcontainer">
+            <div class="gates-container element-container">
+              <div class="gate element">
+                <div class="field">
+                  <label>Name</label>
+                  <input type="text" class="gate-name update-field" />
+                </div>
+                <div class="field">
+                  <label>Name position</label>
+                  <input type="range" class="gate-name-angle update-field" min="0" max="360" />
+                </div>
+                <div class="field">
+                  <label>Azimuth (°)</label>
+                  <input type="number" class="gate-azimuth update-field" />
+                </div>
+                <div class="field">
+                  <label>Distance (nm)</label>
+                  <input type="number" class="gate-distance update-field" />
+                </div>
+                <div class="field">
+                  <label>Orientation (°)</label>
+                  <input type="number" class="gate-orientation update-field" />
+                </div>
+                <div class="field">
+                  <label>Color</label>
+                  <button class="gate-color color-picker update-field"></button>
+                </div>
+                <button class="delete-gate-button delete-button">-</button>
+              </div>
+            </div>
+            <button class="add-gate-button add-button">Add Gate</button>
+          </div>
+        </fieldset>
       </div>
     </div>
     <div class="map-container">
