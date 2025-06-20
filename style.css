@@ -140,7 +140,7 @@ body {
               margin: 5px 0;
 
               &[type=checkbox] {
-                width: 146px;
+                width: 155px;
               }
 
               &[type="range"] {
@@ -185,6 +185,8 @@ body {
           }
 
           .fieldset-subcontainer {
+            display: flex;
+            flex-direction: column;
             margin-top: 20px;
             overflow: hidden;
             transition: max-height 0.3s ease, opacity 0.3s ease;
@@ -233,23 +235,31 @@ body {
                   right: 5px;
                 }
 
+                .delete-point-button {
+                  height: 151px;
+                }
+
+                .delete-nav-point-button {
+                  height: 111px;
+                }
+
                 .delete-cap-point-button {
                   height: 351px;
+                }
+
+                .delete-gate-button {
+                  height: 231px;
                 }
 
                 .delete-area-point-button {
                   height: 111px;
                 }
 
-                .delete-border-button {
-                  height: 231px;
-                }
-
                 .delete-ring-button {
                   height: 191px;
                 }
 
-                .delete-gate-button {
+                .delete-border-button {
                   height: 231px;
                 }
 

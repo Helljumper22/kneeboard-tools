@@ -165,6 +165,71 @@
           </div>
         </fieldset>
 
+        <!-- Points -->
+        <fieldset id="points-fields" class="collapsed">
+          <div class="fieldset-header">
+            <span class="fieldset-title">Points</span>
+            <button class="toggle-fieldset">▼</button>
+          </div>
+          <div class="fieldset-subcontainer">
+            <div class="points-container element-container sortable-container">
+              <div class="point element">
+                <div class="field">
+                  <label>Name</label>
+                  <input type="text" class="point-name update-field" />
+                </div>
+                <div class="field">
+                  <label>Azimuth (°)</label>
+                  <input type="number" class="point-azimuth update-field" />
+                </div>
+                <div class="field">
+                  <label>Distance (nm)</label>
+                  <input type="number" class="point-distance update-field" />
+                </div>
+                <div class="field">
+                  <label>Type</label>
+                  <select class="point-type update-field">
+                    <option value="nav-point" selected>Nav point</option>
+                    <option value="target-point">Target point</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+                <button class="delete-point-button delete-button">-</button>
+              </div>
+            </div>
+            <button class="add-point-button add-button">Add Point</button>
+          </div>
+        </fieldset>
+
+        <!-- Flight plan -->
+        <fieldset id="nav-points-fields" class="collapsed">
+          <div class="fieldset-header">
+            <span class="fieldset-title">Flight Plan</span>
+            <button class="toggle-fieldset">▼</button>
+          </div>
+          <div class="fieldset-subcontainer">
+            <div class="nav-points-container element-container sortable-container">
+              <div class="nav-point element">
+                <div class="drag-handle" title="Drag to reorder">☰</div>
+                <div class="field">
+                  <label>Name</label>
+                  <input type="text" class="nav-point-name update-field" />
+                </div>
+                <div class="field">
+                  <label>Azimuth (°)</label>
+                  <input type="number" class="nav-point-azimuth update-field" />
+                </div>
+                <div class="field">
+                  <label>Distance (nm)</label>
+                  <input type="number" class="nav-point-distance update-field" />
+                </div>
+                <button class="delete-nav-point-button delete-button">-</button>
+              </div>
+            </div>
+            <button class="add-nav-point-button add-button">Add Nav Point</button>
+          </div>
+        </fieldset>
+
         <!-- Borders -->
         <fieldset id="borders-fields" class="collapsed">
           <div class="fieldset-header">

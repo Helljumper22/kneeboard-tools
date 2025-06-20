@@ -115,7 +115,7 @@ class DrawUtils {
     this.ctx.fillRect(xPx, yPx, length, length);
   }
 
-  drawLine(startX, startY, endX, endY, color, strokeWidth = 1) {
+  drawLine(startX, startY, endX, endY, color, strokeWidth = 1, type = 'simple') {
     const startXPx = (startX * this.nmToPixels) + this.centerX;
     const startYPx = (startY * this.nmToPixels) + this.centerY;
     const endXPx = (endX * this.nmToPixels) + this.centerX;
@@ -124,10 +124,47 @@ class DrawUtils {
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = strokeWidth;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(startXPx, startYPx);
-    this.ctx.lineTo(endXPx, endYPx);
-    this.ctx.stroke();
+    switch (type) {
+      case 'simple':
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+        break;
+      case 'double':
+        const lineSpacing = 3;
+        // Calculate the angle of the line
+        const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+
+        // Calculate the offset for the parallel lines
+        const offsetX = lineSpacing * Math.sin(angle);
+        const offsetY = lineSpacing * Math.cos(angle);
+
+        const dx = endXPx - startXPx;
+        const dy = endYPx - startYPx;
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        this.ctx.save();
+        this.ctx.translate(startXPx + offsetX, startYPx - offsetY);
+        this.ctx.rotate(angle);
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(0, -1, distance, lineSpacing + (strokeWidth * 2));
+        this.ctx.restore();
+
+        // Draw the first parallel line
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx - offsetX, startYPx + offsetY);
+        this.ctx.lineTo(endXPx - offsetX, endYPx + offsetY);
+        this.ctx.stroke();
+
+        // Draw the second parallel line
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx + offsetX, startYPx - offsetY);
+        this.ctx.lineTo(endXPx + offsetX, endYPx - offsetY);
+        this.ctx.stroke();
+
+        break;
+    }
   }
 
   drawBorder(startX, startY, endX, endY, color, strokeWidth = 1, crossSpacing = 40, crossSize = 15) {
@@ -136,16 +173,14 @@ class DrawUtils {
     const endXPx = (endX * this.nmToPixels) + this.centerX;
     const endYPx = (endY * this.nmToPixels) + this.centerY;
 
-    const ctx = this.ctx;
-
     // Draw the main border line
-    ctx.strokeStyle = color;
-    ctx.lineWidth = strokeWidth;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = strokeWidth;
 
-    ctx.beginPath();
-    ctx.moveTo(startXPx, startYPx);
-    ctx.lineTo(endXPx, endYPx);
-    ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(startXPx, startYPx);
+    this.ctx.lineTo(endXPx, endYPx);
+    this.ctx.stroke();
 
     // Calculate the angle of the line
     const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
@@ -167,28 +202,26 @@ class DrawUtils {
       const crossX = middleX + i * Math.cos(angle);
       const crossY = middleY + i * Math.sin(angle);
 
-      ctx.save();
-      ctx.translate(crossX, crossY);
-      ctx.rotate(angle + Math.PI / 4);
+      this.ctx.save();
+      this.ctx.translate(crossX, crossY);
+      this.ctx.rotate(angle + Math.PI / 4);
 
       // Draw the cross
-      ctx.strokeStyle = color;
-      ctx.lineWidth = strokeWidth;
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = strokeWidth;
 
-      ctx.beginPath();
-      ctx.moveTo(-crossSize / 2, 0);
-      ctx.lineTo(crossSize / 2, 0);
-      ctx.moveTo(0, -crossSize / 2);
-      ctx.lineTo(0, crossSize / 2);
-      ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.moveTo(-crossSize / 2, 0);
+      this.ctx.lineTo(crossSize / 2, 0);
+      this.ctx.moveTo(0, -crossSize / 2);
+      this.ctx.lineTo(0, crossSize / 2);
+      this.ctx.stroke();
 
-      ctx.restore();
+      this.ctx.restore();
     }
   }
 
   drawInfiniteLine(x, y, angle, color, isDashed = false) {
-    const ctx = this.ctx;
-
     // Convert the starting point from nautical miles to pixels
     const startXPx = (x * this.nmToPixels) + this.centerX;
     const startYPx = (y * this.nmToPixels) + this.centerY;
@@ -205,22 +238,22 @@ class DrawUtils {
     const endYPx2 = startYPx - dy * canvasDiagonal;
 
     // Draw the infinite line
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 1;
 
     if (isDashed) {
-      ctx.setLineDash([5, 5]); // Set dashed line pattern (5px dash, 5px gap)
+      this.ctx.setLineDash([5, 5]); // Set dashed line pattern (5px dash, 5px gap)
     } else {
-      ctx.setLineDash([]); // Reset to solid line
+      this.ctx.setLineDash([]); // Reset to solid line
     }
 
-    ctx.beginPath();
-    ctx.moveTo(endXPx1, endYPx1);
-    ctx.lineTo(endXPx2, endYPx2);
-    ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.moveTo(endXPx1, endYPx1);
+    this.ctx.lineTo(endXPx2, endYPx2);
+    this.ctx.stroke();
 
     // Reset line dash to default (solid) after drawing
-    ctx.setLineDash([]);
+    this.ctx.setLineDash([]);
   }
 
   drawRing(x, y, radius, color, strokeWidth = 1) {
@@ -236,57 +269,7 @@ class DrawUtils {
     this.ctx.stroke();
   }
 
-  drawText(x, y, text, offsetDistance = 0, offsetAngle = 0, textAngle = 0, fontSize = 12) {
-    let xPx = (x * this.nmToPixels) + this.centerX;
-    let yPx = (y * this.nmToPixels) + this.centerY;
-
-    // Apply offset distance and angle
-    xPx += offsetDistance * Math.cos(offsetAngle);
-    yPx += offsetDistance * Math.sin(offsetAngle);
-
-    const ctx = this.ctx;
-
-    // Save the current canvas state
-    ctx.save();
-
-    // Translate to the text position
-    ctx.translate(xPx, yPx);
-
-    // Rotate the canvas to the specified text angle
-    ctx.rotate(textAngle);
-
-    // Measure text dimensions
-    ctx.font = `${fontSize}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const metrics = ctx.measureText(text);
-    const textWidth = metrics.width;
-    const textHeight = fontSize;
-
-    if (this.ctx.globalCompositeOperation == 'destination-over') {
-      // Draw the text
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, 0, 0);
-
-      // Draw white background rectangle
-      ctx.fillStyle = "white";
-      ctx.fillRect((-textWidth / 2), (-textHeight / 2) - 1, textWidth, textHeight);
-    } else {
-      // Draw white background rectangle
-      ctx.fillStyle = "white";
-      ctx.fillRect((-textWidth / 2), (-textHeight / 2) - 1, textWidth, textHeight);
-
-      // Draw the text
-      ctx.fillStyle = 'black';
-      ctx.fillText(text, 0, 0);
-    }
-
-    // Restore the canvas state
-    ctx.restore();
-  }
-
-  drawFamedText(x, y, text, offsetDistance = 0, offsetAngle = 0) {
-    const padding = 2;
+  drawText(x, y, text, type = 'square', offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2) {
     let xPx = (x * this.nmToPixels) + this.centerX - padding;
     let yPx = (y * this.nmToPixels) + this.centerY - padding;
 
@@ -302,27 +285,69 @@ class DrawUtils {
     xPx += offsetDistance * Math.cos(offsetAngle);
     yPx += offsetDistance * Math.sin(offsetAngle);
 
-    // Draw white background rectangle
-    this.ctx.fillStyle = "white";
-    this.ctx.fillRect(xPx - textWidth / 2, yPx - textHeight / 2, boxWidth, boxHeight);
+    this.ctx.save();
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(textAngle);
 
-    // Draw black line
-    this.ctx.strokeStyle = "black";
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeRect(xPx - textWidth / 2, yPx - textHeight / 2, boxWidth, boxHeight);
+    let textX = 0, textY = 0;
+    switch (type) {
+      case 'square':
+        // Draw black square with white background
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
+
+        textX = padding;
+        textY = padding;
+        break;
+      case 'triangle':
+        // Draw black triangle with white background
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.moveTo(padding, (-boxHeight / 2) + (padding / 2));
+        this.ctx.lineTo((boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.lineTo((-boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.fill();
+
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(padding, (-boxHeight / 2) + (padding / 2));
+        this.ctx.lineTo((boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.lineTo((-boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.closePath();
+        this.ctx.stroke();
+
+        textX = padding;
+        textY = padding * 1.3;
+
+        if (text.length > 2) {
+          this.ctx.fillStyle = "white";
+          this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight);
+        }
+        break;
+      case 'no-border':
+        // Draw white background
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(-textWidth / 2, -textHeight / 2, boxWidth, boxHeight);
+
+        if (padding != 0) {
+          textX = padding;
+          textY = padding + 1;
+        }
+        break;
+    }
 
     // Draw the text centered in the rectangle
     this.ctx.fillStyle = "black";
-    this.ctx.fillText(text, xPx + padding - 1, yPx + padding + 1);
+    this.ctx.fillText(text, textX, textY);
+
+    this.ctx.restore();
   }
 
   drawRacetrack(x, y, length, width, orientation, leftSide, color) {
-    /*
-        const racetrackX = capX - ((6 / this.drawUtils.nmToPixels) * Math.cos((this.cap.orientation + 90) * Math.PI / 180));
-        const racetrackY = capY - ((6 / this.drawUtils.nmToPixels) * Math.cos((this.cap.orientation) * Math.PI / 180));;
-   
-        console.log(((6 / this.drawUtils.nmToPixels) * Math.max(0.0, Math.cos((this.cap.orientation + 90) * Math.PI / 180))))*/
-
     const nmToPx = this.nmToPixels;
     const lengthPx = length * nmToPx;
     const widthPx = width * nmToPx;
@@ -343,32 +368,31 @@ class DrawUtils {
     const xPx = (x * nmToPx) + this.centerX - offsetX;
     const yPx = (y * nmToPx) + this.centerY - offsetY;
 
-    const ctx = this.ctx;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2;
 
-    ctx.save();
-    ctx.translate(xPx, yPx);
-    ctx.rotate(angle);
-    ctx.beginPath();
+    this.ctx.save();
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(angle);
+    this.ctx.beginPath();
 
     if (leftSide) {
       // First turn left (top semi-circle)
-      ctx.moveTo(-straight / 2, radius);
-      ctx.arc(-straight / 2, 0, radius, Math.PI / 2, -Math.PI / 2, false);
-      ctx.lineTo(straight / 2, -radius);
-      ctx.arc(straight / 2, 0, radius, -Math.PI / 2, Math.PI / 2, false);
+      this.ctx.moveTo(-straight / 2, radius);
+      this.ctx.arc(-straight / 2, 0, radius, Math.PI / 2, -Math.PI / 2, false);
+      this.ctx.lineTo(straight / 2, -radius);
+      this.ctx.arc(straight / 2, 0, radius, -Math.PI / 2, Math.PI / 2, false);
     } else {
       // First turn right (bottom semi-circle)
-      ctx.moveTo(-straight / 2, -radius);
-      ctx.arc(-straight / 2, 0, radius, -Math.PI / 2, Math.PI / 2, true);
-      ctx.lineTo(straight / 2, radius);
-      ctx.arc(straight / 2, 0, radius, Math.PI / 2, -Math.PI / 2, true);
+      this.ctx.moveTo(-straight / 2, -radius);
+      this.ctx.arc(-straight / 2, 0, radius, -Math.PI / 2, Math.PI / 2, true);
+      this.ctx.lineTo(straight / 2, radius);
+      this.ctx.arc(straight / 2, 0, radius, Math.PI / 2, -Math.PI / 2, true);
     }
 
-    ctx.closePath();
-    ctx.stroke();
-    ctx.restore();
+    this.ctx.closePath();
+    this.ctx.stroke();
+    this.ctx.restore();
   }
 
   drawGate(x, y, length, angle, color) {
