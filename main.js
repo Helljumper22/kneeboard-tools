@@ -33,12 +33,33 @@ class BullseyeMapGenerator {
 
     this.getData();
 
-    $('.download-map-button').on('click', () => {
-      const link = document.createElement('a');
-      link.download = 'bullseye_map.png';
-      link.href = $('.map-canvas')[0].toDataURL('image/png');
-      link.click();
+    $('.import-map-button').on('click', async () => {
+      const mapData = await this.utils.importMap()
+
+      localStorage.setItem(bullseyeDataKey, JSON.stringify(mapData.bullseye));
+      localStorage.setItem(capPointsDataKey, JSON.stringify(mapData.capPoints));
+      localStorage.setItem(areaPointsDataKey, JSON.stringify(mapData.areaPoints));
+      localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
+      localStorage.setItem(ringsDataKey, JSON.stringify(mapData.rings));
+
+      this.getData();
+
+      this.updateMap();
     });
+
+    $('.export-map-button').on('click', () => {
+      const mapData = {
+        'capPoints': this.capPoints,
+        'areaPoints': this.areaPoints,
+        'rings': this.rings,
+        'borders': this.borders,
+        'bullseye': this.bullseye
+      };
+
+      this.utils.exportMap(mapData)
+    });
+
+    $('.download-map-button').on('click', () => this.utils.downloadMap($('.map-canvas')[0]));
 
     $('.reset-fields-button').on('click', () => {
       if (window.confirm('Are you sure ? All data will be lost.')) {
@@ -109,7 +130,6 @@ class BullseyeMapGenerator {
   }
 
   deleteElement(event) {
-    console.log('ici')
     if ($(event.target).closest('.element-container').find('.element').length > 1) {
       $(event.target).closest('.element').remove();
     } else {

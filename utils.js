@@ -1,6 +1,59 @@
 class Utils {
     constructor() { }
 
+    importMap() {
+        return new Promise((resolve, reject) => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                if (!file) return reject(new Error('No file selected'));
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        resolve(data); // Resolve the promise with the parsed JSON data
+                    } catch (err) {
+                        reject(new Error('Invalid JSON file'));
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            input.click();
+        });
+    }
+
+    exportMap(mapData) {
+        const filename = prompt('Enter a filename:', 'map_export');
+        if (!filename) return;
+
+        const mapDataJSON = JSON.stringify(mapData, null, 2);
+        const blob = new Blob([mapDataJSON], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.download = `${filename}.json`;
+        link.href = url;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+
+    downloadMap(canvas) {
+        const filename = prompt('Enter a filename:', 'bullseye_map');
+        if (!filename) return;
+
+        const link = document.createElement('a');
+        link.download = `${filename}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
     getFarthestAngle(angleToPrev, angleToNext) {
         // Normalize angles to the range [-π, π]
         angleToPrev = ((angleToPrev + Math.PI) % (2 * Math.PI)) - Math.PI;

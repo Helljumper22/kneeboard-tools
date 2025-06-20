@@ -36,7 +36,13 @@ body {
         .header-buttons {
           margin-top: 10px;
           display: flex;
+          flex-direction: column;
           gap: 10px;
+
+          .header-button-line {
+            display: flex;
+            justify-content: space-between;
+          }
 
           button {
             padding: 8px 16px;
@@ -46,6 +52,7 @@ body {
             color: white;
             border: none;
             border-radius: 4px;
+            width: 130px;
 
             &:hover {
               background: #555;
