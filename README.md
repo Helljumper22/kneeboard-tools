@@ -18,9 +18,9 @@ All elements are placed based on their azimuth and distance relative to the bull
 The bullseye "spider" options like rings range and line angles can be customized. It can also be constrained to an area to improve readability.
 
 <p align="center">
-  <img width="400" src="https://github.com/user-attachments/assets/7f0355d9-468a-4b94-a69d-84a360dd74a3">
-  <img width="75" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
-  <img width="400" src="https://github.com/user-attachments/assets/9ed0c8bc-5839-4b57-8bc2-7dee929129e7">
+  <img width="300" src="https://github.com/user-attachments/assets/7f0355d9-468a-4b94-a69d-84a360dd74a3">
+  <img width="30" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
+  <img width="300" src="https://github.com/user-attachments/assets/9ed0c8bc-5839-4b57-8bc2-7dee929129e7">
 </p>
 
 #### CAP points
@@ -93,9 +93,9 @@ Easily export the map as a PNG file.
   <img width="300" src="https://github.com/user-attachments/assets/7d3d37c6-5de4-4d04-84b6-6308da52e800">
   <img width="30" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
   <img width="300" src="https://github.com/user-attachments/assets/4ed0ecbd-b77c-42d0-8319-b904e0906ab1">
-  <img width="30" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
+</p>
+<p align="center">
   <img width="300" src="https://github.com/user-attachments/assets/8414adb7-f5b0-4134-908a-ae532ae24755">
-
 </p>
 
 
