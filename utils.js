@@ -27,29 +27,22 @@ class Utils {
         });
     }
 
-    exportMap(mapData) {
-        const filename = prompt('Enter a filename:', 'map_export');
-        if (!filename) return;
-
+    exportMap(mapData, fileName) {
         const mapDataJSON = JSON.stringify(mapData, null, 2);
         const blob = new Blob([mapDataJSON], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement('a');
-        link.download = `${filename}.json`;
+        link.download = `${fileName}.json`;
         link.href = url;
         link.click();
 
         URL.revokeObjectURL(url);
     }
 
-
-    downloadMap(canvas) {
-        const filename = prompt('Enter a filename:', 'bullseye_map');
-        if (!filename) return;
-
+    downloadMap(canvas, fileName) {
         const link = document.createElement('a');
-        link.download = `${filename}.png`;
+        link.download = `${fileName}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
     }

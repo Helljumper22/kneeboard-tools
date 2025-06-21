@@ -73,8 +73,12 @@ class DrawUtils {
   }
 
   drawBackground(color) {
+    this.setToBackground();
+
     this.ctx.fillStyle = color;
     this.ctx.fillRect(0, 0, this.width, this.height);
+
+    this.setToForeground();
   }
 
   drawPoint(x, y, color, radius = 5) {
@@ -334,9 +338,8 @@ class DrawUtils {
           heightFix = 2
         }
 
-        // Draw white background
-        this.ctx.fillStyle = "white";
-        this.ctx.fillRect(-textWidth / 2, -textHeight / 2, boxWidth, boxHeight - heightFix);
+        // Remove elements behind the text to ensure its readable.
+        this.ctx.clearRect(-textWidth / 2, -textHeight / 2, boxWidth, boxHeight - heightFix);
 
         if (padding != 0) {
           textX = padding;
@@ -421,9 +424,8 @@ class DrawUtils {
     this.ctx.translate(xPx, yPx);
     this.ctx.rotate(angleRad);
 
-    // Draw the white background
-    this.ctx.fillStyle = "white";
-    this.ctx.fillRect(-halfWidth, -halfLength, widthPx, lengthPx);
+    // Remove elements behind the text to ensure its readable.
+    this.ctx.clearRect(-halfWidth, -halfLength, widthPx, lengthPx);
 
     // Draw the parallel lines
     this.ctx.strokeStyle = color;

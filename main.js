@@ -65,23 +65,11 @@ class BullseyeMapGenerator {
     });
 
     // Export data to JSON file.
-    $('.export-map-button').on('click', () => {
-      const mapData = {
-        'points': this.points,
-        'capPoints': this.capPoints,
-        'navPoints': this.navPoints,
-        'gates': this.gates,
-        'areaPoints': this.areaPoints,
-        'rings': this.rings,
-        'borders': this.borders,
-        'bullseye': this.bullseye,
-      };
+    $('.show-export-map-modal-button').on('click', () => this.showExportModal());
 
-      this.utils.exportMap(mapData)
-    });
 
     // Export map as png.
-    $('.download-map-button').on('click', () => this.utils.downloadMap($('.map-canvas')[0]));
+    $('.show-download-map-modal-button').on('click', () => this.showDownloadModal());
 
     // Reset all fields.
     $('.reset-fields-button').on('click', () => {
@@ -141,6 +129,76 @@ class BullseyeMapGenerator {
 
     // First drawing of the map.
     this.updateMap();
+  }
+
+  showExportModal() {
+    const exportModal = $('.export-options-modal');
+
+    $(exportModal).find('.file-name').val('');
+    $(exportModal).addClass('show');
+
+    $(exportModal).on('click', (event) => {
+      if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
+        $(exportModal).find('.export-map-button').off('click')
+        $(exportModal).find('.close-button').off('click');
+
+        $(exportModal).removeClass('show');
+      }
+    });
+
+    $(exportModal).find('.export-map-button').on('click', () => {
+      $(exportModal).find('.download-map-button').off('click')
+      $(exportModal).find('.close-button').off('click');
+
+      const mapData = {
+        'points': this.points,
+        'capPoints': this.capPoints,
+        'navPoints': this.navPoints,
+        'gates': this.gates,
+        'areaPoints': this.areaPoints,
+        'rings': this.rings,
+        'borders': this.borders,
+        'bullseye': this.bullseye,
+      };
+
+      const fileName = $(exportModal).find('.file-name').val();
+      this.utils.exportMap(mapData, fileName != '' ? fileName : 'bullseye_map');
+
+      $(exportModal).removeClass('show');
+    });
+  }
+
+  showDownloadModal() {
+    const downloadModal = $('.download-options-modal');
+
+    $(downloadModal).find('.transparent-background').prop('checked', false);
+    $(downloadModal).find('.file-name').val('');
+    $(downloadModal).addClass('show');
+
+    $(downloadModal).on('click', (event) => {
+      if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
+        $(downloadModal).find('.download-map-button').off('click')
+        $(downloadModal).find('.close-button').off('click');
+
+        $(downloadModal).removeClass('show');
+      }
+    });
+
+    $(downloadModal).find('.download-map-button').on('click', () => {
+      $(downloadModal).find('.download-map-button').off('click')
+      $(downloadModal).find('.close-button').off('click');
+
+      if (!$(downloadModal).find('.transparent-background').is(':checked')) {
+        this.drawUtils.drawBackground('white');
+      }
+
+      const fileName = $(downloadModal).find('.file-name').val();
+      this.utils.downloadMap($('.map-canvas')[0], fileName != '' ? fileName : 'bullseye_map');
+
+      $(downloadModal).removeClass('show');
+
+      this.updateMap();
+    });
   }
 
   resetFields() {
@@ -213,8 +271,6 @@ class BullseyeMapGenerator {
 
     // Recalculate scale and redraw map
     this.runScale();
-
-    this.drawUtils.drawBackground('white');
 
     // Draw bullseye
     if (this.bullseye.display) this.runBullseye();

@@ -86,7 +86,7 @@ The app is self-contained and portable - It can be downloaded and run offline.
 
 ### Download
 
-Easily export the map as a PNG file.
+Easily export the map as a PNG file with a white or transparent background.
 
 ## Examples
 <p align="center">

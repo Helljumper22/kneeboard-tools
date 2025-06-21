@@ -34,8 +34,8 @@
         <div class="header-buttons">
           <div class="header-button-line">
             <button class="import-map-button">Import map</button>
-            <button class="export-map-button">Export map</button>
-            <button class="download-map-button">Download map</button>
+            <button class="show-export-map-modal-button">Export map</button>
+            <button class="show-download-map-modal-button">Download map</button>
           </div>
           <div class="header-button-line">
             <button class="reset-fields-button">Reset fields</button>
@@ -356,6 +356,36 @@
     </div>
     <div class="map-container">
       <canvas class="map-canvas" width="600" height="600"></canvas>
+    </div>
+  </div>
+
+  <div class="download-options-modal modal">
+    <div class="modal-content">
+      <div class="close-button">&#10006;</div>
+      <div class="modal-inner-content">
+        <div class="field">
+          <label>Transparent background</label>
+          <input type="checkbox" class="transparent-background" />
+        </div>
+        <div class="field">
+          <label>File name</label>
+          <input type="text" class="file-name" />
+        </div>
+        <button class="download-map-button modal-button">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-options-modal modal">
+    <div class="modal-content">
+      <div class="close-button">&#10006;</div>
+      <div class="modal-inner-content">
+        <div class="field">
+          <label>File name</label>
+          <input type="text" class="file-name" />
+        </div>
+        <button class="export-map-button modal-button">Export</button>
+      </div>
     </div>
   </div>
 </body>
