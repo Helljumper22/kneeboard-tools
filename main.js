@@ -717,14 +717,12 @@ class BullseyeMapGenerator {
           if (capPoint.name != '') {
             const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
 
-            let capNameAngle = (capPoint.orientation + 90);
-            if (capNameAngle >= 270) {
-              capNameAngle -= 180;
-            } else if (capNameAngle >= 90) {
+            let capNameAngle = (capPoint.orientation + 90) % 360;
+            if (capNameAngle <= 270 && capNameAngle >= 90) {
               capNameAngle -= 180;
             }
 
-            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 0, 0, capNameAngle * Math.PI / 180);
+            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 0, 0, capNameAngle * (Math.PI / 180), 0);
           }
         }
 
@@ -787,7 +785,7 @@ class BullseyeMapGenerator {
       $(firstPoint).find('.point-name').val('');
       $(firstPoint).find('.point-azimuth').val('');
       $(firstPoint).find('.point-distance').val('');
-      $(firstPoint).find('.nav-point').val(pointData.type);
+      $(firstPoint).find('.nav-point').val('nav-point');
 
       points.remove();
     }

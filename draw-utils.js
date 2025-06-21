@@ -329,9 +329,14 @@ class DrawUtils {
         }
         break;
       case 'no-border':
+        let heightFix = 0;
+        if (padding == 0) {
+          heightFix = 2
+        }
+
         // Draw white background
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(-textWidth / 2, -textHeight / 2, boxWidth, boxHeight);
+        this.ctx.fillRect(-textWidth / 2, -textHeight / 2, boxWidth, boxHeight - heightFix);
 
         if (padding != 0) {
           textX = padding;
