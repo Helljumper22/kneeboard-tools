@@ -372,7 +372,7 @@ class DrawUtils {
     const widthPx = width * nmToPx;
     const radius = widthPx / 2;
     const straight = lengthPx - widthPx;
-    const angle = (orientation - 90) * Math.PI / 180;
+    const angle = (orientation - (Math.PI / 2));
 
     // Determine the local coordi}nates of the racetrack's endpoint
     // It is always at (straight/2, ±radius) depending on the turn direction
@@ -422,8 +422,6 @@ class DrawUtils {
     const halfLength = lengthPx / 2;
     const halfWidth = widthPx / 2;
 
-    const angleRad = angle * Math.PI / 180;
-
     // Calculate the center position in pixels
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
@@ -433,7 +431,7 @@ class DrawUtils {
 
     // Translate and rotate the canvas
     this.ctx.translate(xPx, yPx);
-    this.ctx.rotate(angleRad);
+    this.ctx.rotate(angle);
 
     // Remove elements behind the text to ensure its readable.
     this.ctx.clearRect(-halfWidth, -halfLength, widthPx, lengthPx);

@@ -335,11 +335,17 @@ class BullseyeMapGenerator {
       const name = $(element).find('.cap-name').val();
       const azimuth = parseFloat($(element).find('.cap-point-azimuth').val());
       const distance = parseFloat($(element).find('.cap-point-distance').val());
-      const length = parseFloat($(element).find('.cap-length').val());
-      const width = parseFloat($(element).find('.cap-width').val());
+      let length = parseFloat($(element).find('.cap-length').val());
+      let width = parseFloat($(element).find('.cap-width').val());
       const orientation = parseFloat($(element).find('.cap-orientation').val());
       const leftSide = $(element).find('.cap-side').val() == 1;
       const color = $(element).find('.cap-color').attr('data-current-color');
+
+      if (length < width) {
+        const temp = width;
+        width = length;
+        length = temp;
+      };
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
         const angleRad = (azimuth - 90) * Math.PI / 180;
@@ -347,7 +353,7 @@ class BullseyeMapGenerator {
         const y = distance * Math.sin(angleRad);
 
         const corners = [];
-        if (!isNaN(length) && !isNaN(width) && !isNaN(orientation)) {
+        if (!isNaN(length) && length >= 0 && !isNaN(width) && width >= 0 && !isNaN(orientation)) {
           corners.push({
             x: x + ((width / 2) * Math.cos((orientation - 90) * Math.PI / 180)),
             y: y - ((width / 2) * Math.cos(orientation * Math.PI / 180))
@@ -634,7 +640,7 @@ class BullseyeMapGenerator {
 
   runGates() {
     this.gates.forEach((gate) => {
-      this.drawUtils.drawGate(gate.x, gate.y, 15, gate.orientation, gate.color)
+      this.drawUtils.drawGate(gate.x, gate.y, 15, gate.orientation * Math.PI / 180, gate.color)
     });
   }
 
@@ -653,9 +659,9 @@ class BullseyeMapGenerator {
   runCapPoints() {
     this.capPoints.forEach((capPoint) => {
       if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
-        if (!isNaN(capPoint.length) && !isNaN(capPoint.width) && !isNaN(capPoint.orientation)) {
+        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
           // Draw CAP racetrack.
-          this.drawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, capPoint.orientation, capPoint.leftSide, capPoint.color)
+          this.drawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, capPoint.orientation * Math.PI / 180, capPoint.leftSide, capPoint.color)
         }
       }
     });
@@ -769,7 +775,7 @@ class BullseyeMapGenerator {
     // Draw CAP names and CAP points name.
     this.capPoints.forEach((capPoint) => {
       if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
-        if (!isNaN(capPoint.length) && !isNaN(capPoint.width) && !isNaN(capPoint.orientation)) {
+        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
           if (capPoint.name != '') {
             const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
 
