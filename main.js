@@ -825,7 +825,7 @@ class BullseyeMapGenerator {
             pointElement = $('.point').first();
           } else {
             pointElement = $('.point').first().clone();
-            $('.point-container').append(pointElement);
+            $('.points-container').append(pointElement);
           }
 
           $(pointElement).find('.point-name').val(pointData.name);
