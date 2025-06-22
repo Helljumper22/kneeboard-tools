@@ -273,21 +273,32 @@ class DrawUtils {
     this.ctx.stroke();
   }
 
-  drawText(x, y, text, type = 'square', offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2) {
+  drawText(x, y, text, type = 'square', fontsize = 16, offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2) {
     let xPx = (x * this.nmToPixels) + this.centerX - padding;
     let yPx = (y * this.nmToPixels) + this.centerY - padding;
 
-    this.ctx.font = "12px sans-serif";
+    this.ctx.font = `${fontsize}px sans-serif`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     const metrics = this.ctx.measureText(text);
     const textWidth = metrics.width;
-    const textHeight = 12;
+    const textHeight = fontsize;
     const boxWidth = textWidth + padding * 2;
     const boxHeight = textHeight + padding * 2;
 
-    xPx += offsetDistance * Math.cos(offsetAngle);
-    yPx += offsetDistance * Math.sin(offsetAngle);
+    if (offsetDistance > 0) {
+      const offsetX = offsetDistance * Math.cos(offsetAngle);
+      const offsetY = offsetDistance * Math.sin(offsetAngle);
+
+      let extraOffsetX = 0, extraOffsetY = 0;
+      if (textAngle == 0) {
+        extraOffsetX = (Math.abs(Math.cos(offsetAngle)) * (boxWidth / 2)) * Math.cos(offsetAngle);
+        extraOffsetY = (Math.abs(Math.sin(offsetAngle)) * (boxHeight / 2)) * Math.sin(offsetAngle);
+      }
+
+      xPx += offsetX + extraOffsetX;
+      yPx += offsetY + extraOffsetY;
+    }
 
     this.ctx.save();
     this.ctx.translate(xPx, yPx);

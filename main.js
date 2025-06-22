@@ -679,7 +679,7 @@ class BullseyeMapGenerator {
         const ringTextY = radius * Math.sin(angleRad);
 
         if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
-          this.drawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 10, angleRad, 0, 0);
+          this.drawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
         }
       }
     }
@@ -723,7 +723,7 @@ class BullseyeMapGenerator {
 
             const textAngle = (angle + 90) % 360;
             if (!displayedAngles.includes(textAngle)) {
-              this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', bullseyeInArea ? 20 : 0, angle * Math.PI / 180, 0, 0);
+              this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, angle * Math.PI / 180, 0, 0);
 
               displayedAngles.push(textAngle);
             }
@@ -741,29 +741,29 @@ class BullseyeMapGenerator {
     // Draw bullseye name
     if (this.bullseye.name != '' && this.bullseye.display) {
       const angleRad = (this.bullseye.nameAngle - 90) * Math.PI / 180;
-      this.drawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 30, angleRad, 0, 0);
+      this.drawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 16, 25, angleRad, 0, 0);
     }
 
     this.drawUtils.unclipCanvas();
 
     // Draw border names
     this.borders.forEach((border) => {
-      if (border.name != '') this.drawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
+      if (border.name != '') this.drawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
     });
 
     // Draw ring names
     this.rings.forEach((ring) => {
-      if (ring.name != '') this.drawUtils.drawText(ring.x, ring.y, ring.name, 'square');
+      if (ring.name != '') this.drawUtils.drawText(ring.x, ring.y, ring.name);
     });
 
     // Draw area points name
     this.areaPoints.forEach((areaPoint) => {
-      if (areaPoint.name != '') this.drawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name, 'square');
+      if (areaPoint.name != '') this.drawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
     });
 
     // Draw area points name
     this.navPoints.forEach((navPoint) => {
-      if (navPoint.name != '') this.drawUtils.drawText(navPoint.x, navPoint.y, navPoint.name, 'square');
+      if (navPoint.name != '') this.drawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
     });
 
     // Draw CAP names and CAP points name.
@@ -778,12 +778,12 @@ class BullseyeMapGenerator {
               capNameAngle -= 180;
             }
 
-            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 0, 0, capNameAngle * (Math.PI / 180), 0);
+            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle * (Math.PI / 180), 0);
           }
         }
 
         if (capPoint.pointName != '') {
-          this.drawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName, 'square');
+          this.drawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
         }
       }
     });
@@ -802,14 +802,14 @@ class BullseyeMapGenerator {
           break;
       }
 
-      this.drawUtils.drawText(point.x, point.y, point.name, type, 0, 0, 0, padding);
+      this.drawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
     });
 
     // Draw gate names
     this.gates.forEach((gate) => {
       if (gate.name != '') {
         const angleRad = (gate.nameAngle - 90) * Math.PI / 180;
-        this.drawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 30, angleRad, 0, 0);
+        this.drawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
       }
     });
   }
