@@ -3,8 +3,8 @@ class DrawUtils {
     this.canvas = $('.map-canvas')[0];
     this.ctx = this.canvas.getContext('2d');
 
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
+    this.width = 800;
+    this.height = 800;
 
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
@@ -14,6 +14,12 @@ class DrawUtils {
   }
 
   clearCanvas() {
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
+
+    this.centerX = this.width / 2;
+    this.centerY = this.height / 2;
+
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
 
@@ -438,7 +444,7 @@ class DrawUtils {
 
     // Draw the parallel lines
     this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = '2';
+    this.ctx.lineWidth = 2;
 
     this.ctx.beginPath();
     this.ctx.moveTo(-halfWidth, -halfLength); // Left parallel line start
@@ -463,6 +469,40 @@ class DrawUtils {
     this.ctx.stroke();
 
     // Restore the canvas state
+    this.ctx.restore();
+  }
+
+  drawAirbase(x, y, angle, color) {
+    const radius = 10;
+
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+
+
+
+    this.ctx.save();
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(angle - Math.PI / 2);
+
+    // Circle
+    this.ctx.beginPath();
+    this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    this.ctx.fill();
+    this.ctx.clip();
+
+    // Rectangle
+    this.ctx.fillStyle = "white";
+    this.ctx.fillRect(-radius, -radius / 4, radius * 2, radius * 0.5);
+    //this.ctx.strokeRect(xPx - (radius + 2), yPx - (radius + 2) / 3, (radius + 2) * 2, (radius + 2) * 0.75);
+
+
+    this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    this.ctx.stroke();
+
     this.ctx.restore();
   }
 }

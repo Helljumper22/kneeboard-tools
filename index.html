@@ -352,6 +352,46 @@
             <button class="add-gate-button add-button">Add Gate</button>
           </div>
         </fieldset>
+
+        <!-- MOBs -->
+        <fieldset id="mobs-fields" class="collapsed">
+          <div class="fieldset-header">
+            <span class="fieldset-title">MOBs</span>
+            <button class="toggle-fieldset">▼</button>
+          </div>
+          <div class="fieldset-subcontainer">
+            <div class="mobs-container element-container">
+              <div class="mob element">
+                <div class="field">
+                  <label>Name</label>
+                  <input type="text" class="mob-name update-field" />
+                </div>
+                <div class="field">
+                  <label>Name position</label>
+                  <input type="range" class="mob-name-angle update-field" min="0" max="360" />
+                </div>
+                <div class="field">
+                  <label>Azimuth (°)</label>
+                  <input type="number" class="mob-azimuth update-field" />
+                </div>
+                <div class="field">
+                  <label>Distance (nm)</label>
+                  <input type="number" class="mob-distance update-field" />
+                </div>
+                <div class="field">
+                  <label>Orientation (°)</label>
+                  <input type="number" class="mob-orientation update-field" />
+                </div>
+                <div class="field">
+                  <label>Color</label>
+                  <button class="mob-color color-picker update-field"></button>
+                </div>
+                <button class="delete-mob-button delete-button">-</button>
+              </div>
+            </div>
+            <button class="add-mob-button add-button">Add MOB</button>
+          </div>
+        </fieldset>
       </div>
     </div>
     <div class="map-container">
@@ -366,6 +406,10 @@
         <div class="field">
           <label>Transparent background</label>
           <input type="checkbox" class="transparent-background" />
+        </div>
+        <div class="field">
+          <label>A4 format</label>
+          <input type="checkbox" class="format-a4" />
         </div>
         <div class="field">
           <label>File name</label>
