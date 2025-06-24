@@ -175,6 +175,7 @@ class BullseyeMapGenerator {
   showDownloadModal() {
     const downloadModal = $('.download-options-modal');
 
+    $(downloadModal).find('.format-a4').prop('checked', false);
     $(downloadModal).find('.transparent-background').prop('checked', false);
     $(downloadModal).find('.file-name').val('');
     $(downloadModal).addClass('show');
