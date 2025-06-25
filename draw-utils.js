@@ -482,13 +482,11 @@ class DrawUtils {
     this.ctx.fillStyle = color;
     this.ctx.lineWidth = 2;
 
-
-
     this.ctx.save();
     this.ctx.translate(xPx, yPx);
     this.ctx.rotate(angle - Math.PI / 2);
 
-    // Circle
+    // Clip canvas to circle and fill it.
     this.ctx.beginPath();
     this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
     this.ctx.fill();
@@ -497,10 +495,88 @@ class DrawUtils {
     // Rectangle
     this.ctx.fillStyle = "white";
     this.ctx.fillRect(-radius, -radius / 4, radius * 2, radius * 0.5);
-    //this.ctx.strokeRect(xPx - (radius + 2), yPx - (radius + 2) / 3, (radius + 2) * 2, (radius + 2) * 0.75);
 
-
+    // Circle border.
     this.ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+    this.ctx.stroke();
+
+    this.ctx.restore();
+  }
+
+  drawAircraft(x, y, angle, quantity, color) {
+    console.log(quantity);
+    const length = 20;
+    const width = 15;
+    const offsetDistance = 8;
+    const offsetAngle = Math.PI / 6;
+
+    const aircraftOffsetX = offsetDistance * Math.cos(angle + offsetAngle);
+    const aircraftOffsetY = offsetDistance * Math.sin(angle + offsetAngle);
+
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    this.ctx.fillStyle = color;
+
+    for (let i = quantity - 1; i >= 0; i--) {
+      this.ctx.save();
+      this.ctx.translate(xPx + (aircraftOffsetX * i), yPx + (aircraftOffsetY * i));
+      this.ctx.rotate(angle - Math.PI);
+
+      // Aircraft shape
+      this.ctx.beginPath();
+      this.ctx.moveTo(-width / 2, -length / 2);
+      this.ctx.lineTo(0, length / 2);
+      this.ctx.lineTo(width / 2, -length / 2);
+      this.ctx.lineTo(0, -length / 4);
+      this.ctx.closePath();
+      this.ctx.fill();
+
+      this.ctx.restore();
+    }
+  }
+
+  drawArrow(x, y, angle, length, width, color) {
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+    length *= this.nmToPixels;
+    width *= this.nmToPixels;
+
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+
+    this.ctx.save();
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(angle - Math.PI);
+
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(width / 4, -length / 2);
+    this.ctx.lineTo(width / 4, (length / 2) - (width / 1));
+    this.ctx.lineTo(width / 2, (length / 2) - (width / 1));
+    this.ctx.lineTo(0, length / 2);
+    this.ctx.lineTo(-width / 2, (length / 2) - (width / 1));
+    this.ctx.lineTo(-width / 4, (length / 2) - (width / 1));
+    this.ctx.lineTo(-width / 4, -length / 2);
+    this.ctx.closePath();
+    this.ctx.clip();
+    this.ctx.clearRect(-width / 2, -length / 2, width, length);
+
+    this.ctx.restore();
+
+    this.ctx.save();
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(angle - Math.PI);
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(width / 4, -length / 2);
+    this.ctx.lineTo(width / 4, (length / 2) - (width / 1));
+    this.ctx.lineTo(width / 2, (length / 2) - (width / 1));
+    this.ctx.lineTo(0, length / 2);
+    this.ctx.lineTo(-width / 2, (length / 2) - (width / 1));
+    this.ctx.lineTo(-width / 4, (length / 2) - (width / 1));
+    this.ctx.lineTo(-width / 4, -length / 2);
     this.ctx.stroke();
 
     this.ctx.restore();
