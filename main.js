@@ -258,8 +258,9 @@ class BullseyeMapGenerator {
     $('.half-angle-lines').prop('checked', true);
 
     $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-    $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
     $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
+    $('.map-orienation').val(0);
+    $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
     $('.gate-name-angle').val($('.gate-name-angle').prop('max') / 2);
 
     $('.cap-side').val(1);
@@ -365,6 +366,7 @@ class BullseyeMapGenerator {
     this.bullseye.ringsRangeAngle = parseInt($('.ring-range-angle').val())
     this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
     this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
+    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
 
     // MOBs
     this.mobs = [];
@@ -377,7 +379,7 @@ class BullseyeMapGenerator {
       const color = $(element).find('.mob-color').attr('data-current-color');
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -396,11 +398,11 @@ class BullseyeMapGenerator {
       const color = $(element).find('.border-color').attr('data-current-color');
 
       if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
-        const startAngleRad = (startAzimuth - 90) * Math.PI / 180;
+        const startAngleRad = ((startAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const startX = startDistance * Math.cos(startAngleRad);
         const startY = startDistance * Math.sin(startAngleRad);
 
-        const endAngleRad = (endAzimuth - 90) * Math.PI / 180;
+        const endAngleRad = ((endAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const endX = endDistance * Math.cos(endAngleRad);
         const endY = endDistance * Math.sin(endAngleRad);
 
@@ -422,7 +424,7 @@ class BullseyeMapGenerator {
       const color = $(element).find('.ring-color').attr('data-current-color');
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -438,7 +440,7 @@ class BullseyeMapGenerator {
       const distance = parseFloat($(element).find('.area-point-distance').val());
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -457,7 +459,7 @@ class BullseyeMapGenerator {
       const color = $(element).find('.gate-color').attr('data-current-color');
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -476,7 +478,7 @@ class BullseyeMapGenerator {
       const color = $(element).find('.arrow-color').attr('data-current-color');
 
       if (!isNaN(azimuth) && !isNaN(distance) && !isNaN(length) && !isNaN(width)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -496,7 +498,7 @@ class BullseyeMapGenerator {
       const color = $(element).find('.aircraft-color').attr('data-current-color');
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -513,7 +515,7 @@ class BullseyeMapGenerator {
       const distance = parseFloat($(element).find('.nav-point-distance').val());
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -541,41 +543,43 @@ class BullseyeMapGenerator {
       };
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
         const corners = [];
         if (!isNaN(length) && length >= 0 && !isNaN(width) && width >= 0 && !isNaN(orientation)) {
+          const orienationRad = (orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180)
+
           corners.push({
-            x: x + ((width / 2) * Math.cos((orientation - 90) * Math.PI / 180)),
-            y: y - ((width / 2) * Math.cos(orientation * Math.PI / 180))
+            x: x + ((width / 2) * Math.cos(orienationRad - Math.PI / 2)),
+            y: y - ((width / 2) * Math.cos(orienationRad))
           });
 
           corners.push({
-            x: corners[0].x - (length * Math.cos((orientation - 90) * Math.PI / 180)),
-            y: corners[0].y + (length * Math.cos(orientation * Math.PI / 180))
+            x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)),
+            y: corners[0].y + (length * Math.cos(orienationRad))
           });
 
           if (leftSide) {
             corners.push({
-              x: corners[0].x - (length * Math.cos((orientation - 90) * Math.PI / 180)) - (width * Math.cos(orientation * Math.PI / 180)),
-              y: corners[0].y + (length * Math.cos(orientation * Math.PI / 180)) - (width * Math.cos((orientation - 90) * Math.PI / 180))
+              x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) - (width * Math.cos(orienationRad)),
+              y: corners[0].y + (length * Math.cos(orienationRad)) - (width * Math.cos(orienationRad - Math.PI / 2))
             });
 
             corners.push({
-              x: corners[0].x - (width * Math.cos(orientation * Math.PI / 180)),
-              y: corners[0].y - (width * Math.cos((orientation - 90) * Math.PI / 180))
+              x: corners[0].x - (width * Math.cos(orienationRad)),
+              y: corners[0].y - (width * Math.cos(orienationRad - Math.PI / 2))
             });
           } else {
             corners.push({
-              x: corners[0].x - (length * Math.cos((orientation - 90) * Math.PI / 180)) + (width * Math.cos(orientation * Math.PI / 180)),
-              y: corners[0].y + (length * Math.cos(orientation * Math.PI / 180)) + (width * Math.cos((orientation - 90) * Math.PI / 180))
+              x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) + (width * Math.cos(orienationRad)),
+              y: corners[0].y + (length * Math.cos(orienationRad)) + (width * Math.cos(orienationRad - Math.PI / 2))
             });
 
             corners.push({
-              x: corners[0].x + (width * Math.cos(orientation * Math.PI / 180)),
-              y: corners[0].y + (width * Math.cos((orientation - 90) * Math.PI / 180))
+              x: corners[0].x + (width * Math.cos(orienationRad)),
+              y: corners[0].y + (width * Math.cos(orienationRad - Math.PI / 2))
             });
           }
         }
@@ -593,7 +597,7 @@ class BullseyeMapGenerator {
       const type = $(element).find('.point-type').val();
 
       if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = (azimuth - 90) * Math.PI / 180;
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const x = distance * Math.cos(angleRad);
         const y = distance * Math.sin(angleRad);
 
@@ -724,7 +728,7 @@ class BullseyeMapGenerator {
     const linesAngle = this.bullseye.halfAnglesLines ? this.utils.getClosestDivisorTo90(this.bullseye.linesAngle) / 2 : this.utils.getClosestDivisorTo90(this.bullseye.linesAngle);
     let dashed = false;
     for (let angle = 0; angle < 180; angle += linesAngle) {
-      const angleRad = angle * Math.PI / 180;
+      const angleRad = (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
       this.drawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
 
       if (this.bullseye.halfAnglesLines) {
@@ -749,7 +753,7 @@ class BullseyeMapGenerator {
 
   runMobs() {
     this.mobs.forEach((mob) => {
-      this.drawUtils.drawAirbase(mob.x, mob.y, mob.orientation * Math.PI / 180, mob.color);
+      this.drawUtils.drawAirbase(mob.x, mob.y, (mob.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), mob.color);
     });
   }
 
@@ -783,19 +787,19 @@ class BullseyeMapGenerator {
 
   runGates() {
     this.gates.forEach((gate) => {
-      this.drawUtils.drawGate(gate.x, gate.y, 15, gate.orientation * Math.PI / 180, gate.color)
+      this.drawUtils.drawGate(gate.x, gate.y, 15, (gate.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), gate.color)
     });
   }
 
   runArrows() {
     this.arrows.forEach((arrow) => {
-      this.drawUtils.drawArrow(arrow.x, arrow.y, arrow.orientation * Math.PI / 180, arrow.length, arrow.width, arrow.color);
+      this.drawUtils.drawArrow(arrow.x, arrow.y, (arrow.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), arrow.length, arrow.width, arrow.color);
     });
   }
 
   runAircraft() {
     this.aircraft.forEach((aircraft) => {
-      this.drawUtils.drawAircraft(aircraft.x, aircraft.y, aircraft.orientation * Math.PI / 180, aircraft.quantity, aircraft.color);
+      this.drawUtils.drawAircraft(aircraft.x, aircraft.y, (aircraft.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), aircraft.quantity, aircraft.color);
     });
   }
 
@@ -816,7 +820,7 @@ class BullseyeMapGenerator {
       if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
         if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
           // Draw CAP racetrack.
-          this.drawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, capPoint.orientation * Math.PI / 180, capPoint.leftSide, capPoint.color)
+          this.drawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, (capPoint.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), capPoint.leftSide, capPoint.color);
         }
       }
     });
@@ -835,7 +839,7 @@ class BullseyeMapGenerator {
 
         const ringsRangeAngle = Math.round(this.bullseye.ringsRangeAngle / linesAngle) * linesAngle;
 
-        const angleRad = (ringsRangeAngle - 90) * Math.PI / 180;
+        const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         const ringTextX = radius * Math.cos(angleRad);
         const ringTextY = radius * Math.sin(angleRad);
 
@@ -858,7 +862,7 @@ class BullseyeMapGenerator {
             this.areaPoints.forEach((point, index) => {
               const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length];
 
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: angle * Math.PI / 180 }, { start: point, end: nextPoint });
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180) }, { start: point, end: nextPoint });
 
               if (intersection) {
                 intersections.push(intersection);
@@ -871,7 +875,7 @@ class BullseyeMapGenerator {
             corners.forEach((corner, index) => {
               const nextCorner = corners[(index + 1) % corners.length];
 
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: angle * Math.PI / 180 }, { start: corner, end: nextCorner });
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180) }, { start: corner, end: nextCorner });
 
               if (intersection) {
                 intersections.push(intersection);
@@ -884,7 +888,7 @@ class BullseyeMapGenerator {
 
             const textAngle = (angle + 90) % 360;
             if (!displayedAngles.includes(textAngle)) {
-              this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, angle * Math.PI / 180, 0, 0);
+              this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), 0, 0);
 
               displayedAngles.push(textAngle);
             }
@@ -901,7 +905,7 @@ class BullseyeMapGenerator {
 
     // Draw bullseye name
     if (this.bullseye.name != '' && this.bullseye.display) {
-      const angleRad = (this.bullseye.nameAngle - 90) * Math.PI / 180;
+      const angleRad = ((this.bullseye.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
       this.drawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 16, 25, angleRad, 0, 0);
     }
 
@@ -909,7 +913,7 @@ class BullseyeMapGenerator {
 
     // Draw MOB names
     this.mobs.forEach((mob) => {
-      const angleRad = (mob.nameAngle - 90) * Math.PI / 180;
+      const angleRad = ((mob.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
       if (mob.name != '') this.drawUtils.drawText(mob.x, mob.y, mob.name, 'no-border', 14, 20, angleRad, 0, 0);
     });
 
@@ -931,14 +935,14 @@ class BullseyeMapGenerator {
     // Draw gate names
     this.gates.forEach((gate) => {
       if (gate.name != '') {
-        const angleRad = (gate.nameAngle - 90) * Math.PI / 180;
+        const angleRad = ((gate.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
         this.drawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
       }
     });
 
     // Draw aircraft names
     this.aircraft.forEach((aircraft) => {
-      const angleRad = (aircraft.nameAngle - 90) * Math.PI / 180;
+      const angleRad = ((aircraft.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
       if (aircraft.name != '') this.drawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
     });
 
@@ -954,12 +958,12 @@ class BullseyeMapGenerator {
           if (capPoint.name != '') {
             const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
 
-            let capNameAngle = (capPoint.orientation + 90) % 360;
-            if (capNameAngle <= 270 && capNameAngle >= 90) {
-              capNameAngle -= 180;
+            let capNameAngle = (((capPoint.orientation + 90) * (Math.PI / 180)) % 360) + (this.bullseye.mapOrientation * Math.PI / 180);
+            if (capNameAngle <= Math.PI * 1.5 && capNameAngle >= Math.PI / 2) {
+              capNameAngle -= Math.PI;
             }
 
-            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle * (Math.PI / 180), 0);
+            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
           }
         }
 
@@ -1000,6 +1004,7 @@ class BullseyeMapGenerator {
         $('.ring-range-angle').val(bullseyeData.ringsRangeAngle)
         $('.lines-angle').val(bullseyeData.linesAngle);
         $('.half-angle-lines').prop('checked', bullseyeData.halfAnglesLines);
+        $('.map-orientation').val(bullseyeData.mapOrientation);
       }
     } catch (error) {
       $('.display-bullseye').prop('checked', true);
@@ -1010,6 +1015,7 @@ class BullseyeMapGenerator {
       $('.ring-range-angle').val(180)
       $('.lines-angle').val(30);
       $('.half-angle-lines').prop('checked', true);
+      $('.map-orientation').val(0)
     }
 
     // MOBs
@@ -1025,6 +1031,7 @@ class BullseyeMapGenerator {
             $('.mobs-container').append(mobElement);
 
             mobElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            mobElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = mobElement.find('.color-picker');
             if (colorPicker) {
@@ -1067,6 +1074,7 @@ class BullseyeMapGenerator {
             $('.borders-container').append(borderElement);
 
             borderElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            borderElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = borderElement.find('.color-picker');
             if (colorPicker) {
@@ -1109,6 +1117,7 @@ class BullseyeMapGenerator {
             $('.rings-container').append(ringElement);
 
             ringElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            ringElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = ringElement.find('.color-picker');
             if (colorPicker) {
@@ -1149,6 +1158,7 @@ class BullseyeMapGenerator {
             $('.area-points-container').append(areaPointElement);
 
             areaPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            areaPointElement.find('.update-field').on('input', () => this.updateMap());
           }
 
           $(areaPointElement).find('.area-point-name').val(areaPointData.name);
@@ -1180,6 +1190,7 @@ class BullseyeMapGenerator {
             $('.gates-container').append(gateElement);
 
             gateElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            gateElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = gateElement.find('.color-picker');
             if (colorPicker) {
@@ -1222,6 +1233,7 @@ class BullseyeMapGenerator {
             $('.arrow-container').append(arrowElement);
 
             arrowElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            arrowElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = arrowElement.find('.color-picker');
             if (colorPicker) {
@@ -1264,6 +1276,7 @@ class BullseyeMapGenerator {
             $('.aircraft-container').append(aircraftElement);
 
             aircraftElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            aircraftElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = aircraftElement.find('.color-picker');
             if (colorPicker) {
@@ -1308,6 +1321,7 @@ class BullseyeMapGenerator {
             $('.nav-points-container').append(navPointElement);
 
             navPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            navPointElement.find('.update-field').on('input', () => this.updateMap());
           }
 
           $(navPointElement).find('.nav-point-name').val(navPointData.name);
@@ -1339,6 +1353,7 @@ class BullseyeMapGenerator {
             $('.cap-points-container').append(capPointElement);
 
             capPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            capPointElement.find('.update-field').on('input', () => this.updateMap());
 
             const colorPicker = capPointElement.find('.color-picker');
             if (colorPicker) {
@@ -1387,6 +1402,7 @@ class BullseyeMapGenerator {
             $('.points-container').append(pointElement);
 
             pointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
+            pointElement.find('.update-field').on('input', () => this.updateMap());
           }
 
           $(pointElement).find('.point-name').val(pointData.name);

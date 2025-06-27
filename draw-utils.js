@@ -32,6 +32,14 @@ class DrawUtils {
     ];
   }
 
+  setToBackground() {
+    this.ctx.globalCompositeOperation = 'destination-over';
+  }
+
+  setToForeground() {
+    this.ctx.globalCompositeOperation = 'source-over';
+  }
+
   setScale(furthestPoint) {
     // Ensure the furthest point fits within the canvas
     const maxRadius = Math.min(this.width, this.height) / 2;
@@ -41,14 +49,6 @@ class DrawUtils {
   setCenter(x, y) {
     this.centerX = (this.width / 2) - (x * this.nmToPixels);
     this.centerY = (this.height / 2) - (y * this.nmToPixels);
-  }
-
-  setToBackground() {
-    this.ctx.globalCompositeOperation = 'destination-over';
-  }
-
-  setToForeground() {
-    this.ctx.globalCompositeOperation = 'source-over';
   }
 
   clipCanvas(points) {
