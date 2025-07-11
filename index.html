@@ -4,524 +4,613 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bullseye Map Generator</title>
-  <link rel="icon" type="image/x-icon" href="./assets/bullseye.png">
+  <title>Kneeboard Generation Tools</title>
+  <link rel="icon" type="image/x-icon" href="./src/assets/bullseye.png">
 
+  <!-- Library stylesheets -->
   <link rel="stylesheet" href="./libs/jquery-ui.min.css">
 
-  <link rel="stylesheet" href="./style.css">
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./src/global.css">
+  <!---- Bullseye map ---->
+  <link rel="stylesheet" href="./src/bullseye-map/bullseye-map.css">
+  <!---- Kneeboard ---->
+  <link rel="stylesheet" href="./src/kneeboard/kneeboard.css">
 
+
+  <!-- Library scripts -->
   <script src="./libs/jquery-3.7.1.min.js"></script>
   <script src="./libs/jquery-ui.min.js"></script>
   <script src="./libs/jscolor.min.js"></script>
+  <script src="./libs/luaparse.js"></script>
+  <script src="./libs/jszip.min.js"></script>
 
-  <script src="./main.js"></script>
-  <script src="./draw-utils.js"></script>
-  <script src="./utils.js"></script>
+
+  <!-- Config and templates -->
+  <script src="./config.js"></script>
+  <script src="./templates/kneeboard/M2000C.js"></script>
+
+  <!-- Scripts -->
+  <script src="./src/app.js"></script>
+  <!---- Bullseye map ---->
+  <script src="./src/bullseye-map/bullseye-map.js"></script>
+  <!---- Kneeboard ---->
+  <script src="./src/kneeboard/kneeboard.js"></script>
+  <!---- Utils ---->
+  <script src="./src/utils/utils.js"></script>
+  <script src="./src/utils/kneeboard-draw-utils.js"></script>
+  <script src="./src/utils/map-draw-utils.js"></script>
 </head>
 
 <body>
   <div class="container">
-    <div class="sidebar">
-      <header class="sidebar-header">
-        <h1 class="sidebar-title">Bullseye Map Generator</h1>
-        <span class="disclaimer">This tool will produce a readable map when setup properly, but it is not foolproof. It
-          is easy to break
-          intentionally.
-          <br> <br>
-          The app is <b>not responsive</b> and <b>doesn't work on smartphone display</b>.
-        </span>
-        <div class="header-buttons">
-          <div class="header-button-line">
-            <button class="import-map-button">Import map</button>
-            <button class="show-export-map-modal-button">Export map</button>
-            <button class="show-download-map-modal-button">Download map</button>
-          </div>
-          <div class="header-button-line">
-            <button class="reset-fields-button">Reset fields</button>
-          </div>
+    <header class="header">
+      <h1 class="header-title">Kneeboard Generation Tools</h1>
+
+    </header>
+    <div class="tabs-container">
+      <div class="tabs-button-container">
+        <div class="tab-button" attr-tab="bullseye-map-tab">Bullseye Map</div>
+        <div class="tab-button" attr-tab="kneeboard-tab">Kneeboard</div>
+        <div class="disclaimer">
+          <span>This app is <b>not responsive</b> and <b>doesn't work on smartphone
+              display</b>.</span>
         </div>
-      </header>
-      <div class="input-fields-container">
-
-        <!-- Bullseye -->
-        <fieldset id="bullseye-fields">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Bullseye options</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="field">
-              <label>Display bullseye</label>
-              <input type="checkbox" class="display-bullseye update-field" checked />
-            </div>
-            <div class="field">
-              <label>Limit bullseye to area</label>
-              <input type="checkbox" class="limit-bullseye-to-area update-field" checked />
-            </div>
-            <div class="field">
-              <label>Bullseye name</label>
-              <input type="text" class="bullseye-name update-field" />
-            </div>
-            <div class="field">
-              <label>Name position</label>
-              <input type="range" class="bullseye-name-angle update-field" min="0" max="360" />
-            </div>
-            <div class="field">
-              <label>Ring range (nm)</label>
-              <input type="number" class="rings-range update-field" value="20" />
-            </div>
-            <div class="field">
-              <label>Ring range position</label>
-              <input type="range" class="ring-range-angle update-field" min="0" max="360" />
-            </div>
-            <div class="field">
-              <label>Line angles* (°)</label>
-              <input type="number" class="lines-angle update-field" value="30" />
-            </div>
-            <div class="field">
-              <label>Half angle lines</label>
-              <input type="checkbox" class="half-angle-lines update-field" checked />
-            </div>
-            <div class="field">
-              <label>Map orientation (°)</label>
-              <input type="number" class="map-orientation update-field" value="0" />
-            </div>
-            <span class="asterisk-text">* Rounded to closest divider of 90.</span>
-          </div>
-        </fieldset>
-
-        <!-- MOBs -->
-        <fieldset id="mobs-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">MOBs</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="mobs-container element-container">
-              <div class="mob element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="mob-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Name position</label>
-                  <input type="range" class="mob-name-angle update-field" min="0" max="360" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="mob-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="mob-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Orientation (°)</label>
-                  <input type="number" class="mob-orientation update-field" />
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="mob-color color-picker update-field"></button>
-                </div>
-                <button class="delete-mob-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-mob-button add-button">Add MOB</button>
-          </div>
-        </fieldset>
-
-        <!-- Borders -->
-        <fieldset id="borders-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Borders</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="borders-container element-container">
-              <div class="border element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="border-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Start azimuth (°)</label>
-                  <input type="number" class="border-start-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Start distance (nm)</label>
-                  <input type="number" class="border-start-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>End azimuth (°)</label>
-                  <input type="number" class="border-end-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>End distance (nm)</label>
-                  <input type="number" class="border-end-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="border-color color-picker update-field"></button>
-                </div>
-                <button class="delete-border-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-border-button add-button">Add Border</button>
-          </div>
-        </fieldset>
-
-        <!-- Rings -->
-        <fieldset id="rings-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Rings</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="rings-container element-container">
-              <div class="ring element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="ring-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="ring-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="ring-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Radius (nm)</label>
-                  <input type="number" class="ring-radius update-field" />
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="ring-color color-picker update-field"></button>
-                </div>
-                <button class="delete-ring-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-ring-button add-button">Add Ring</button>
-          </div>
-        </fieldset>
-
-        <!-- Area points -->
-        <fieldset id="area-points-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Area Points</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="area-points-container element-container sortable-container">
-              <div class="area-point element">
-                <div class="drag-handle" title="Drag to reorder">☰</div>
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="area-point-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="area-point-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="area-point-distance update-field" />
-                </div>
-                <button class="delete-area-point-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-area-point-button add-button">Add Area Point</button>
-          </div>
-        </fieldset>
-
-        <!-- Gates -->
-        <fieldset id="gates-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Gates</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="gates-container element-container">
-              <div class="gate element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="gate-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Name position</label>
-                  <input type="range" class="gate-name-angle update-field" min="0" max="360" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="gate-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="gate-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Orientation (°)</label>
-                  <input type="number" class="gate-orientation update-field" />
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="gate-color color-picker update-field"></button>
-                </div>
-                <button class="delete-gate-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-gate-button add-button">Add Gate</button>
-          </div>
-        </fieldset>
-
-        <!-- Arrows -->
-        <fieldset id="arrows-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Arrows</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="arrows-container element-container">
-              <div class="arrow element">
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="arrow-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="arrow-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Orientation (°)</label>
-                  <input type="number" class="arrow-orientation update-field" />
-                </div>
-                <div class="field">
-                  <label>Length (nm)</label>
-                  <input type="number" class="arrow-length update-field" />
-                </div>
-                <div class="field">
-                  <label>Width (nm)</label>
-                  <input type="number" class="arrow-width update-field" />
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="arrow-color color-picker update-field"></button>
-                </div>
-                <button class="delete-arrow-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-arrow-button add-button">Add Arrow</button>
-          </div>
-        </fieldset>
-
-        <!-- Aircraft -->
-        <fieldset id="aircraft-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Aircraft</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="aircraft-container element-container">
-              <div class="aircraft element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="aircraft-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Name position</label>
-                  <input type="range" class="aircraft-name-angle update-field" min="0" max="360" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="aircraft-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="aircraft-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Orientation (°)</label>
-                  <input type="number" class="aircraft-orientation update-field" />
-                </div>
-                <div class="field">
-                  <label>Quantity</label>
-                  <select class="aircraft-quantity update-field">
-                    <option value="1" selected>1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="aircraft-color color-picker update-field"></button>
-                </div>
-                <button class="delete-aircraft-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-aircraft-button add-button">Add Aircraft</button>
-          </div>
-        </fieldset>
-
-        <!-- Flight plan -->
-        <fieldset id="nav-points-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Flight Plan</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="nav-points-container element-container sortable-container">
-              <div class="nav-point element">
-                <div class="drag-handle" title="Drag to reorder">☰</div>
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="nav-point-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="nav-point-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="nav-point-distance update-field" />
-                </div>
-                <button class="delete-nav-point-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-nav-point-button add-button">Add Nav Point</button>
-          </div>
-        </fieldset>
-
-        <!-- Cap point -->
-        <fieldset id="cap-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">CAP Points</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="cap-points-container element-container">
-              <div class="cap-point element">
-                <div class="field">
-                  <label>Point name</label>
-                  <input type="text" class="cap-point-name update-field" />
-                </div>
-                <div class="field">
-                  <label>CAP name</label>
-                  <input type="text" class="cap-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="cap-point-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="cap-point-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Length (nm)</label>
-                  <input type="number" class="cap-length update-field" />
-                </div>
-                <div class="field">
-                  <label>Width (nm)</label>
-                  <input type="number" class="cap-width update-field" />
-                </div>
-                <div class="field">
-                  <label>Orientation* (°)</label>
-                  <input type="number" class="cap-orientation update-field" />
-                </div>
-                <div class="field">
-                  <label>Side</label>
-                  <select class="cap-side update-field">
-                    <option value="1" selected>Left</option>
-                    <option value="0">Right</option>
-                  </select>
-                </div>
-                <div class="field">
-                  <label>Color</label>
-                  <button class="cap-color color-picker update-field"></button>
-                </div>
-                <button class="delete-cap-point-button delete-button">-</button>
-              </div>
-            </div>
-            <span class="asterisk-text">* Use true heading.</span>
-            <button class="add-cap-point-button add-button">Add CAP Point</button>
-          </div>
-        </fieldset>
-
-        <!-- Points -->
-        <fieldset id="points-fields" class="collapsed">
-          <div class="fieldset-header">
-            <span class="fieldset-title">Points</span>
-            <button class="toggle-fieldset">▼</button>
-          </div>
-          <div class="fieldset-subcontainer">
-            <div class="points-container element-container sortable-container">
-              <div class="point element">
-                <div class="field">
-                  <label>Name</label>
-                  <input type="text" class="point-name update-field" />
-                </div>
-                <div class="field">
-                  <label>Azimuth (°)</label>
-                  <input type="number" class="point-azimuth update-field" />
-                </div>
-                <div class="field">
-                  <label>Distance (nm)</label>
-                  <input type="number" class="point-distance update-field" />
-                </div>
-                <div class="field">
-                  <label>Type</label>
-                  <select class="point-type update-field">
-                    <option value="nav-point" selected>Nav point</option>
-                    <option value="target-point">Target point</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
-                <button class="delete-point-button delete-button">-</button>
-              </div>
-            </div>
-            <button class="add-point-button add-button">Add Point</button>
-          </div>
-        </fieldset>
       </div>
-    </div>
-    <div class="map-container">
-      <canvas class="map-canvas" width="800" height="800"></canvas>
-    </div>
-  </div>
+      <div class="tabs">
+        <!-- ========== Bullseye Map ========== -->
+        <div class="tab" attr-tab="bullseye-map-tab">
+          <div class="tab-content">
+            <div class="sidebar">
+              <header class="sidebar-header">
+                <h1 class="sidebar-title">Bullseye Map</h1>
+                <span class="disclaimer">This tool will produce a readable map when setup properly, but it is not
+                  foolproof. It is easy to break intentionally.</span>
+                <div class="header-buttons">
+                  <button class="import-map-button">Import map</button>
+                  <button class="show-export-map-modal-button">Export map</button>
+                  <button class="show-download-map-modal-button">Download map</button>
+                  <button class="reset-map-fields-button">Reset fields</button>
+                </div>
+              </header>
+              <div class="input-fields-container">
 
-  <div class="download-options-modal modal">
-    <div class="modal-content">
-      <div class="close-button">&#10006;</div>
-      <div class="modal-inner-content">
-        <div class="field">
-          <label>Transparent background</label>
-          <input type="checkbox" class="transparent-background" />
+                <!-- Bullseye -->
+                <fieldset id="bullseye-fields">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Bullseye options</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="field">
+                      <label>Display bullseye</label>
+                      <input type="checkbox" class="display-bullseye update-field" checked />
+                    </div>
+                    <div class="field">
+                      <label>Limit bullseye to area</label>
+                      <input type="checkbox" class="limit-bullseye-to-area update-field" checked />
+                    </div>
+                    <div class="field">
+                      <label>Bullseye name</label>
+                      <input type="text" class="bullseye-name update-field" />
+                    </div>
+                    <div class="field">
+                      <label>Name position</label>
+                      <input type="range" class="bullseye-name-angle update-field" min="0" max="360" />
+                    </div>
+                    <div class="field">
+                      <label>Ring range (nm)</label>
+                      <input type="number" class="rings-range update-field" value="20" />
+                    </div>
+                    <div class="field">
+                      <label>Ring range position</label>
+                      <input type="range" class="ring-range-angle update-field" min="0" max="360" />
+                    </div>
+                    <div class="field">
+                      <label>Line angles* (°)</label>
+                      <input type="number" class="lines-angle update-field" value="30" />
+                    </div>
+                    <div class="field">
+                      <label>Half angle lines</label>
+                      <input type="checkbox" class="half-angle-lines update-field" checked />
+                    </div>
+                    <div class="field">
+                      <label>Map orientation (°)</label>
+                      <input type="number" class="map-orientation update-field" value="0" />
+                    </div>
+                    <span class="asterisk-text">* Rounded to closest divider of 90.</span>
+                  </div>
+                </fieldset>
+
+                <!-- MOBs -->
+                <fieldset id="mobs-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">MOBs</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="mobs-container element-container">
+                      <div class="mob element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="mob-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Name position</label>
+                          <input type="range" class="mob-name-angle update-field" min="0" max="360" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="mob-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="mob-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Orientation (°)</label>
+                          <input type="number" class="mob-orientation update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="mob-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-mob-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-mob-button add-button">Add MOB</button>
+                  </div>
+                </fieldset>
+
+                <!-- Borders -->
+                <fieldset id="borders-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Borders</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="borders-container element-container">
+                      <div class="border element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="border-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Start azimuth (°)</label>
+                          <input type="number" class="border-start-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Start distance (nm)</label>
+                          <input type="number" class="border-start-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>End azimuth (°)</label>
+                          <input type="number" class="border-end-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>End distance (nm)</label>
+                          <input type="number" class="border-end-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="border-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-border-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-border-button add-button">Add Border</button>
+                  </div>
+                </fieldset>
+
+                <!-- Rings -->
+                <fieldset id="rings-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Rings</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="rings-container element-container">
+                      <div class="ring element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="ring-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="ring-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="ring-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Radius (nm)</label>
+                          <input type="number" class="ring-radius update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="ring-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-ring-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-ring-button add-button">Add Ring</button>
+                  </div>
+                </fieldset>
+
+                <!-- Area points -->
+                <fieldset id="area-points-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Area Points</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="area-points-container element-container sortable-container">
+                      <div class="area-point element">
+                        <div class="drag-handle" title="Drag to reorder">☰</div>
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="area-point-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="area-point-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="area-point-distance update-field" />
+                        </div>
+                        <button class="delete-area-point-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-area-point-button add-button">Add Area Point</button>
+                  </div>
+                </fieldset>
+
+                <!-- Gates -->
+                <fieldset id="gates-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Gates</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="gates-container element-container">
+                      <div class="gate element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="gate-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Name position</label>
+                          <input type="range" class="gate-name-angle update-field" min="0" max="360" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="gate-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="gate-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Orientation (°)</label>
+                          <input type="number" class="gate-orientation update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="gate-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-gate-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-gate-button add-button">Add Gate</button>
+                  </div>
+                </fieldset>
+
+                <!-- Arrows -->
+                <fieldset id="arrows-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Arrows</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="arrows-container element-container">
+                      <div class="arrow element">
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="arrow-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="arrow-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Orientation (°)</label>
+                          <input type="number" class="arrow-orientation update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Length (nm)</label>
+                          <input type="number" class="arrow-length update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Width (nm)</label>
+                          <input type="number" class="arrow-width update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="arrow-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-arrow-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-arrow-button add-button">Add Arrow</button>
+                  </div>
+                </fieldset>
+
+                <!-- Aircraft -->
+                <fieldset id="aircraft-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Aircraft</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="aircraft-container element-container">
+                      <div class="aircraft element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="aircraft-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Name position</label>
+                          <input type="range" class="aircraft-name-angle update-field" min="0" max="360" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="aircraft-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="aircraft-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Orientation (°)</label>
+                          <input type="number" class="aircraft-orientation update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Quantity</label>
+                          <select class="aircraft-quantity update-field">
+                            <option value="1" selected>1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="aircraft-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-aircraft-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-aircraft-button add-button">Add Aircraft</button>
+                  </div>
+                </fieldset>
+
+                <!-- Flight plan -->
+                <fieldset id="nav-points-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Flight Plan</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="nav-points-container element-container sortable-container">
+                      <div class="nav-point element">
+                        <div class="drag-handle" title="Drag to reorder">☰</div>
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="nav-point-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="nav-point-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="nav-point-distance update-field" />
+                        </div>
+                        <button class="delete-nav-point-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-nav-point-button add-button">Add Nav Point</button>
+                  </div>
+                </fieldset>
+
+                <!-- Cap point -->
+                <fieldset id="cap-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">CAP Points</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="cap-points-container element-container">
+                      <div class="cap-point element">
+                        <div class="field">
+                          <label>Point name</label>
+                          <input type="text" class="cap-point-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>CAP name</label>
+                          <input type="text" class="cap-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="cap-point-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="cap-point-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Length (nm)</label>
+                          <input type="number" class="cap-length update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Width (nm)</label>
+                          <input type="number" class="cap-width update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Orientation* (°)</label>
+                          <input type="number" class="cap-orientation update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Side</label>
+                          <select class="cap-side update-field">
+                            <option value="1" selected>Left</option>
+                            <option value="0">Right</option>
+                          </select>
+                        </div>
+                        <div class="field">
+                          <label>Color</label>
+                          <button class="cap-color color-picker update-field"></button>
+                        </div>
+                        <button class="delete-cap-point-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <span class="asterisk-text">* Use true heading.</span>
+                    <button class="add-cap-point-button add-button">Add CAP Point</button>
+                  </div>
+                </fieldset>
+
+                <!-- Points -->
+                <fieldset id="points-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Points</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="points-container element-container sortable-container">
+                      <div class="point element">
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="point-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="point-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="point-distance update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Type</label>
+                          <select class="point-type update-field">
+                            <option value="nav-point" selected>Nav point</option>
+                            <option value="target-point">Target point</option>
+                            <option value="none">None</option>
+                          </select>
+                        </div>
+                        <button class="delete-point-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-point-button add-button">Add Point</button>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div class="map-container">
+              <canvas class="map-canvas" height="800" width="800"></canvas>
+            </div>
+          </div>
+
+          <div class="download-options-modal modal">
+            <div class="modal-content">
+              <div class="close-button">&#10006;</div>
+              <div class="modal-inner-content">
+                <div class="field">
+                  <label>Transparent background</label>
+                  <input type="checkbox" class="transparent-background" />
+                </div>
+                <div class="field">
+                  <label>A4 format</label>
+                  <input type="checkbox" class="format-a4" />
+                </div>
+                <div class="field">
+                  <label>File name</label>
+                  <input type="text" class="file-name" />
+                </div>
+                <button class="download-map-button modal-button">Download</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>A4 format</label>
-          <input type="checkbox" class="format-a4" />
+        <!-- ========== Kneeboard ========== -->
+        <div class="tab" attr-tab="kneeboard-tab">
+          <div class="tab-content">
+            <div class="sidebar">
+              <header class="sidebar-header">
+                <h1 class="sidebar-title">Kneeboard</h1>
+                <div class="header-buttons">
+                  <button class="import-kneeboard-button">Import kneeboard data</button>
+                  <button class="show-export-kneeboard-modal-button">Export kneeboard data</button>
+                  <button class="import-miz-button">Import miz</button>
+                  <button class="show-download-kneeboard-modal-button">Download kneeboard</button>
+                  <button class="reset-kneeboard-fields-button">Reset fields</button>
+                </div>
+              </header>
+            </div>
+            <div class="kneeboard-container">
+              <div class="previous-arrow">◄</div>
+              <canvas class="kneeboard-canvas" height="1080" width="764"></canvas>
+              <div class="kneeboard-fields-container"></div>
+              <div class="next-arrow">►</div>
+            </div>
+          </div>
+
+          <div class="miz-import-group-modal modal">
+            <div class="modal-content">
+              <div class="close-button">&#10006;</div>
+              <div class="modal-loading-container">Processing</div>
+              <div class="modal-inner-content hide">
+                <div class="field">
+                  <label>Select flight</label>
+                  <select class="selected-group"></select>
+                </div>
+                <div class="field">
+                  <label>Start at 11</label>
+                  <input type="checkbox" class="start-at-11" />
+                </div>
+                <button class="miz-import-group modal-button">Import flight data</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="download-kneeboard-modal modal">
+            <div class="modal-content">
+              <div class="close-button">&#10006;</div>
+              <div class="modal-inner-content">
+                <div class="field">
+                  <label>File name</label>
+                  <input type="text" class="file-name" />
+                </div>
+                <button class="download-kneeboard-button modal-button">Download</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>File name</label>
-          <input type="text" class="file-name" />
-        </div>
-        <button class="download-map-button modal-button">Download</button>
       </div>
-    </div>
-  </div>
 
-  <div class="export-options-modal modal">
-    <div class="modal-content">
-      <div class="close-button">&#10006;</div>
-      <div class="modal-inner-content">
-        <div class="field">
-          <label>File name</label>
-          <input type="text" class="file-name" />
+      <div class="export-options-modal modal">
+        <div class="modal-content">
+          <div class="close-button">&#10006;</div>
+          <div class="modal-inner-content">
+            <div class="field">
+              <label>File name</label>
+              <input type="text" class="file-name" />
+            </div>
+            <button class="export-data-button modal-button">Export</button>
+          </div>
         </div>
-        <button class="export-map-button modal-button">Export</button>
       </div>
     </div>
   </div>

@@ -1,10 +1,10 @@
-class DrawUtils {
+class MapDrawUtils {
   constructor() {
     this.canvas = $('.map-canvas')[0];
     this.ctx = this.canvas.getContext('2d');
 
-    this.width = 800;
-    this.height = 800;
+    this.height = 700;
+    this.width = 700;
 
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;

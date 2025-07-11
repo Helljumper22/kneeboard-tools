@@ -1,0 +1,145 @@
+body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
+  .tab-content {
+    height: 100%;
+
+    .sidebar {
+      height: 100%;
+
+      .sidebar-header {
+        .header-buttons {
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+      }
+    }
+
+    .kneeboard-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1e1e1e;
+      width: 100%;
+
+      .previous-arrow,
+      .next-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 25px;
+        cursor: pointer;
+
+        &.hide {
+          display: none;
+        }
+      }
+
+      .previous-arrow {
+        left: 20px;
+      }
+
+      .next-arrow {
+        right: 20px;
+      }
+
+      .kneeboard-canvas {
+        background: white;
+        border: 1px solid black;
+        height: 800px;
+        width: 565px;
+      }
+
+      .kneeboard-fields-container {
+        position: absolute;
+        height: 800px;
+        width: 565px;
+
+        input,
+        textarea,
+        .custom-select-container {
+          font-family: Arial;
+          position: absolute;
+          border: 0px;
+          color: black;
+          background-color: transparent;
+          margin: 0;
+          padding: 0;
+          resize: none;
+          overflow: hidden;
+
+          &:focus {
+            outline: none;
+            box-shadow: none;
+            border: 0px;
+          }
+        }
+
+        .custom-select-container {
+          display: flex;
+          align-items: stretch;
+          overflow: visible;
+
+          .custom-select-display {
+            position: relative;
+            display: flex;
+            align-items: center;
+            position: relative;
+            height: 100%;
+            width: 100%;
+
+            .custom-select-input {
+              flex: 1;
+              width: 100%;
+              text-align: inherit;
+              box-sizing: border-box;
+              font-size: inherit;
+
+              &.disabled {
+                pointer-events: none;
+              }
+            }
+
+            .custom-select-arrow {
+              position: absolute;
+              cursor: pointer;
+              top: 50%;
+              transform: translateY(-50%);
+              user-select: none;
+
+              &.left {
+                left: 0px;
+              }
+
+              &.right {
+                right: 0px;
+              }
+            }
+
+
+          }
+
+          .custom-select-dropdown {
+            display: none;
+            border: 1px solid #444;
+            background: white;
+            position: absolute;
+            top: 100%;
+            left: -1px;
+            width: 100%;
+            z-index: 1000;
+            color: black;
+            user-select: none;
+
+            .custom-select-option {
+              padding: 4px 2px;
+              cursor: pointer;
+
+              &:hover {
+                background-color: #ddd;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
