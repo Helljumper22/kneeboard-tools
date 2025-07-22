@@ -278,4 +278,19 @@ class Utils {
     zeroPad(num, places) {
         return String(num).padStart(places, '0');
     }
+
+    fahrenheitToCelsius(f) {
+        return (f - 32) * 5 / 9;
+    }
+
+    getContrailsRange(slTemp) {
+        const minAlt = Math.max(0, (560 * slTemp) + 18400);
+        const maxAlt = 39000;
+
+        if (minAlt < maxAlt) {
+            return [minAlt, maxAlt];
+        } else {
+            return false;
+        }
+    }
 }

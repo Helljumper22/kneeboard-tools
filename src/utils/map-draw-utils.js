@@ -504,7 +504,6 @@ class MapDrawUtils {
   }
 
   drawAircraft(x, y, angle, quantity, color) {
-    console.log(quantity);
     const length = 20;
     const width = 15;
     const offsetDistance = 8;

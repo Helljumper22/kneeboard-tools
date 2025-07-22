@@ -1,10 +1,33 @@
-const darkBackground = '#D9D9D9'
-const lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R'];
-const takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2'];
-const formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW l', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'FL 4 L', 'FL 4 R'];
+const M2000C_OCA_darkBackground = '#D9D9D9'
 
-const M2000C_1 = {
-    id: 'M2000C-page-1',
+const M2000C_OCA_lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R'];
+const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
+const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'FL 4 L', 'FL 4 R'];
+const M2000C_OCA_riskLevelOptions = ['LOW', 'MEDIUM', 'HIGH'];
+const M2000C_OCA_yesNoOptions = ['Y', 'N'];
+const M2000C_OCA_wcsOptions = ['HOLD', 'TIGHT', 'FREE'];
+
+const M2000C_OCA_reactionCanvasPath = "M2 0 2 25 27 25 27 0ZM62 45A1 1 0 0032 45 1 1 0 0062 45M30 70A1 1 0 000 70 1 1 0 0030 70M27 25 36 35";
+const M2000C_OCA_racetrackPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18ZM35 19 34 20 35 21 36 20 35 19Z";
+const M2000C_OCA_racetrackRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18ZM5 19 4 20 5 21 6 20 5 19Z";
+const M2000C_OCA_racetrack1ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M35 25 33 29 37 29ZM35 19 34 20 35 21 36 20 35 19Z";
+const M2000C_OCA_racetrack1ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M5 25 3 29 7 29ZM5 19 4 20 5 21 6 20 5 19Z";
+const M2000C_OCA_racetrack11ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M35 25 33 29 37 29ZM35 19 34 20 35 21 36 20 35 19M5 60 3 56 7 56Z";
+const M2000C_OCA_racetrack11ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M5 25 3 29 7 29ZM5 19 4 20 5 21 6 20 5 19M35 60 33 56 37 56Z";
+const M2000C_OCA_racetrack2ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M32 25 30 29 34 29ZM38 25 36 29 40 29ZM35 19 34 20 35 21 36 20 35 19";
+const M2000C_OCA_racetrack2ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM8 25 6 29 10 29ZM5 19 4 20 5 21 6 20 5 19";
+const M2000C_OCA_racetrack22ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M32 25 30 29 34 29ZM38 25 36 29 40 29ZM35 19 34 20 35 21 36 20 35 19M8 60 6 56 10 56ZM2 60 0 56 4 56Z";
+const M2000C_OCA_racetrack22ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM8 25 6 29 10 29ZM5 19 4 20 5 21 6 20 5 19M38 60 36 56 40 56ZM32 60 30 56 34 56Z";
+const M2000C_OCA_racetrack4ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M32 25 30 29 34 29ZM28 29 30 33 26 33ZM38 25 36 29 40 29ZM42 29 40 33 44 33ZM35 19 34 20 35 21 36 20 35 19";
+const M2000C_OCA_racetrack4ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM-2 29 0 33-4 33ZM9 25 7 29 11 29ZM13 29 11 33 15 33ZM5 19 4 20 5 21 6 20 5 19";
+
+const M2000C_OCA_racetrackPathList = [
+    M2000C_OCA_racetrackPath, M2000C_OCA_racetrack1ShipPath, M2000C_OCA_racetrack11ShipPath, M2000C_OCA_racetrack2ShipPath, M2000C_OCA_racetrack22ShipPath, M2000C_OCA_racetrack4ShipPath,
+    M2000C_OCA_racetrackRightHandPath, M2000C_OCA_racetrack1ShipRightHandPath, M2000C_OCA_racetrack11ShipRightHandPath, M2000C_OCA_racetrack2ShipRightHandPath, M2000C_OCA_racetrack22ShipRightHandPath, M2000C_OCA_racetrack4ShipRightHandPath
+];
+
+const M2000C_OCA_1 = {
+    id: 'M2000C-OCA-page-1',
     _name: 'Mirage 2000C kneeboard page 1',
     rows: 44,
     columns: 19,
@@ -17,7 +40,7 @@ const M2000C_1 = {
             text: 'DATE',
             position: [0, 1, 0, 2],
             borderWidths: [2, 0, 2, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Mission name',
@@ -45,71 +68,71 @@ const M2000C_1 = {
             _name: 'Pilots',
             _description: 'Pilots text',
             text: 'PILOTS',
-            position: [1, 2, 0, 2],
-            borderWidths: [2, 2, 2, 1]
+            position: [1, 2, 0, 3],
+            borderWidths: [2, 2, 1, 1]
         },
         {
             _name: 'Callsign',
             _description: 'Callsign text',
             text: 'CALLSIGN',
-            position: [1, 2, 2, 6],
-            borderWidths: [2, 1, 2, 2]
+            position: [1, 2, 3, 7],
+            borderWidths: [2, 1, 1, 2]
         },
         {
             _name: 'Pilot number',
             _description: 'Pilot number text',
             text: 'No',
-            position: [1, 2, 6, 7],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 7, 8],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'A/C number',
             _description: 'A/C number text',
             text: 'A/C',
-            position: [1, 2, 7, 9],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 8, 10],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'RADAR channel',
             _description: 'RADAR channel text',
             text: 'RDR',
-            position: [1, 2, 9, 10],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 10, 11],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'Yardstick 1 channel',
             _description: 'Yardstick 1 channel text',
             text: 'AA1',
-            position: [1, 2, 10, 12],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 11, 13],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'Yardstick 2 channel',
             _description: 'Yardstick 2 channel text',
             text: 'AA2',
-            position: [1, 2, 12, 14],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 13, 15],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'IFF mode 3',
             _description: 'IFF mode 3 text',
             text: 'IFF3',
-            position: [1, 2, 14, 16],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 15, 17],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'IFF mode 1',
             _description: 'IFF mode 1 text',
             text: 'IFF1',
-            position: [1, 2, 16, 17],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 17, 18],
+            borderWidths: [2, 1, 1, 1]
         },
         {
             _name: 'Altitude block',
             _description: 'Altitude block text',
             text: 'ALT',
-            position: [1, 2, 17, 19],
-            borderWidths: [2, 1, 2, 1]
+            position: [1, 2, 18, 19],
+            borderWidths: [2, 1, 1, 1]
         },
         // Row 9
         {
@@ -163,7 +186,7 @@ const M2000C_1 = {
             position: [11, 14, 0, 1],
             borderWidths: [2, 1, 2, 2],
             textOrientation: 'vertical',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'RAM',
@@ -172,7 +195,7 @@ const M2000C_1 = {
             position: [11, 14, 4, 5],
             borderWidths: [2, 1, 2, 2],
             textOrientation: 'vertical',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 12
         {
@@ -188,6 +211,7 @@ const M2000C_1 = {
             text: 'HDG',
             position: [11, 12, 2, 3],
             borderWidths: [2, 1, 1, 1],
+            padding: 0,
         },
         {
             _name: 'BAS number',
@@ -272,7 +296,7 @@ const M2000C_1 = {
             text: 'AUTHENTICATE',
             position: [11, 12, 15, 19],
             borderWidths: [2, 2, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 15
         {
@@ -288,7 +312,7 @@ const M2000C_1 = {
             text: 'DOMS',
             position: [14, 15, 7, 9],
             borderWidths: [2, 2, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Package',
@@ -296,7 +320,7 @@ const M2000C_1 = {
             text: 'PACKAGE',
             position: [14, 15, 9, 19],
             borderWidths: [2, 2, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 16
         {
@@ -305,7 +329,7 @@ const M2000C_1 = {
             text: 'INTER 2',
             position: [15, 16, 0, 3],
             borderWidths: [1, 0, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Line-up formation',
@@ -365,7 +389,7 @@ const M2000C_1 = {
             text: 'GCI 1',
             position: [17, 18, 0, 3],
             borderWidths: [1, 0, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Take-off type',
@@ -390,7 +414,7 @@ const M2000C_1 = {
             text: 'SAFETY',
             position: [19, 20, 0, 3],
             borderWidths: [1, 0, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Climb type',
@@ -415,7 +439,7 @@ const M2000C_1 = {
             text: 'STK COMMON',
             position: [21, 22, 0, 3],
             borderWidths: [1, 0, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Join up type',
@@ -457,7 +481,7 @@ const M2000C_1 = {
             text: 'PACKAGE NOTES',
             position: [26, 27, 13, 19],
             borderWidths: [2, 2, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 28
         {
@@ -474,7 +498,7 @@ const M2000C_1 = {
             text: 'DMC',
             position: [27, 28, 9, 11],
             borderWidths: [1, 1, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 29
         {
@@ -498,7 +522,7 @@ const M2000C_1 = {
             text: 'MIL GUARD',
             position: [29, 30, 0, 3],
             borderWidths: [1, 0, 2, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Landing type',
@@ -514,7 +538,7 @@ const M2000C_1 = {
             text: 'STKPL',
             position: [29, 30, 9, 11],
             borderWidths: [1, 1, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 31
         {
@@ -532,7 +556,7 @@ const M2000C_1 = {
             position: [31, 34, 7, 8],
             borderWidths: [2, 1, 2, 2],
             textOrientation: 'vertical',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 32
         {
@@ -541,7 +565,7 @@ const M2000C_1 = {
             text: 'BINGO',
             position: [31, 32, 0, 4],
             borderWidths: [1, 1, 1, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Tanker callsign',
@@ -563,7 +587,8 @@ const M2000C_1 = {
             text: 'OFF LOAD',
             position: [31, 32, 17, 19],
             borderWidths: [2, 2, 1, 1],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0,
         },
         // Row 33
         {
@@ -594,7 +619,7 @@ const M2000C_1 = {
             text: 'YOYO',
             position: [33, 34, 0, 4],
             borderWidths: [1, 1, 2, 2],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Tanker tacan',
@@ -769,7 +794,7 @@ const M2000C_1 = {
             _description: 'Date text field',
             position: [0, 1, 2, 5],
             borderWidths: [2, 2, 2, 0],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'mission-name',
@@ -793,470 +818,471 @@ const M2000C_1 = {
         {
             id: 'flight-callsign',
             _description: 'Flight callsign field',
-            position: [2, 8, 2, 4],
-            borderWidths: [2, 2, 2, 2]
+            position: [2, 8, 3, 5],
+            borderWidths: [1, 1, 2, 2],
+            textAlign: 'center',
+            textOrientation: 'slanted',
+            bold: true
         },
         // Row 3
         {
             id: 'pilot-1',
             _description: 'Pilot 1 field',
-            position: [2, 3, 0, 2],
-            borderWidths: [2, 2, 1, 2],
+            position: [2, 3, 0, 3],
+            borderWidths: [1, 2, 1, 2],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-callsign',
             _description: 'Pilot 1 callsign field',
-            position: [2, 3, 4, 6],
-            borderWidths: [2, 1, 1, 2],
+            position: [2, 3, 5, 7],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-number',
             _description: 'Pilot 1 number field',
-            position: [2, 3, 6, 7],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 7, 8],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-aircraft',
             _description: 'Pilot 1 aircraft field',
-            position: [2, 3, 7, 9],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 8, 10],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-radar-channel',
             _description: 'Pilot 1 RADAR channel field',
-            position: [2, 3, 9, 10],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 10, 11],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
-        },
-        {
-            id: 'pilot-1-radar-channel',
-            _description: 'Pilot 1 radar field',
-            position: [2, 3, 9, 10],
-            borderWidths: [2, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-yardstick-1',
             _description: 'Pilot 1 yardstick 1 field',
-            position: [2, 3, 10, 12],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 11, 13],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-yardstick-2',
             _description: 'Pilot 1 yardstick 2 field',
-            position: [2, 3, 12, 14],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 13, 15],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-iff-mode-3',
             _description: 'Pilot 1 IFF mode 3 field',
-            position: [2, 3, 14, 16],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 15, 17],
+            borderWidths: [0, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-iff-mode-1',
             _description: 'Pilot 1 IFF mode 1 field',
-            position: [2, 3, 16, 17],
-            borderWidths: [2, 1, 1, 1],
+            position: [2, 3, 17, 18],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-1-altitude-block',
             _description: 'Pilot 1 altitude block field',
-            position: [2, 3, 17, 19],
-            borderWidths: [2, 2, 1, 1],
+            position: [2, 3, 18, 19],
+            borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            padding: 0,
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 4
         {
             id: 'pilot-2',
             _description: 'Pilot 2 field',
-            position: [3, 4, 0, 2],
+            position: [3, 4, 0, 3],
             borderWidths: [1, 2, 1, 2],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-callsign',
             _description: 'Pilot 2 callsign field',
-            position: [3, 4, 4, 6],
-            borderWidths: [1, 1, 1, 2],
+            position: [3, 4, 5, 7],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-number',
             _description: 'Pilot 2 number field',
-            position: [3, 4, 6, 7],
+            position: [3, 4, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-aircraft',
             _description: 'Pilot 2 aircraft field',
-            position: [3, 4, 7, 9],
+            position: [3, 4, 8, 10],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-radar-channel',
             _description: 'Pilot 2 RADAR channel field',
-            position: [3, 4, 9, 10],
+            position: [3, 4, 10, 11],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-yardstick-1',
             _description: 'Pilot 2 yardstick 1 field',
-            position: [3, 4, 10, 12],
+            position: [3, 4, 11, 13],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-yardstick-2',
             _description: 'Pilot 2 yardstick 2 field',
-            position: [3, 4, 12, 14],
+            position: [3, 4, 13, 15],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-iff-mode-3',
             _description: 'Pilot 2 IFF mode 3 field',
-            position: [3, 4, 14, 16],
+            position: [3, 4, 15, 17],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-iff-mode-1',
             _description: 'Pilot 2 IFF mode 1 field',
-            position: [3, 4, 16, 17],
+            position: [3, 4, 17, 18],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-2-altitude-block',
             _description: 'Pilot 2 altitude block field',
-            position: [3, 4, 17, 19],
+            position: [3, 4, 18, 19],
             borderWidths: [1, 2, 1, 1],
-            textAlign: 'center'
+            textAlign: 'center',
+            padding: 0,
         },
         // Row 5
         {
             id: 'pilot-3',
             _description: 'Pilot 3 field',
-            position: [4, 5, 0, 2],
+            position: [4, 5, 0, 3],
             borderWidths: [1, 2, 1, 2],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-callsign',
             _description: 'Pilot 3 callsign field',
-            position: [4, 5, 4, 6],
-            borderWidths: [1, 1, 1, 2],
+            position: [4, 5, 5, 7],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-number',
             _description: 'Pilot 3 number field',
-            position: [4, 5, 6, 7],
+            position: [4, 5, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-aircraft',
             _description: 'Pilot 3 aircraft field',
-            position: [4, 5, 7, 9],
+            position: [4, 5, 8, 10],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-radar-channel',
             _description: 'Pilot 3 radar field',
-            position: [4, 5, 9, 10],
+            position: [4, 5, 10, 11],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-yardstick-1',
             _description: 'Pilot 3 yardstick 1 field',
-            position: [4, 5, 10, 12],
+            position: [4, 5, 11, 13],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-yardstick-2',
             _description: 'Pilot 3 yardstick 2 field',
-            position: [4, 5, 12, 14],
+            position: [4, 5, 13, 15],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-iff-mode-3',
             _description: 'Pilot 3 IFF mode 3 field',
-            position: [4, 5, 14, 16],
+            position: [4, 5, 15, 17],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-iff-mode-1',
             _description: 'Pilot 3 IFF mode 1 field',
-            position: [4, 5, 16, 17],
+            position: [4, 5, 17, 18],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-3-altitude-block',
             _description: 'Pilot 3 altitude block field',
-            position: [4, 5, 17, 19],
+            position: [4, 5, 18, 19],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            padding: 0,
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 6
         {
             id: 'pilot-4',
             _description: 'Pilot 4 field',
-            position: [5, 6, 0, 2],
+            position: [5, 6, 0, 3],
             borderWidths: [1, 2, 1, 2],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-callsign',
             _description: 'Pilot 4 callsign field',
-            position: [5, 6, 4, 6],
-            borderWidths: [1, 1, 1, 2],
+            position: [5, 6, 5, 7],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-number',
             _description: 'Pilot 4 number field',
-            position: [5, 6, 6, 7],
+            position: [5, 6, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-aircraft',
             _description: 'Pilot 4 aircraft field',
-            position: [5, 6, 7, 9],
+            position: [5, 6, 8, 10],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-radar-channel',
             _description: 'Pilot 4 RADAR channel field',
-            position: [5, 6, 9, 10],
+            position: [5, 6, 10, 11],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-yardstick-1',
             _description: 'Pilot 4 yardstick 1 field',
-            position: [5, 6, 10, 12],
+            position: [5, 6, 11, 13],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-yardstick-2',
             _description: 'Pilot 4 yardstick 2 field',
-            position: [5, 6, 12, 14],
+            position: [5, 6, 13, 15],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-iff-mode-3',
             _description: 'Pilot 4 IFF mode 3 field',
-            position: [5, 6, 14, 16],
+            position: [5, 6, 15, 17],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-iff-mode-1',
             _description: 'Pilot 4 IFF mode 1 field',
-            position: [5, 6, 16, 17],
+            position: [5, 6, 17, 18],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-4-altitude-block',
             _description: 'Pilot 4 altitude block field',
-            position: [5, 6, 17, 19],
+            position: [5, 6, 18, 19],
             borderWidths: [1, 2, 1, 1],
-            textAlign: 'center'
+            textAlign: 'center',
+            padding: 0,
         },
         // Row 7
         {
             id: 'pilot-5',
             _description: 'Pilot 5 field',
-            position: [6, 7, 0, 2],
+            position: [6, 7, 0, 3],
             borderWidths: [1, 2, 1, 2],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-callsign',
             _description: 'Pilot 5 callsign field',
-            position: [6, 7, 4, 6],
-            borderWidths: [1, 1, 1, 2],
+            position: [6, 7, 5, 7],
+            borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-number',
             _description: 'Pilot 5 number field',
-            position: [6, 7, 6, 7],
+            position: [6, 7, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-aircraft',
             _description: 'Pilot 5 aircraft field',
-            position: [6, 7, 7, 9],
+            position: [6, 7, 8, 10],
             borderWidths: [1, 1, 1, 1],
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-radar-channel',
             _description: 'Pilot 5 RADAR channel field',
-            position: [6, 7, 9, 10],
+            position: [6, 7, 10, 11],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-yardstick-1',
             _description: 'Pilot 5 yardstick 1 field',
-            position: [6, 7, 10, 12],
+            position: [6, 7, 11, 13],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-yardstick-2',
             _description: 'Pilot 5 yardstick 2 field',
-            position: [6, 7, 12, 14],
+            position: [6, 7, 13, 15],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-iff-mode-3',
             _description: 'Pilot 5 IFF mode 3 field',
-            position: [6, 7, 14, 16],
+            position: [6, 7, 15, 17],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-iff-mode-1',
             _description: 'Pilot 5 IFF mode 1 field',
-            position: [6, 7, 16, 17],
+            position: [6, 7, 17, 18],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'pilot-5-altitude-block',
             _description: 'Pilot 5 altitude block field',
-            position: [6, 7, 17, 19],
+            position: [6, 7, 18, 19],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            padding: 0,
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 8
         {
             id: 'pilot-6',
             _description: 'Pilot 6 field',
-            position: [7, 8, 0, 2],
+            position: [7, 8, 0, 3],
             borderWidths: [1, 2, 2, 2],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-callsign',
             _description: 'Pilot 6 callsign field',
-            position: [7, 8, 4, 6],
-            borderWidths: [1, 1, 2, 2]
+            position: [7, 8, 5, 7],
+            borderWidths: [1, 1, 2, 1]
         },
         {
             id: 'pilot-6-number',
             _description: 'Pilot 6 number field',
-            position: [7, 8, 6, 7],
+            position: [7, 8, 7, 8],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-aircraft',
             _description: 'Pilot 6 aircraft field',
-            position: [7, 8, 7, 9],
+            position: [7, 8, 8, 10],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-radar-channel',
             _description: 'Pilot 6 RADAR channel field',
-            position: [7, 8, 9, 10],
+            position: [7, 8, 10, 11],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-yardstick-1',
             _description: 'Pilot 6 yardstick 1 field',
-            position: [7, 8, 10, 12],
+            position: [7, 8, 11, 13],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-yardstick-2',
             _description: 'Pilot 6 yardstick 2 field',
-            position: [7, 8, 12, 14],
+            position: [7, 8, 13, 15],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-iff-mode-3',
             _description: 'Pilot 6 IFF mode 3 field',
-            position: [7, 8, 14, 16],
+            position: [7, 8, 15, 17],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-iff-mode-1',
             _description: 'Pilot 6 IFF mode 1 field',
-            position: [7, 8, 16, 17],
+            position: [7, 8, 17, 18],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'
         },
         {
             id: 'pilot-6-altitude-block',
             _description: 'Pilot 6 altitude block field',
-            position: [7, 8, 17, 19],
+            position: [7, 8, 18, 19],
             borderWidths: [1, 2, 2, 1],
-            textAlign: 'center'
+            textAlign: 'center',
+            padding: 0,
         },
         // Row 9
         {
@@ -1559,7 +1585,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'inter-2-callsign',
@@ -1567,7 +1593,7 @@ const M2000C_1 = {
             position: [15, 16, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 17
         {
@@ -1589,7 +1615,7 @@ const M2000C_1 = {
             id: 'line-up-formation',
             type: 'input-select',
             _description: 'Line-up formation field',
-            options: lineupOptions,
+            options: M2000C_OCA_lineupOptions,
             dropdownSide: 'left',
             position: [16, 17, 7, 9],
             borderWidths: [0, 2, 0, 2],
@@ -1640,7 +1666,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'gci-1-callsign',
@@ -1648,7 +1674,7 @@ const M2000C_1 = {
             position: [17, 18, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'package-2-callsign',
@@ -1707,7 +1733,7 @@ const M2000C_1 = {
             id: 'take-off-formation',
             type: 'input-select',
             _description: 'Take-off formation field',
-            options: takeoffOptions,
+            options: M2000C_OCA_takeoffOptions,
             dropdownSide: 'left',
             position: [18, 19, 7, 9],
             borderWidths: [0, 2, 0, 2],
@@ -1758,7 +1784,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'safety-callsign',
@@ -1766,7 +1792,7 @@ const M2000C_1 = {
             position: [19, 20, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'package-4-callsign',
@@ -1874,7 +1900,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'strike-common-callsign',
@@ -1882,7 +1908,7 @@ const M2000C_1 = {
             position: [21, 22, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'package-6-callsign',
@@ -1998,7 +2024,7 @@ const M2000C_1 = {
             borderWidths: [1, 0, 1, 2],
             textAlign: 'center',
             bold: true,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-2-channel',
@@ -2007,7 +2033,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-2-callsign',
@@ -2015,7 +2041,7 @@ const M2000C_1 = {
             position: [23, 24, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'package-8-callsign',
@@ -2081,8 +2107,8 @@ const M2000C_1 = {
         {
             id: 'transit-formation',
             type: 'input-select',
-            _description: 'Transirt formation field',
-            options: formationOptions,
+            _description: 'Transit formation field',
+            options: M2000C_OCA_formationOptions,
             dropdownSide: 'left',
             position: [24, 25, 7, 9],
             borderWidths: [0, 2, 0, 2],
@@ -2133,7 +2159,7 @@ const M2000C_1 = {
             borderWidths: [1, 0, 1, 2],
             textAlign: 'center',
             bold: true,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-4-channel',
@@ -2142,7 +2168,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-4-callsign',
@@ -2150,7 +2176,7 @@ const M2000C_1 = {
             position: [25, 26, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'package-10-callsign',
@@ -2244,7 +2270,7 @@ const M2000C_1 = {
             borderWidths: [1, 0, 1, 2],
             textAlign: 'center',
             bold: true,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-6-channel',
@@ -2253,7 +2279,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 1, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'additional-freq-6-callsign',
@@ -2261,7 +2287,7 @@ const M2000C_1 = {
             position: [27, 28, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'deputy-mission-commander-callsign',
@@ -2269,7 +2295,7 @@ const M2000C_1 = {
             position: [27, 28, 11, 13],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 29
         {
@@ -2310,7 +2336,7 @@ const M2000C_1 = {
             borderWidths: [1, 1, 2, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'mil-guard-freq-channel',
@@ -2318,7 +2344,7 @@ const M2000C_1 = {
             position: [29, 30, 4, 7],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'strike-package-lead-callsign',
@@ -2326,7 +2352,7 @@ const M2000C_1 = {
             position: [29, 30, 11, 13],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 31
         {
@@ -2375,7 +2401,7 @@ const M2000C_1 = {
             position: [31, 32, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'tanker-callsign',
@@ -2420,7 +2446,7 @@ const M2000C_1 = {
             position: [33, 34, 4, 7],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
-            backgroundColor: darkBackground
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'tanker-tacan',
@@ -2971,7 +2997,7 @@ const M2000C_1 = {
         {
             id: 'nav-point-20-longitude',
             _description: 'Nav point 20 longitude field',
-            position: [44, 44, 12, 14],
+            position: [43, 44, 12, 14],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
             padding: 0,
@@ -2989,8 +3015,8 @@ const M2000C_1 = {
     ]
 }
 
-const M2000C_2 = {
-    id: 'M2000C-page-2',
+const M2000C_OCA_2 = {
+    id: 'M2000C-OCA-page-2',
     _name: 'Mirage 2000C kneeboard page 2',
     rows: 44,
     columns: 19,
@@ -2998,25 +3024,1406 @@ const M2000C_2 = {
     textCells: [
         // Row 1
         {
-            _name: 'Date',
-            _description: 'Date text',
-            text: 'DATE',
+            _name: 'Magnetic variation',
+            _description: 'Magnetic variation text',
+            text: 'MAG VAR',
             position: [0, 1, 0, 2],
-            borderWidths: [2, 0, 2, 2],
-            backgroundColor: darkBackground
+            borderWidths: [2, 0, 2, 2]
+        },
+        {
+            _name: 'Sea level temperature',
+            _description: 'Sea level temperature text',
+            text: 'SL TEMP',
+            position: [0, 1, 4, 6],
+            borderWidths: [2, 0, 2, 2]
+        },
+        {
+            _name: 'Contrails altitude',
+            _description: 'Contrails altitud text',
+            text: 'CONTRAILS',
+            position: [0, 1, 8, 11],
+            borderWidths: [2, 0, 2, 2]
+        },
+        // Row 2
+        {
+            _name: 'Pilot number',
+            _description: 'Pilot number text',
+            text: 'No',
+            position: [1, 2, 0, 1],
+            borderWidths: [2, 1, 1, 2]
+        },
+        {
+            _name: 'Pilot target',
+            _description: 'Pilot target text',
+            text: 'TARGET',
+            position: [1, 2, 1, 3],
+            borderWidths: [2, 1, 1, 1]
+        },
+        {
+            _name: 'Pilot sorting',
+            _description: 'Pilot sorting text',
+            text: 'SORTING',
+            position: [1, 2, 3, 5],
+            borderWidths: [2, 1, 1, 1]
+        },
+        {
+            _name: 'Pilot lock Φ',
+            _description: 'Pilot lock Φ text',
+            text: 'LOCK Φ',
+            position: [1, 2, 5, 8],
+            borderWidths: [2, 1, 1, 1]
+        },
+        {
+            _name: 'Pilot shot Φ',
+            _description: 'Pilot shot Φ text',
+            text: 'SHOT Φ',
+            position: [1, 2, 8, 11],
+            borderWidths: [2, 2, 1, 1]
+        },
+        // Row 3 - 9
+        {
+            _name: 'Threat 1 path',
+            type: 'path',
+            _description: 'Treat 1 path field',
+            path: M2000C_OCA_reactionCanvasPath,
+            position: [2, 9, 11, 15],
+            borderWidths: [1, 1, 1, 2],
+        },
+        {
+            _name: 'Threat 2 path',
+            type: 'path',
+            _description: 'Treat 1 path field',
+            path: M2000C_OCA_reactionCanvasPath,
+            position: [2, 9, 15, 19],
+            borderWidths: [1, 2, 1, 1],
+        },
+        // Row 9
+        {
+            _name: 'Hold',
+            _description: 'Hold text',
+            text: 'HOLD',
+            position: [8, 9, 0, 5],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'CAP',
+            _description: 'CAP text',
+            text: 'CAP',
+            position: [8, 9, 6, 11],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 10
+        {
+            _name: 'Hold formation',
+            _description: 'Hold formation text',
+            text: 'FORM',
+            position: [9, 10, 2, 4],
+            borderWidths: [1, 0, 0, 0],
+            textAlign: 'center'
+        },
+        {
+            _name: 'Filler',
+            _description: 'Filler',
+            text: '',
+            position: [9, 10, 4, 5],
+            borderWidths: [1, 2, 0, 0],
+        },
+        {
+            _name: 'CAP formation',
+            _description: 'CAP formation text',
+            text: 'FORM',
+            position: [9, 10, 8, 10],
+            borderWidths: [1, 0, 0, 0],
+            textAlign: 'center'
+        },
+        {
+            _name: 'Filler',
+            _description: 'Filler',
+            text: '',
+            position: [9, 10, 10, 11],
+            borderWidths: [1, 2, 0, 0],
+        },
+        // Row 11 - 17
+        {
+            _name: 'Threat 3 path',
+            type: 'path',
+            _description: 'Treat 3 path field',
+            path: M2000C_OCA_reactionCanvasPath,
+            position: [10, 17, 11, 15],
+            borderWidths: [1, 1, 1, 2],
+        },
+        {
+            _name: 'Threat 4 path',
+            type: 'path',
+            _description: 'Treat 4 path field',
+            path: M2000C_OCA_reactionCanvasPath,
+            position: [10, 17, 15, 19],
+            borderWidths: [1, 2, 1, 1],
+        },
+        // Row 12
+        {
+            _name: 'Hold INS',
+            _description: 'Hold INS text',
+            text: 'INS',
+            position: [11, 12, 2, 4],
+            borderWidths: [0, 0, 0, 0],
+        },
+        {
+            _name: 'CAP INS',
+            _description: 'CAP INS text',
+            text: 'INS',
+            position: [11, 12, 8, 10],
+            borderWidths: [0, 0, 0, 0],
+        },
+        // Row 13
+        {
+            _name: 'Hold altitude',
+            _description: 'Hold altitude text',
+            text: 'ALT',
+            position: [12, 13, 2, 4],
+            borderWidths: [0, 0, 0, 0],
+        },
+        {
+            _name: 'CAP altitude',
+            _description: 'CAP altitude text',
+            text: 'ALT',
+            position: [12, 13, 8, 10],
+            borderWidths: [0, 0, 0, 0],
+        },
+        // Row 14
+        {
+            _name: 'Hold speed',
+            _description: 'Hold speed text',
+            text: 'SPEED',
+            position: [13, 14, 2, 4],
+            borderWidths: [0, 0, 0, 0],
+        },
+        {
+            _name: 'CAP speed',
+            _description: 'CAP speed text',
+            text: 'SPEED',
+            position: [13, 14, 8, 10],
+            borderWidths: [0, 0, 0, 0],
+        },
+        // Row 15
+        {
+            _name: 'Hold reference',
+            _description: 'Hold reference text',
+            text: 'REF',
+            position: [14, 15, 2, 4],
+            borderWidths: [0, 0, 0, 0],
+        },
+        {
+            _name: 'CAP reference',
+            _description: 'CAP reference text',
+            text: 'REF',
+            position: [14, 15, 8, 10],
+            borderWidths: [0, 0, 0, 0],
+        },
+        // Row 16
+        {
+            _name: 'Risk level',
+            _description: 'Risk level text',
+            text: 'RISK LEVEL',
+            position: [15, 16, 0, 3],
+            borderWidths: [2, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Flow',
+            _description: 'Flow text',
+            text: 'FLOW',
+            position: [15, 16, 3, 6],
+            borderWidths: [2, 1, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Targeting ratio',
+            _description: 'Targeting ratio text',
+            text: 'TARGETING RATIO',
+            position: [15, 16, 6, 11],
+            borderWidths: [2, 2, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 18
+        {
+            _name: 'Gameplan',
+            _description: 'Gameplan text',
+            text: 'GAMEPLAN',
+            position: [17, 18, 11, 19],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 20
+        {
+            _name: 'Aircraft merge ratio',
+            _description: 'Aircraft merge ratio text',
+            text: 'A/C MERGE RATIO',
+            position: [19, 20, 0, 3],
+            borderWidths: [1, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'VID ratio',
+            _description: 'VID ratio text',
+            text: 'VID RATIO',
+            position: [19, 20, 3, 6],
+            borderWidths: [1, 1, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Min range recommit',
+            _description: 'Min range recommit text',
+            text: 'MIN RANGE RECOMMIT',
+            position: [19, 20, 6, 11],
+            borderWidths: [1, 2, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 24
+        {
+            _name: 'Ingress',
+            _description: 'Ingress text',
+            text: 'INGRESS',
+            position: [23, 24, 2, 5],
+            borderWidths: [2, 1, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'CAP',
+            _description: 'CAP text',
+            text: 'CAP',
+            position: [23, 24, 5, 8],
+            borderWidths: [2, 1, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Egress',
+            _description: 'Egress text',
+            text: 'EGRESS',
+            position: [23, 24, 8, 11],
+            borderWidths: [2, 2, 1, 1],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 25-26
+        {
+            _name: 'Commit criterias',
+            _description: 'Commit criterias text',
+            text: 'COMMIT\nCRITS',
+            position: [24, 26, 0, 2],
+            borderWidths: [1, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 27-28
+        {
+            _name: 'Commit formation',
+            _description: 'Commit formation text',
+            text: 'COMMIT\nFORM',
+            position: [26, 28, 0, 2],
+            borderWidths: [1, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 28
+        {
+            _name: 'Flow',
+            _description: 'Flow text',
+            text: 'FLOW',
+            position: [27, 28, 11, 19],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 29-34
+        {
+            _name: 'Tactic',
+            _description: 'Tactic text',
+            text: 'TACTIC',
+            position: [28, 34, 0, 2],
+            borderWidths: [1, 1, 2, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 35
+        {
+            _name: 'Nav point 11',
+            _description: 'Nav point 11 text',
+            text: '11',
+            position: [34, 35, 0, 1],
+            borderWidths: [2, 2, 1, 2]
+        },
+        {
+            _name: 'Border cross authority',
+            _description: 'Border cross authority text',
+            text: 'BCA',
+            position: [34, 35, 5, 6],
+            borderWidths: [2, 0, 1, 2],
+            padding: 0
+        },
+        {
+            _name: 'Border shoot authority',
+            _description: 'Border shoot authority text',
+            text: 'BSA',
+            position: [34, 35, 7, 8],
+            borderWidths: [2, 0, 1, 1],
+            padding: 0
+        },
+        {
+            _name: 'Rules of engagement',
+            _description: 'Rules of engagement text',
+            text: 'ROEs',
+            position: [34, 35, 9, 13],
+            borderWidths: [2, 2, 0, 2],
+            textAlign: 'left'
+        },
+        {
+            _name: 'Code words',
+            _description: 'Code words text',
+            text: 'CODE WORDS',
+            position: [34, 35, 13, 19],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 36
+        {
+            _name: 'Nav point 12',
+            _description: 'Nav point 12 text',
+            text: '12',
+            position: [35, 36, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        {
+            _name: 'Weapon control status',
+            _description: 'Weapon control status text',
+            text: 'WCS',
+            position: [35, 36, 5, 7],
+            borderWidths: [1, 0, 2, 2]
+        },
+        // Row 37-40
+        {
+            _name: 'BAS',
+            _description: 'BAS text',
+            text: 'BAS',
+            position: [36, 39, 5, 6],
+            borderWidths: [2, 1, 2, 2],
+            textOrientation: 'vertical',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 37
+        {
+            _name: 'Nav point 13',
+            _description: 'Nav point 13 text',
+            text: '13',
+            position: [36, 37, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        {
+            _name: 'BAS altitude',
+            _description: 'BAS altitude text',
+            text: 'ALT',
+            position: [36, 37, 6, 7],
+            borderWidths: [2, 1, 1, 1],
+        },
+        {
+            _name: 'BAS heading',
+            _description: 'BAS heading text',
+            text: 'HDG',
+            position: [36, 37, 7, 8],
+            borderWidths: [2, 1, 1, 1],
+            padding: 0,
+        },
+        {
+            _name: 'BAS number',
+            _description: 'BAS number text',
+            text: 'NBR',
+            position: [36, 37, 8, 9],
+            borderWidths: [2, 2, 1, 1],
+        },
+        // Row 38
+        {
+            _name: 'Nav point 14',
+            _description: 'Nav point 14 text',
+            text: '14',
+            position: [37, 38, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        // Row 39
+        {
+            _name: 'Nav point 15',
+            _description: 'Nav point 15 text',
+            text: '15',
+            position: [38, 39, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        // Row 40
+        {
+            _name: 'Nav point 16',
+            _description: 'Nav point 16 text',
+            text: '16',
+            position: [39, 40, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        {
+            _name: 'Shotgun state',
+            _description: 'Shotgun state text',
+            text: 'SHOTGUN',
+            position: [39, 40, 5, 9],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 41
+        {
+            _name: 'Nav point 17',
+            _description: 'Nav point 17 text',
+            text: '17',
+            position: [40, 41, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        // Row 42
+        {
+            _name: 'Nav point 18',
+            _description: 'Nav point 18 text',
+            text: '18',
+            position: [41, 42, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        {
+            _name: 'Fuel conditions',
+            _description: 'Fuel conditions text',
+            text: 'FUEL CONDITIONS',
+            position: [41, 42, 5, 9],
+            borderWidths: [2, 2, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 43
+        {
+            _name: 'Nav point 19',
+            _description: 'Nav point 19 text',
+            text: '19',
+            position: [42, 43, 0, 1],
+            borderWidths: [1, 2, 1, 2]
+        },
+        {
+            _name: 'Fuel state yellow',
+            _description: 'Fuel state yellow text',
+            text: 'YELLOW',
+            position: [42, 43, 5, 7],
+            borderWidths: [1, 0, 1, 2]
+        },
+        // Row 44
+        {
+            _name: 'Nav point 20',
+            _description: 'Nav point 20 text',
+            text: '20',
+            position: [43, 44, 0, 1],
+            borderWidths: [1, 2, 2, 2]
+        },
+        {
+            _name: 'Fuel state red',
+            _description: 'Fuel state red text',
+            text: 'RED',
+            position: [43, 44, 5, 7],
+            borderWidths: [1, 0, 2, 2]
         },
     ],
     // ----------------================ textFieldCells ================----------------
     textFieldCells: [
         // Row 1
         {
-            id: 'date',
-            _description: 'Date text field',
-            position: [0, 1, 2, 5],
+            id: 'mag-var',
+            _description: 'Magnetic variation text field',
+            position: [0, 1, 2, 4],
             borderWidths: [2, 2, 2, 0],
-            backgroundColor: darkBackground
+            textAlign: 'center',
+        },
+        {
+            id: 'sl-temp',
+            _description: 'Sea level temperature text field',
+            position: [0, 1, 6, 8],
+            borderWidths: [2, 2, 2, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'contrails-alt',
+            _description: 'Contrails altitude text field',
+            position: [0, 1, 11, 14],
+            borderWidths: [2, 2, 2, 0],
+            textAlign: 'center',
+        },
+        // Row 2
+        {
+            id: 'threat-1-name',
+            _description: 'Threat 1 name text field',
+            position: [1, 2, 11, 15],
+            borderWidths: [2, 1, 1, 2],
+            textAlign: 'center',
+            bold: true,
+        },
+        {
+            id: 'threat-2-name',
+            _description: 'Threat 2 name text field',
+            position: [1, 2, 15, 19],
+            borderWidths: [2, 2, 1, 1],
+            textAlign: 'center',
+            bold: true,
+        },
+        // Row 3 - 9
+        {
+            id: 'threat-1-dap',
+            type: 'path-field',
+            _description: 'Treat 1 defensive action point field',
+            position: [2, 9, 11, 15],
+            internalPosition: [0.20, 0.075, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-1-abort-range',
+            type: 'path-field',
+            _description: 'Treat 1 abort range field',
+            position: [2, 9, 11, 15],
+            internalPosition: [0.53, 0.39, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-1-nez',
+            type: 'path-field',
+            _description: 'Treat 1 no escape zone field',
+            position: [2, 9, 11, 15],
+            internalPosition: [0.21, 0.63, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-2-dap',
+            type: 'path-field',
+            _description: 'Treat 2 defensive action point field',
+            position: [2, 9, 15, 19],
+            internalPosition: [0.20, 0.075, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-2-abort-range',
+            type: 'path-field',
+            _description: 'Treat 2 abort range field',
+            position: [2, 9, 15, 19],
+            internalPosition: [0.53, 0.39, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-2-nez',
+            type: 'path-field',
+            _description: 'Treat 2 no escape zone field',
+            position: [2, 9, 15, 19],
+            internalPosition: [0.21, 0.63, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        // Row 3
+        {
+            id: 'pilot-1-number',
+            _description: 'Pilot 1 number text field',
+            position: [2, 3, 0, 1],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-1-target',
+            _description: 'Pilot 1 target text field',
+            position: [2, 3, 1, 3],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-1-sorting',
+            _description: 'Pilot 1 sorting text field',
+            position: [2, 3, 3, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-1-lock-phi',
+            _description: 'Pilot 1 lock phi text field',
+            position: [2, 3, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-1-shot-phi',
+            _description: 'Pilot 1 shot phi text field',
+            position: [2, 3, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 4
+        {
+            id: 'pilot-2-number',
+            _description: 'Pilot 2 number text field',
+            position: [3, 4, 0, 1],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-2-target',
+            _description: 'Pilot 2 target text field',
+            position: [3, 4, 1, 3],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-2-sorting',
+            _description: 'Pilot 2 sorting text field',
+            position: [3, 4, 3, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-2-lock-phi',
+            _description: 'Pilot 2 lock phi text field',
+            position: [3, 4, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-2-shot-phi',
+            _description: 'Pilot 2 shot phi text field',
+            position: [3, 4, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+        },
+        // Row 5
+        {
+            id: 'pilot-3-number',
+            _description: 'Pilot 3 number text field',
+            position: [4, 5, 0, 1],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-3-target',
+            _description: 'Pilot 3 target text field',
+            position: [4, 5, 1, 3],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-3-sorting',
+            _description: 'Pilot 3 sorting text field',
+            position: [4, 5, 3, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-3-lock-phi',
+            _description: 'Pilot 3 lock phi text field',
+            position: [4, 5, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-3-shot-phi',
+            _description: 'Pilot 3 shot phi text field',
+            position: [4, 5, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 6
+        {
+            id: 'pilot-4-number',
+            _description: 'Pilot 4 number text field',
+            position: [5, 6, 0, 1],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-4-target',
+            _description: 'Pilot 4 target text field',
+            position: [5, 6, 1, 3],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-4-sorting',
+            _description: 'Pilot 4 sorting text field',
+            position: [5, 6, 3, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-4-lock-phi',
+            _description: 'Pilot 4 lock phi text field',
+            position: [5, 6, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-4-shot-phi',
+            _description: 'Pilot 4 shot phi text field',
+            position: [5, 6, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+        },
+        // Row 7
+        {
+            id: 'pilot-5-number',
+            _description: 'Pilot 5 number text field',
+            position: [6, 7, 0, 1],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-5-target',
+            _description: 'Pilot 5 target text field',
+            position: [6, 7, 1, 3],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-5-sorting',
+            _description: 'Pilot 5 sorting text field',
+            position: [6, 7, 3, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-5-lock-phi',
+            _description: 'Pilot 5 lock phi text field',
+            position: [6, 7, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            id: 'pilot-5-shot-phi',
+            _description: 'Pilot 5 shot phi text field',
+            position: [6, 7, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        // Row 8
+        {
+            id: 'pilot-6-number',
+            _description: 'Pilot 6 number text field',
+            position: [7, 8, 0, 1],
+            borderWidths: [1, 1, 2, 2],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-6-target',
+            _description: 'Pilot 6 target text field',
+            position: [7, 8, 1, 3],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-6-sorting',
+            _description: 'Pilot 6 sorting text field',
+            position: [7, 8, 3, 5],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-6-lock-phi',
+            _description: 'Pilot 6 lock phi text field',
+            position: [7, 8, 5, 8],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'pilot-6-shot-phi',
+            _description: 'Pilot 6 shot phi text field',
+            position: [7, 8, 8, 11],
+            borderWidths: [1, 2, 2, 1],
+            textAlign: 'center',
+        },
+        // Row 10 - 15
+        {
+            id: 'hold-racetrack',
+            type: 'path-select',
+            _description: 'Hold path field',
+            options: M2000C_OCA_racetrackPathList,
+            position: [9, 15, 0, 2],
+            borderWidths: [1, 0, 2, 2],
+            columns: 6,
+            default: 0
+        },
+        {
+            id: 'cap-racetrack',
+            type: 'path-select',
+            _description: 'CAP path field',
+            options: M2000C_OCA_racetrackPathList,
+            position: [9, 15, 6, 8],
+            borderWidths: [1, 0, 2, 2],
+            columns: 6,
+            default: 0
+        },
+        // Row 10
+        {
+            id: 'threat-3-name',
+            _description: 'Threat 4 name text field',
+            position: [9, 10, 11, 15],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+            bold: true,
+        },
+        {
+            id: 'threat-4-name',
+            _description: 'Threat 4 name text field',
+            position: [9, 10, 15, 19],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+            bold: true,
+        },
+        // Row 11 - 17
+        {
+            id: 'threat-3-dap',
+            type: 'path-field',
+            _description: 'Treat 3 defensive action point field',
+            position: [10, 17, 11, 15],
+            internalPosition: [0.20, 0.075, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-3-abort-range',
+            type: 'path-field',
+            _description: 'Treat 3 abort range field',
+            position: [10, 17, 11, 15],
+            internalPosition: [0.53, 0.39, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-3-nez',
+            type: 'path-field',
+            _description: 'Treat 3 no escape zone field',
+            position: [10, 17, 11, 15],
+            internalPosition: [0.21, 0.63, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-4-dap',
+            type: 'path-field',
+            _description: 'Treat 2 defensive action point field',
+            position: [10, 17, 15, 19],
+            internalPosition: [0.20, 0.075, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-4-abort-range',
+            type: 'path-field',
+            _description: 'Treat 4 abort range field',
+            position: [10, 17, 15, 19],
+            internalPosition: [0.53, 0.39, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'threat-4-nez',
+            type: 'path-field',
+            _description: 'Treat 4 no escape zone field',
+            position: [10, 17, 15, 19],
+            internalPosition: [0.21, 0.63, 0.26, 0.26],
+            borderWidths: [0, 0, 0, 0],
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 0,
+        },
+        // Row 11
+        {
+            id: 'hold-formation',
+            type: 'input-select',
+            _description: 'Hold formation field',
+            options: M2000C_OCA_formationOptions,
+            dropdownSide: 'left',
+            position: [10, 11, 3, 5],
+            borderWidths: [0, 2, 0, 0],
+            padding: 2,
+        },
+        {
+            id: 'cap-formation',
+            type: 'input-select',
+            _description: 'CAP formation field',
+            options: M2000C_OCA_formationOptions,
+            dropdownSide: 'left',
+            position: [10, 11, 9, 11],
+            borderWidths: [0, 2, 0, 0],
+            padding: 2
+        },
+        // Row 12
+        {
+            id: 'hold-ins',
+            _description: 'Hold INS text field',
+            position: [11, 12, 4, 5],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'cap-ins',
+            _description: 'CAP INS text field',
+            position: [11, 12, 10, 11],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        // Row 13
+        {
+            id: 'hold-alt',
+            _description: 'Hold altitude text field',
+            position: [12, 13, 4, 5],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'cap-alt',
+            _description: 'CAP altitude text field',
+            position: [12, 13, 10, 11],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        // Row 14
+        {
+            id: 'hold-speed',
+            _description: 'Hold speed text field',
+            position: [13, 14, 4, 5],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'cap-speed',
+            _description: 'CAP speed text field',
+            position: [13, 14, 10, 11],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        // Row 15
+        {
+            id: 'hold-ref',
+            _description: 'Hold reference text field',
+            position: [14, 15, 4, 5],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'cap-ref',
+            _description: 'CAP reference text field',
+            position: [14, 15, 10, 11],
+            borderWidths: [0, 2, 0, 0],
+            textAlign: 'center',
+        },
+        // Row 17-19
+        {
+            id: 'risk-level',
+            type: 'linked-select',
+            _description: 'Risk level text field',
+            options: M2000C_OCA_riskLevelOptions,
+            linkedFields: [
+                'risk-level-flow',
+                'risk-level-targeting-ratio',
+                'risk-level-aircraft-merge-ratio',
+                'risk-level-vid-ratio',
+                'risk-level-min-rage-recommit',
+            ],
+            position: [16, 19, 0, 3],
+            borderWidths: [1, 1, 1, 2],
+            textAlign: 'center',
+        },
+        {
+            id: 'risk-level-flow',
+            type: 'text-area',
+            _description: 'Risk level flow text field',
+            linkedOptions: [
+                '',
+                '\nNever bellow DAP',
+                '\nSpiked > DAP\nNaked > MAR',
+                '\nSpiked > MAP\nNaked < MAR'
+            ],
+            position: [16, 19, 3, 6],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'risk-level-targeting-ratio',
+            type: 'text-area',
+            _description: 'Risk level targeting ratio text field',
+            linkedOptions: [
+                '',
+                '\n2v1 contact\n2v1 group if not heavy',
+                '1v1 contact\n1v1 group if not heavy\n & not Alamo A/C capable',
+                '\n1vX'
+            ],
+            position: [16, 19, 6, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+        },
+        // Row 19-27
+        {
+            id: 'gameplan',
+            type: 'text-area',
+            _description: 'Gameplan text field',
+            position: [18, 27, 11, 19],
+            borderWidths: [1, 2, 2, 2],
+        },
+        // Row 21-23
+        {
+            id: 'risk-level-aircraft-merge-ratio',
+            type: 'text-area',
+            _description: 'Risk level aircraft-merge ratio text field',
+            linkedOptions: [
+                '',
+                '\nAvoid if possible',
+                '\nYes but 2v1',
+                '\nYes 1vX',
+            ],
+            position: [20, 23, 0, 3],
+            borderWidths: [1, 1, 2, 2],
+            textAlign: 'center',
+        },
+        {
+            id: 'risk-level-vid-ratio',
+            type: 'text-area',
+            _description: 'Risk level VID ratio text field',
+            linkedOptions: [
+                '',
+                '\n2v1 contact',
+                '\n2v1 group if not heavy',
+                '\n1v1',
+            ],
+            position: [20, 23, 3, 6],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'risk-level-min-rage-recommit',
+            type: 'text-area',
+            _description: 'Risk level min range recommit text field',
+            linkedOptions: [
+                '',
+                '\nNaked/Nails > MAR + 10nm\n\nSpiked > MAP + 15nm',
+                '\n\n> MAR + 10nm',
+                '\nNaked if < MAR\nSpiked > MAR + 5nm',
+            ],
+            position: [20, 23, 6, 11],
+            borderWidths: [1, 2, 2, 1],
+            textAlign: 'center',
+            fontSize: 11,
+            padding: 0
+        },
+        // Row 25-26
+        {
+            id: 'commit-criterias-ingress',
+            type: 'text-area',
+            _description: 'Commit criterias ingress text field',
+            position: [24, 26, 2, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'commit-criterias-cap',
+            type: 'text-area',
+            _description: 'Commit criterias CAP text field',
+            position: [24, 26, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'commit-criterias-egress',
+            type: 'text-area',
+            _description: 'Commit criterias egress text field',
+            position: [24, 26, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+        },
+        // Row 27-28
+        {
+            id: 'commit-formation-ingress',
+            type: 'input-select',
+            _description: 'Commit formation ingress text field',
+            options: M2000C_OCA_formationOptions,
+            position: [26, 28, 2, 5],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'commit-formation-cap',
+            type: 'input-select',
+            _description: 'Commit formation CAP text field',
+            options: M2000C_OCA_formationOptions,
+            position: [26, 28, 5, 8],
+            borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
+        },
+        {
+            id: 'commit-formation-egress',
+            type: 'input-select',
+            _description: 'Commit formation egress text field',
+            options: M2000C_OCA_formationOptions,
+            position: [26, 28, 8, 11],
+            borderWidths: [1, 2, 1, 1],
+            textAlign: 'center',
+        },
+        // Row 29-34
+        {
+            id: 'tactic-ingress',
+            type: 'text-area',
+            _description: 'Tactic ingress text field',
+            position: [28, 34, 2, 5],
+            borderWidths: [1, 1, 2, 1],
+            type: 'text-area',
+        },
+        {
+            id: 'tactic-cap',
+            type: 'text-area',
+            _description: 'Tactic CAP text field',
+            position: [28, 34, 5, 8],
+            borderWidths: [1, 1, 2, 1],
+        },
+        {
+            id: 'tactic-egress',
+            type: 'text-area',
+            _description: 'Tactic egress text field',
+            position: [28, 34, 8, 11],
+            borderWidths: [1, 2, 2, 1],
+        },
+        {
+            id: 'flow',
+            type: 'text-area',
+            _description: 'Flow text field',
+            position: [28, 34, 11, 19],
+            borderWidths: [1, 2, 2, 2],
+        },
+        // Row 35
+        {
+            id: 'nav-point-11-name',
+            _description: 'Nav point 11 name text field',
+            position: [34, 35, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        {
+            id: 'bca',
+            type: 'input-select',
+            _description: 'Border cross authority text field',
+            options: M2000C_OCA_yesNoOptions,
+            position: [34, 35, 6, 7],
+            borderWidths: [2, 1, 1, 0],
+            textAlign: 'center',
+        },
+        {
+            id: 'bsa',
+            type: 'input-select',
+            _description: 'Border shoot authority text field',
+            options: M2000C_OCA_yesNoOptions,
+            position: [34, 35, 8, 9],
+            borderWidths: [2, 2, 1, 0],
+            textAlign: 'center',
+        },
+        // Row 36-44
+        {
+            id: 'roes',
+            type: 'text-area',
+            _description: 'Rules of engagement text field',
+            position: [35, 44, 9, 13],
+            borderWidths: [0, 2, 2, 2],
+        },
+        {
+            id: 'code-words',
+            type: 'text-area',
+            _description: 'Code words text field',
+            position: [35, 44, 13, 19],
+            borderWidths: [1, 2, 2, 2],
+        },
+        // Row 36
+        {
+            id: 'nav-point-12-name',
+            _description: 'Nav point 12 name text field',
+            position: [35, 36, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        {
+            id: 'wcs',
+            type: 'input-select',
+            _description: 'Weapon control status text field',
+            options: M2000C_OCA_wcsOptions,
+            position: [35, 36, 7, 9],
+            borderWidths: [1, 2, 1, 0],
+            textAlign: 'center',
+        },
+        // Row 37
+        {
+            id: 'nav-point-13-name',
+            _description: 'Nav point 13 name text field',
+            position: [36, 37, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        // Row 38-40
+        {
+            id: 'bas-altitude',
+            _description: 'BAS altitude field',
+            position: [37, 39, 6, 7],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'bas-heading',
+            _description: 'BAS heading field',
+            position: [37, 39, 7, 8],
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center',
+            padding: 0,
+        },
+        {
+            id: 'bas-number',
+            _description: 'BAS heading field',
+            position: [37, 39, 8, 9],
+            borderWidths: [1, 2, 2, 1],
+            textAlign: 'center',
+            padding: 0,
+        },
+        // Row 38
+        {
+            id: 'nav-point-14-name',
+            _description: 'Nav point 14 name text field',
+            position: [37, 38, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        // Row 39
+        {
+            id: 'nav-point-15-name',
+            _description: 'Nav point 15 name text field',
+            position: [38, 39, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        // Row 40
+        {
+            id: 'nav-point-16-name',
+            _description: 'Nav point 13 name text field',
+            position: [39, 40, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        // Row 41
+        {
+            id: 'nav-point-17-name',
+            _description: 'Nav point 17 name text field',
+            position: [40, 41, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        {
+            id: 'shotgun-state',
+            _description: 'Shotgun state text field',
+            position: [40, 41, 5, 9],
+            borderWidths: [1, 2, 2, 2],
+            textAlign: 'center',
+            default: '0 2 2+'
+        },
+        // Row 42
+        {
+            id: 'nav-point-18-name',
+            _description: 'Nav point 18 name text field',
+            position: [41, 42, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        // Row 43
+        {
+            id: 'nav-point-19-name',
+            _description: 'Nav point 19 name text field',
+            position: [42, 43, 1, 5],
+            borderWidths: [1, 2, 1, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        {
+            id: 'fuel-state-yellow',
+            _description: 'Fuel state yellow text field',
+            position: [42, 43, 7, 9],
+            borderWidths: [1, 2, 1, 0],
+            textAlign: 'center',
+        },
+        // Row 44
+        {
+            id: 'nav-point-20-name',
+            _description: 'Nav point 20 name text field',
+            position: [43, 44, 1, 5],
+            borderWidths: [1, 2, 2, 2],
+            textAlign: 'center',
+            padding: 0,
+            fontSize: 11,
+        },
+        {
+            id: 'fuel-state-red',
+            _description: 'Fuel state red text field',
+            position: [43, 44, 7, 9],
+            borderWidths: [1, 2, 2, 0],
+            textAlign: 'center',
         },
     ]
 }
 
-const M2000C = [M2000C_1, M2000C_2]
+const M2000C_OCA = {
+    id: 'M2000C_OCA',
+    name: 'Mirage 2000C OCA',
+    pages: [M2000C_OCA_1, M2000C_OCA_2]
+};

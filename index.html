@@ -28,7 +28,8 @@
 
   <!-- Config and templates -->
   <script src="./config.js"></script>
-  <script src="./templates/kneeboard/M2000C.js"></script>
+  <script src="./templates/kneeboard/M2000C-OCA.js"></script>
+  <script src="./templates/kneeboard/GCI.js"></script>
 
   <!-- Scripts -->
   <script src="./src/app.js"></script>
@@ -36,6 +37,8 @@
   <script src="./src/bullseye-map/bullseye-map.js"></script>
   <!---- Kneeboard ---->
   <script src="./src/kneeboard/kneeboard.js"></script>
+  <script src="./src/kneeboard/kneeboard-M2000C-OCA.js"></script>
+  <script src="./src/kneeboard/kneeboard-GCI.js"></script>
   <!---- Utils ---->
   <script src="./src/utils/utils.js"></script>
   <script src="./src/utils/kneeboard-draw-utils.js"></script>
@@ -550,6 +553,10 @@
             <div class="sidebar">
               <header class="sidebar-header">
                 <h1 class="sidebar-title">Kneeboard</h1>
+                <div class="kneeboard-select-container">
+                  <span>Kneeboard template</span>
+                  <select class="kneeboard-select"></select>
+                </div>
                 <div class="header-buttons">
                   <button class="import-kneeboard-button">Import kneeboard data</button>
                   <button class="show-export-kneeboard-modal-button">Export kneeboard data</button>
@@ -575,10 +582,6 @@
                 <div class="field">
                   <label>Select flight</label>
                   <select class="selected-group"></select>
-                </div>
-                <div class="field">
-                  <label>Start at 11</label>
-                  <input type="checkbox" class="start-at-11" />
                 </div>
                 <button class="miz-import-group modal-button">Import flight data</button>
               </div>

@@ -86,7 +86,8 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
             height: 100%;
             width: 100%;
 
-            .custom-select-input {
+            .custom-select-input,
+            .custom-path-select-input {
               flex: 1;
               width: 100%;
               text-align: inherit;
@@ -98,11 +99,14 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
               }
             }
 
-            .custom-select-arrow {
+            .custom-path-select-input {
+              display: none;
+            }
+
+            .custom-select-arrow,
+            .custom-path-select-arrow {
               position: absolute;
               cursor: pointer;
-              top: 50%;
-              transform: translateY(-50%);
               user-select: none;
 
               &.left {
@@ -114,22 +118,30 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
               }
             }
 
+            .custom-select-arrow {
+              top: 50%;
+              transform: translateY(-50%);
+            }
 
+            .custom-path-select-arrow {
+              top: 0;
+            }
           }
 
-          .custom-select-dropdown {
+          .custom-select-dropdown,
+          .custom-path-select-dropdown {
             display: none;
             border: 1px solid #444;
             background: white;
             position: absolute;
             top: 100%;
             left: -1px;
-            width: 100%;
             z-index: 1000;
             color: black;
             user-select: none;
 
-            .custom-select-option {
+            .custom-select-option,
+            .custom-path-select-option {
               padding: 4px 2px;
               cursor: pointer;
 
@@ -137,6 +149,39 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
                 background-color: #ddd;
               }
             }
+          }
+
+          .custom-select-dropdown {
+            width: 100%;
+
+            &.show {
+              display: block;
+            }
+          }
+
+          .custom-path-select-dropdown {
+            flex-wrap: wrap;
+
+            &.show {
+              display: flex;
+            }
+
+            .custom-path-select-option {
+              box-sizing: border-box;
+
+              svg {
+                height: 100%;
+                width: 100%;
+              }
+            }
+          }
+        }
+
+        .special-field-format {
+          opacity: 0;
+
+          &:focus {
+            opacity: 1;
           }
         }
       }

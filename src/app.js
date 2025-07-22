@@ -1,9 +1,16 @@
 class App {
   activeTabKey = 'active-tab';
+  selectedKneeboardKey = 'selected-kneeboard-tab';
 
   constructor() {
     this.bullseyeMap = new BullseyeMap();
-    this.kneeboard = new Kneeboard();
+
+    const kneeboardM2000C_OCA = new KneeboardM2000C_OCA();
+    const kneeboardGCI = new KneeboardGCI();
+
+    this.kneeboardTemplates = {};
+    this.kneeboardTemplates[kneeboardM2000C_OCA.kneeboardId] = kneeboardM2000C_OCA;
+    this.kneeboardTemplates[kneeboardGCI.kneeboardId] = kneeboardGCI;
 
     this.init()
   }
@@ -11,14 +18,7 @@ class App {
   init() {
     this.runTabs();
 
-    customElements.define('import-template', class extends HTMLElement {
-      connectedCallback() {
-        const path = this.getAttribute('path');
-        fetch(path).then(r => r.text()).then(html => {
-          this.innerHTML = html;
-        });
-      }
-    });
+    this.kneeboardSelect();
   }
 
   runTabs() {
@@ -37,6 +37,40 @@ class App {
     });
   }
 
+  kneeboardSelect() {
+    const kneeboardSelect = $('.kneeboard-select');
+    for (const [key, kneeboard] of Object.entries(this.kneeboardTemplates)) {
+      $(kneeboardSelect).append(
+        $('<option>', {
+          value: kneeboard.kneeboardId,
+          text: kneeboard.kneeboardName
+        })
+      );
+    }
+
+    const selectedKneeboard = localStorage.getItem(this.selectedKneeboardKey);
+    if (selectedKneeboard) {
+      this.kneeboardTemplates[selectedKneeboard].init();
+
+      $(kneeboardSelect).val(selectedKneeboard);
+    } else {
+      const defaultKneeboard = Object.keys(this.kneeboardTemplates)[0]
+
+      this.kneeboardTemplates[defaultKneeboard].init();
+
+      $(kneeboardSelect).val(defaultKneeboard);
+
+      localStorage.setItem(this.selectedKneeboardKey, defaultKneeboard);
+    }
+
+    $(kneeboardSelect).on('change', (event) => {
+      const newKneeboard = $(event.target).val();
+
+      this.kneeboardTemplates[newKneeboard].init();
+
+      localStorage.setItem(this.selectedKneeboardKey, newKneeboard);
+    });
+  }
 }
 
 $(document).ready(function () {
