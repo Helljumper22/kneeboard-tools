@@ -388,62 +388,6 @@ class KneeboardDrawUtils {
           'font-weight': textOptions.bold ? 'bold' : 'normal',
         })
         .appendTo('.kneeboard-fields-container');
-
-      /*switch (type) {
-        case 'text-area':
-          width -= textOptions.padding * 2
-          height -= textOptions.padding * 2;
-          $(`<textarea id="${id}"></textarea>`)
-            .css({
-              'top': `${y}px`,
-              'left': `${x}px`,
-              'width': `${width}px`,
-              'height': `${height}px`,
-              'font-size': `${textOptions.fontSize}px`,
-              'line-height': `${textOptions.fontSize}px`, // Aligns the text with the canvas text, WTF.
-              'margin': `${textOptions.padding}px`,
-              'text-align': textOptions.textAlign,
-              'font-weight': textOptions.bold ? 'bold' : 'normal'
-            })
-            .appendTo('.kneeboard-fields-container');
-          break;
-        case 'text':
-        default:
-          switch (textOptions.textOrientation) {
-            case 'slanted':
-              $(`<input type="text" id="${id}" class="special-field-format">`)
-                .css({
-                  'top': `${y}px`,
-                  'left': `${x}px`,
-                  'width': `${width}px`,
-                  'height': `${height}px`,
-                  'font-size': `${textOptions.fontSize}px`,
-                  'line-height': `${textOptions.fontSize * 2}px`, // Aligns the text with the canvas text, WTF.
-                  'padding': `0`,
-                  'text-align': textOptions.textAlign,
-                  'font-weight': textOptions.bold ? 'bold' : 'normal'
-                })
-                .appendTo('.kneeboard-fields-container');
-              break;
-            default:
-              width -= textOptions.padding * 2
-              $(`<input type="text" id="${id}">`)
-                .css({
-                  'top': `${y}px`,
-                  'left': `${x}px`,
-                  'width': `${width}px`,
-                  'height': `${height}px`,
-                  'font-size': `${textOptions.fontSize}px`,
-                  'line-height': `${textOptions.fontSize * 2}px`, // Aligns the text with the canvas text, WTF.
-                  'padding': `0 ${textOptions.padding}px`,
-                  'text-align': textOptions.textAlign,
-                  'font-weight': textOptions.bold ? 'bold' : 'normal'
-                })
-                .appendTo('.kneeboard-fields-container');
-              break;
-          }
-          break;
-      }*/
     }
   }
 

@@ -135,6 +135,22 @@ class MapDrawUtils {
     this.ctx.lineWidth = strokeWidth;
 
     switch (type) {
+      case 'dashed':
+        const length = Math.hypot(endXPx - startXPx, endYPx - startYPx); // Get the Euclidean distance
+
+        const desiredDashLength = 5;
+        const dashCount = Math.floor(length / (desiredDashLength * 2)) || 1;
+        const dashLength = Math.round(length / (dashCount * 2));
+
+        this.ctx.setLineDash([dashLength, dashLength]);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+
+        this.ctx.setLineDash([]);
+        break;
       case 'simple':
         this.ctx.beginPath();
         this.ctx.moveTo(startXPx, startYPx);
@@ -312,6 +328,93 @@ class MapDrawUtils {
 
     let textX = 0, textY = 0;
     switch (type) {
+      case 'plus-top':
+      case 'plus-bottom':
+        this.ctx.strokeStyle = "black";
+        this.ctx.moveTo((textHeight / 2), padding);
+        this.ctx.lineTo(-(textHeight / 2), padding);
+        this.ctx.moveTo(0, (textHeight / 2) + padding);
+        this.ctx.lineTo(0, -(textHeight / 2) + padding);
+        this.ctx.stroke();
+
+        if (type == 'plus-top') {
+          textY -= textHeight - padding * 2;
+        } else {
+          textY += textHeight + padding * 2;
+        }
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
+        break;
+      case 'octogone':
+        const octo_x = -(padding) - ((textHeight * 1.2) / 2);
+        const octo_y = (-padding * 2) - ((textHeight * 1.2) / 2);
+        const octo_w = boxHeight * 1.2;
+        const octo_h = boxHeight * 1.2;
+
+        // Octagon "cut" size
+        const octo_cut = Math.min(octo_w, octo_h) * 0.3; // adjust cut ratio as needed
+
+        // Define 8 points of the octagon
+        const points = [
+          [octo_x + octo_cut, octo_y],                  // Top-left inner
+          [octo_x + octo_w - octo_cut, octo_y],         // Top-right inner
+          [octo_x + octo_w, octo_y + octo_cut],         // Right-top inner
+          [octo_x + octo_w, octo_y + octo_h - octo_cut],// Right-bottom inner
+          [octo_x + octo_w - octo_cut, octo_y + octo_h],// Bottom-right inner
+          [octo_x + octo_cut, octo_y + octo_h],         // Bottom-left inner
+          [octo_x, octo_y + octo_h - octo_cut],         // Left-bottom inner
+          [octo_x, octo_y + octo_cut],                  // Left-top inner
+        ];
+
+        // Draw octagon
+        this.ctx.beginPath();
+        this.ctx.moveTo(points[0][0], points[0][1]);
+        for (let i = 1; i < points.length; i++) {
+          this.ctx.lineTo(points[i][0], points[i][1]);
+        }
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fill();
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+
+        if (text.length > 2) {
+          this.ctx.fillStyle = "white";
+          this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
+        }
+        break;
+      case 'rounded-square':
+        const rs_radius = 6; // Corner radius
+        const rs_x = -textWidth / 2;
+        const rs_y = -padding - textHeight / 2;
+        const rs_w = boxWidth;
+        const rs_h = boxHeight;
+
+        // Begin rounded rectangle path
+        this.ctx.beginPath();
+        this.ctx.moveTo(rs_x + rs_radius, rs_y);
+        this.ctx.lineTo(rs_x + rs_w - rs_radius, rs_y);
+        this.ctx.quadraticCurveTo(rs_x + rs_w, rs_y, rs_x + rs_w, rs_y + rs_radius);
+        this.ctx.lineTo(rs_x + rs_w, rs_y + rs_h - rs_radius);
+        this.ctx.quadraticCurveTo(rs_x + rs_w, rs_y + rs_h, rs_x + rs_w - rs_radius, rs_y + rs_h);
+        this.ctx.lineTo(rs_x + rs_radius, rs_y + rs_h);
+        this.ctx.quadraticCurveTo(rs_x, rs_y + rs_h, rs_x, rs_y + rs_h - rs_radius);
+        this.ctx.lineTo(rs_x, rs_y + rs_radius);
+        this.ctx.quadraticCurveTo(rs_x, rs_y, rs_x + rs_radius, rs_y);
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fill();
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+
+        textX = padding;
+        textY = padding;
+        break;
       case 'square':
         // Draw black square with white background
         this.ctx.fillStyle = "white";
@@ -346,7 +449,7 @@ class MapDrawUtils {
 
         if (text.length > 2) {
           this.ctx.fillStyle = "white";
-          this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight);
+          this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - (padding / 3));
         }
         break;
       case 'no-border':

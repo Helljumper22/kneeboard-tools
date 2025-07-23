@@ -129,7 +129,8 @@ body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
                   height: 191px;
                 }
 
-                .delete-area-point-button {
+                .delete-area-point-button,
+                .delete-faor-point-button {
                   height: 111px;
                 }
 

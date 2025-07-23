@@ -270,6 +270,35 @@
                   </div>
                 </fieldset>
 
+                <!-- FAOR points -->
+                <fieldset id="faor-points-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">FAOR Points</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="faor-points-container element-container sortable-container">
+                      <div class="faor-point element">
+                        <div class="drag-handle" title="Drag to reorder">☰</div>
+                        <div class="field">
+                          <label>Name</label>
+                          <input type="text" class="faor-point-name update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Azimuth (°)</label>
+                          <input type="number" class="faor-point-azimuth update-field" />
+                        </div>
+                        <div class="field">
+                          <label>Distance (nm)</label>
+                          <input type="number" class="faor-point-distance update-field" />
+                        </div>
+                        <button class="delete-faor-point-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-faor-point-button add-button">Add FAOR Point</button>
+                  </div>
+                </fieldset>
+
                 <!-- Gates -->
                 <fieldset id="gates-fields" class="collapsed">
                   <div class="fieldset-header">

@@ -79,6 +79,8 @@ class KneeboardM2000C_OCA extends Kneeboard {
       $(mizImportGroupModal).find('.modal-loading-container').addClass('hide');
       $(mizImportGroupModal).find('.modal-inner-content').removeClass('hide');
 
+      $(mizImportGroupModal).find('.selected-group option').remove();
+
       if (flights.length > 0) {
         for (const keyFlight in flights) {
           if (Object.hasOwn(flights, keyFlight)) {

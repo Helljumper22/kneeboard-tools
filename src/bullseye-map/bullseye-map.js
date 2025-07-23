@@ -6,6 +6,7 @@ mobsDataKey = 'mobs-data';
 bordersDataKey = 'borders-data';
 ringsDataKey = 'rings-data';
 areaPointsDataKey = 'area-points-data';
+faorPointsDataKey = 'faor-points-data';
 gatesDataKey = 'gates-data';
 arrowsDataKey = 'arrows-data';
 aircraftDataKey = 'aircraft-data';
@@ -25,6 +26,7 @@ class BullseyeMap {
     this.borders = [];
     this.rings = [];
     this.areaPoints = [];
+    this.faorPoints = [];
     this.gates = [];
     this.arrows = [];
     this.aircraft = [];
@@ -45,7 +47,7 @@ class BullseyeMap {
     this.getData();
 
     // Import data from JSON file
-    $('.import-map-button').on('click', async () => {
+    $('.import-map-button').off('click').on('click', async () => {
       const mapData = await this.utils.importData('.json');
 
       if (mapData) {
@@ -56,6 +58,7 @@ class BullseyeMap {
         localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
         localStorage.setItem(ringsDataKey, JSON.stringify(mapData.rings));
         localStorage.setItem(areaPointsDataKey, JSON.stringify(mapData.areaPoints));
+        localStorage.setItem(faorPointsDataKey, JSON.stringify(mapData.faorPoints));
         localStorage.setItem(gatesDataKey, JSON.stringify(mapData.gates));
         localStorage.setItem(arrowsDataKey, JSON.stringify(mapData.arrows));
         localStorage.setItem(aircraftDataKey, JSON.stringify(mapData.aircraft));
@@ -70,13 +73,13 @@ class BullseyeMap {
     });
 
     // Export data to JSON file.
-    $('.show-export-map-modal-button').on('click', () => this.showExportModal());
+    $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
 
     // Export map as png.
-    $('.show-download-map-modal-button').on('click', () => this.showDownloadModal());
+    $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
 
     // Reset all fields.
-    $('.reset-map-fields-button').on('click', () => {
+    $('.reset-map-fields-button').off('click').on('click', () => {
       if (window.confirm('Are you sure ? All data will be lost.')) {
         this.resetFields();
 
@@ -103,13 +106,13 @@ class BullseyeMap {
     });
 
     // Add element to list.
-    $('.add-button').on('click', (event) => this.addElement(event));
+    $('.add-button').off('click').on('click', (event) => this.addElement(event));
 
     // Delete element from list.
-    $('.delete-button').on('click', (event) => this.deleteElement(event));
+    $('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
 
     // Update map when a field is changed.
-    $('.update-field').on('input', () => this.updateMap());
+    $('.update-field').off('input').on('input', () => this.updateMap());
 
     // Get the current state of the fieldsets.
     this.fieldsetsData = [];
@@ -121,7 +124,7 @@ class BullseyeMap {
     });
 
     // Display or hide the fieldsets.
-    $('.toggle-fieldset').on('click', (event) => {
+    $('.toggle-fieldset').off('click').on('click', (event) => {
       const fieldset = $(event.target).closest('fieldset');
       fieldset.toggleClass('collapsed');
 
@@ -141,25 +144,20 @@ class BullseyeMap {
     $(exportModal).find('.file-name').val('');
     $(exportModal).addClass('show');
 
-    $(exportModal).on('click', (event) => {
+    $(exportModal).off('click').on('click', (event) => {
       if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
-        $(exportModal).find('.export-data-button').off('click')
-        $(exportModal).find('.close-button').off('click');
-
         $(exportModal).removeClass('show');
       }
     });
 
-    $(exportModal).find('.export-data-button').on('click', () => {
-      $(exportModal).find('.download-map-button').off('click')
-      $(exportModal).find('.close-button').off('click');
-
+    $(exportModal).find('.export-data-button').off('click').on('click', () => {
       const mapData = {
         'bullseye': this.bullseye,
         'mobs': this.mobs,
         'borders': this.borders,
         'rings': this.rings,
         'areaPoints': this.areaPoints,
+        'faorPoints': this.faorPoints,
         'gates': this.gates,
         'arrows': this.arrows,
         'aircraft': this.aircraft,
@@ -183,19 +181,13 @@ class BullseyeMap {
     $(downloadModal).find('.file-name').val('');
     $(downloadModal).addClass('show');
 
-    $(downloadModal).on('click', (event) => {
+    $(downloadModal).off('click').on('click', (event) => {
       if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
-        $(downloadModal).find('.download-map-button').off('click')
-        $(downloadModal).find('.close-button').off('click');
-
         $(downloadModal).removeClass('show');
       }
     });
 
-    $(downloadModal).find('.download-map-button').on('click', () => {
-      $(downloadModal).find('.download-map-button').off('click')
-      $(downloadModal).find('.close-button').off('click');
-
+    $(downloadModal).find('.download-map-button').off('click').on('click', () => {
       if ($(downloadModal).find('.format-a4').is(':checked')) {
         this.mapDrawUtils.canvas.width = 800;
         this.mapDrawUtils.canvas.height = 1131;
@@ -268,6 +260,7 @@ class BullseyeMap {
     $('.border:not(:first)').remove();
     $('.ring:not(:first)').remove();
     $('.area-point:not(:first)').remove();
+    $('.faor-point:not(:first)').remove();
     $('.gate:not(:first)').remove();
     $('.nav-point:not(:first)').remove();
   }
@@ -278,8 +271,8 @@ class BullseyeMap {
     newPoint.find('input').val('');
     $(elementContainer).append(newPoint);
 
-    newPoint.find('.update-field').on('input', () => this.updateMap());
-    newPoint.find('.delete-button').on('click', (event) => this.deleteElement(event));
+    newPoint.find('.update-field').off('input').on('input', () => this.updateMap());
+    newPoint.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
 
     const colorPicker = newPoint.find('.color-picker');
     if (colorPicker.length > 0) {
@@ -333,6 +326,9 @@ class BullseyeMap {
 
     // Draw area points
     this.runAreaPoints();
+
+    // Draw area points
+    this.runFaorPoints();
 
     // Draw gates
     this.runGates();
@@ -444,6 +440,22 @@ class BullseyeMap {
         const y = distance * Math.sin(angleRad);
 
         this.areaPoints.push({ name, azimuth, distance, x, y });
+      }
+    });
+
+    // FAOR points
+    this.faorPoints = [];
+    $('.faor-point').each((index, element) => {
+      const name = $(element).find('.faor-point-name').val();
+      const azimuth = parseFloat($(element).find('.faor-point-azimuth').val());
+      const distance = parseFloat($(element).find('.faor-point-distance').val());
+
+      if (!isNaN(azimuth) && !isNaN(distance)) {
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const x = distance * Math.cos(angleRad);
+        const y = distance * Math.sin(angleRad);
+
+        this.faorPoints.push({ name, azimuth, distance, x, y });
       }
     });
 
@@ -644,6 +656,14 @@ class BullseyeMap {
       maxY = Math.max(maxY, areaPoint.y);
     });
 
+    // Include area points in bounding box
+    this.faorPoints.forEach((faorPoint) => {
+      minX = Math.min(minX, faorPoint.x);
+      maxX = Math.max(maxX, faorPoint.x);
+      minY = Math.min(minY, faorPoint.y);
+      maxY = Math.max(maxY, faorPoint.y);
+    });
+
     // Include gates in bounding box
     this.gates.forEach((gate) => {
       minX = Math.min(minX, gate.x);
@@ -780,6 +800,20 @@ class BullseyeMap {
         const endPoint = this.areaPoints[(i + 1) % this.areaPoints.length]; // Wrap around to the first point
 
         this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3);
+      }
+    }
+  }
+
+  runFaorPoints() {
+    if (this.faorPoints.length > 1) {
+      // Draw dashed lines between points to form a polygon
+      for (let i = 0; i < this.faorPoints.length; i++) {
+        if (i == 0 || this.faorPoints.length > 2) {
+          const startPoint = this.faorPoints[i];
+          const endPoint = this.faorPoints[(i + 1) % this.faorPoints.length]; // Wrap around to the first point
+
+          this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 2, 'dashed');
+        }
       }
     }
   }
@@ -923,12 +957,17 @@ class BullseyeMap {
 
     // Draw ring names
     this.rings.forEach((ring) => {
-      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name);
+      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name, 'plus-bottom');
     });
 
     // Draw area points name
     this.areaPoints.forEach((areaPoint) => {
       if (areaPoint.name != '') this.mapDrawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
+    });
+
+    // Draw FAOR points name
+    this.faorPoints.forEach((faorPoint) => {
+      if (faorPoint.name != '') this.mapDrawUtils.drawText(faorPoint.x, faorPoint.y, faorPoint.name);
     });
 
     // Draw gate names
@@ -1029,8 +1068,8 @@ class BullseyeMap {
             mobElement = $('.mob').first().clone();
             $('.mobs-container').append(mobElement);
 
-            mobElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            mobElement.find('.update-field').on('input', () => this.updateMap());
+            mobElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            mobElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = mobElement.find('.color-picker');
             if (colorPicker) {
@@ -1072,8 +1111,8 @@ class BullseyeMap {
             borderElement = $('.border').first().clone();
             $('.borders-container').append(borderElement);
 
-            borderElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            borderElement.find('.update-field').on('input', () => this.updateMap());
+            borderElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            borderElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = borderElement.find('.color-picker');
             if (colorPicker) {
@@ -1115,8 +1154,8 @@ class BullseyeMap {
             ringElement = $('.ring').first().clone();
             $('.rings-container').append(ringElement);
 
-            ringElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            ringElement.find('.update-field').on('input', () => this.updateMap());
+            ringElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            ringElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = ringElement.find('.color-picker');
             if (colorPicker) {
@@ -1156,8 +1195,8 @@ class BullseyeMap {
             areaPointElement = $('.area-point').first().clone();
             $('.area-points-container').append(areaPointElement);
 
-            areaPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            areaPointElement.find('.update-field').on('input', () => this.updateMap());
+            areaPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            areaPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(areaPointElement).find('.area-point-name').val(areaPointData.name);
@@ -1176,6 +1215,38 @@ class BullseyeMap {
       areaPoints.remove();
     }
 
+    // FAOR points
+    try {
+      const faorPointsData = JSON.parse(localStorage.getItem(faorPointsDataKey));
+      if (faorPointsData) {
+        faorPointsData.forEach((faorPointsData, index) => {
+          let faorPointElement;
+          if (index == 0) {
+            faorPointElement = $('.faor-point').first();
+          } else {
+            faorPointElement = $('.faor-point').first().clone();
+            $('.faor-points-container').append(faorPointElement);
+
+            faorPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            faorPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(faorPointElement).find('.faor-point-name').val(faorPointsData.name);
+          $(faorPointElement).find('.faor-point-azimuth').val(faorPointsData.azimuth);
+          $(faorPointElement).find('.faor-point-distance').val(faorPointsData.distance);
+        });
+      }
+    } catch (error) {
+      const faorPoints = $('.faor-point:not(:first)');
+      const firstFaorPoint = $('.faor-point').first();
+
+      $(firstFaorPoint).find('.faor-point-name').val('');
+      $(firstFaorPoint).find('.faor-point-azimuth').val('');
+      $(firstFaorPoint).find('.faor-point-distance').val('');
+
+      faorPoints.remove();
+    }
+
     // Gates
     try {
       const gatesData = JSON.parse(localStorage.getItem(gatesDataKey));
@@ -1188,8 +1259,8 @@ class BullseyeMap {
             gateElement = $('.gate').first().clone();
             $('.gates-container').append(gateElement);
 
-            gateElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            gateElement.find('.update-field').on('input', () => this.updateMap());
+            gateElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            gateElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = gateElement.find('.color-picker');
             if (colorPicker) {
@@ -1231,8 +1302,8 @@ class BullseyeMap {
             arrowElement = $('.arrow').first().clone();
             $('.arrow-container').append(arrowElement);
 
-            arrowElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            arrowElement.find('.update-field').on('input', () => this.updateMap());
+            arrowElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            arrowElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = arrowElement.find('.color-picker');
             if (colorPicker) {
@@ -1274,8 +1345,8 @@ class BullseyeMap {
             aircraftElement = $('.aircraft').first().clone();
             $('.aircraft-container').append(aircraftElement);
 
-            aircraftElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            aircraftElement.find('.update-field').on('input', () => this.updateMap());
+            aircraftElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            aircraftElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = aircraftElement.find('.color-picker');
             if (colorPicker) {
@@ -1319,8 +1390,8 @@ class BullseyeMap {
             navPointElement = $('.nav-point').first().clone();
             $('.nav-points-container').append(navPointElement);
 
-            navPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            navPointElement.find('.update-field').on('input', () => this.updateMap());
+            navPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            navPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(navPointElement).find('.nav-point-name').val(navPointData.name);
@@ -1351,8 +1422,8 @@ class BullseyeMap {
             capPointElement = $('.cap-point').first().clone();
             $('.cap-points-container').append(capPointElement);
 
-            capPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            capPointElement.find('.update-field').on('input', () => this.updateMap());
+            capPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            capPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = capPointElement.find('.color-picker');
             if (colorPicker) {
@@ -1400,8 +1471,8 @@ class BullseyeMap {
             pointElement = $('.point').first().clone();
             $('.points-container').append(pointElement);
 
-            pointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            pointElement.find('.update-field').on('input', () => this.updateMap());
+            pointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            pointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(pointElement).find('.point-name').val(pointData.name);
@@ -1450,6 +1521,7 @@ class BullseyeMap {
     localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));
     localStorage.setItem(ringsDataKey, JSON.stringify(this.rings));
     localStorage.setItem(areaPointsDataKey, JSON.stringify(this.areaPoints));
+    localStorage.setItem(faorPointsDataKey, JSON.stringify(this.faorPoints));
     localStorage.setItem(gatesDataKey, JSON.stringify(this.gates));
     localStorage.setItem(arrowsDataKey, JSON.stringify(this.arrows));
     localStorage.setItem(aircraftDataKey, JSON.stringify(this.aircraft));
