@@ -1162,6 +1162,7 @@ const M2000C_OCA_1 = {
             _description: 'Pilot 5 aircraft field',
             position: [6, 7, 8, 10],
             borderWidths: [1, 1, 1, 1],
+            textAlign: 'center',
             backgroundColor: M2000C_OCA_darkBackground
         },
         {
@@ -1407,7 +1408,11 @@ const M2000C_OCA_1 = {
         // Row 13-14
         {
             id: 'bas-altitude',
+            type: 'linked-text',
             _description: 'BAS altitude field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'bas-altitude'],
+            ],
             position: [12, 14, 1, 2],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
@@ -1415,7 +1420,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'bas-heading',
+            type: 'linked-text',
             _description: 'BAS heading field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'bas-heading'],
+            ],
             position: [12, 14, 2, 3],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
@@ -1423,7 +1432,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'bas-number',
-            _description: 'BAS heading field',
+            type: 'linked-text',
+            _description: 'BAS number field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'bas-number'],
+            ],
             position: [12, 14, 3, 4],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
@@ -4084,6 +4097,7 @@ const M2000C_OCA_2 = {
             position: [11, 12, 4, 5],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         {
             id: 'cap-ins',
@@ -4091,6 +4105,7 @@ const M2000C_OCA_2 = {
             position: [11, 12, 10, 11],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         // Row 13
         {
@@ -4099,6 +4114,7 @@ const M2000C_OCA_2 = {
             position: [12, 13, 4, 5],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         {
             id: 'cap-alt',
@@ -4106,6 +4122,7 @@ const M2000C_OCA_2 = {
             position: [12, 13, 10, 11],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         // Row 14
         {
@@ -4114,6 +4131,7 @@ const M2000C_OCA_2 = {
             position: [13, 14, 4, 5],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         {
             id: 'cap-speed',
@@ -4121,6 +4139,7 @@ const M2000C_OCA_2 = {
             position: [13, 14, 10, 11],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         // Row 15
         {
@@ -4129,6 +4148,7 @@ const M2000C_OCA_2 = {
             position: [14, 15, 4, 5],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         {
             id: 'cap-ref',
@@ -4136,6 +4156,7 @@ const M2000C_OCA_2 = {
             position: [14, 15, 10, 11],
             borderWidths: [0, 2, 0, 0],
             textAlign: 'center',
+            padding: 0,
         },
         // Row 17-19
         {
@@ -4162,7 +4183,7 @@ const M2000C_OCA_2 = {
                 '',
                 '\nNever below DAP',
                 '\nSpiked > DAP\nNaked > MAR',
-                '\nSpiked > MAP\nNaked < MAR'
+                '\nSpiked > MAR\nNaked < MAR'
             ],
             position: [16, 19, 3, 6],
             borderWidths: [1, 1, 1, 1],
@@ -4393,7 +4414,11 @@ const M2000C_OCA_2 = {
         // Row 38-40
         {
             id: 'bas-altitude',
+            type: 'linked-text',
             _description: 'BAS altitude field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'bas-altitude'],
+            ],
             position: [37, 39, 6, 7],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
@@ -4401,7 +4426,11 @@ const M2000C_OCA_2 = {
         },
         {
             id: 'bas-heading',
+            type: 'linked-text',
             _description: 'BAS heading field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'bas-heading'],
+            ],
             position: [37, 39, 7, 8],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
@@ -4409,7 +4438,11 @@ const M2000C_OCA_2 = {
         },
         {
             id: 'bas-number',
-            _description: 'BAS heading field',
+            type: 'linked-text',
+            _description: 'BAS number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'bas-number'],
+            ],
             position: [37, 39, 8, 9],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',

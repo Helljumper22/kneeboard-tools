@@ -101,10 +101,11 @@ class Kneeboard {
 
   runDataImport() {
     $('.import-kneeboard-button').off('click').on('click', async () => {
-      const kneeboardData = await this.utils.importData('.json');
+      const importKneeboardData = await this.utils.importData('.json');
 
-      if (kneeboardData) {
-        localStorage.setItem(this.kneeboardDataKey, JSON.stringify(kneeboardData));
+      if (importKneeboardData) {
+        const kneeboardData = JSON.parse(localStorage.getItem(this.kneeboardDataKey));
+        localStorage.setItem(this.kneeboardDataKey, JSON.stringify({ ...kneeboardData, ...importKneeboardData }));
 
         this.displayKneeboard();
       }
@@ -197,7 +198,6 @@ class Kneeboard {
     });
 
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
-
       const fileName = $(exportModal).find('.file-name').val();
       this.utils.exportMap(this.kneeboardData, fileName != '' ? fileName : 'kneeboard');
 
@@ -222,7 +222,6 @@ class Kneeboard {
       const kneeboardImages = {};
       this.kneeboardTemplate.pages.forEach((template, index) => {
         this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
-        this.kneeboardDrawUtils.clearCanvas();
         this.kneeboardDrawUtils.clearInputFields();
 
         // Draw the kneeboard background.
@@ -278,8 +277,6 @@ class Kneeboard {
 
   displayKneeboard() {
     this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[this.currentPage].rows, this.kneeboardTemplate.pages[this.currentPage].columns);
-    this.kneeboardDrawUtils.clearCanvas();
-    this.kneeboardDrawUtils.clearInputFields();
 
     // Draw the kneeboard background.
     this.displayStaticContent(this.kneeboardTemplate.pages[this.currentPage]);
@@ -297,10 +294,15 @@ class Kneeboard {
     // Handle special field display
     this.runSpecialFields();
 
+    // Handle linked fields
+    this.runLinkedFields();
+
     this.saveData();
   }
 
   displayStaticContent(template) {
+    this.kneeboardDrawUtils.clearCanvas();
+
     template.textCells?.forEach((textCell) => {
       if (textCell.type == 'path') {
         this.kneeboardDrawUtils.drawSvgShape(
@@ -349,6 +351,8 @@ class Kneeboard {
   }
 
   displayFields(template) {
+    this.kneeboardDrawUtils.clearInputFields();
+
     template.textFieldCells.forEach((textFieldCell) => {
       switch (textFieldCell.type) {
         case 'path-field':
@@ -408,7 +412,6 @@ class Kneeboard {
               textAlign: textFieldCell.textAlign ?? null,
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
-              linkedFields: textFieldCell.linkedFields ?? [],
             },
             textFieldCell.dropdownSide ?? 'right'
           );
@@ -430,7 +433,6 @@ class Kneeboard {
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
               textOrientation: textFieldCell.textOrientation ?? null,
-              linkedOptions: textFieldCell.linkedOptions ?? [],
             },
           );
           break;
@@ -521,7 +523,9 @@ class Kneeboard {
     try {
       const kneeboardData = JSON.parse(localStorage.getItem(this.kneeboardDataKey));
       if (kneeboardData) {
-        this.kneeboardData = kneeboardData;
+        this.kneeboardTemplate.pages.forEach((page) => {
+          this.kneeboardData[page.id] = kneeboardData[page.id];
+        });
       } else {
         this.resetFields();
       }
@@ -607,6 +611,64 @@ class Kneeboard {
     });
   }
 
+  runLinkedFields() {
+    this.kneeboardTemplate.pages[this.currentPage].textFieldCells.forEach((textFieldCell) => {
+      switch (textFieldCell.type) {
+        case 'linked-text':
+          $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('change', (event) => {
+            textFieldCell.linkedFields.forEach((linkedField) => {
+              if (Array.isArray(linkedField)) {
+                this.kneeboardData[linkedField[0]] = this.kneeboardData[linkedField[0]].filter((field) => field.id != linkedField[1]);
+                this.kneeboardData[linkedField[0]].push({
+                  id: linkedField[1],
+                  value: $(event.target).val(),
+                });
+              } else {
+                this.kneeboardData[this.currentPageId] = this.kneeboardData[this.currentPageId].filter((field) => field.id != linkedField);
+                this.kneeboardData[this.currentPageId].push({
+                  id: linkedField,
+                  value: $(event.target).val(),
+                });
+              }
+
+              this.saveData();
+              this.displayKneeboard();
+            });
+          });
+          break;
+        case 'linked-select':
+          $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('change', (event) => {
+            console.log($(event.target), textFieldCell);
+
+            textFieldCell.linkedFields.forEach((linkedField) => {
+              if (Array.isArray(linkedField)) {
+                const linkedTextFieldCell = this.kneeboardTemplate.pages[this.currentPage].textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
+
+                this.kneeboardData[linkedField[0]] = this.kneeboardData[linkedField[0]].filter((field) => field.id != linkedField[1]);
+                this.kneeboardData[linkedField[0]].push({
+                  id: linkedField[1],
+                  value: linkedTextFieldCell.linkedOptions[textFieldCell.options.indexOf($(event.target).val()) + 1],
+                });
+              } else {
+                const linkedTextFieldCell = this.kneeboardTemplate.pages[this.currentPage].textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
+
+                this.kneeboardData[this.currentPageId] = this.kneeboardData[this.currentPageId].filter((field) => field.id != linkedField);
+                this.kneeboardData[this.currentPageId].push({
+                  id: linkedField,
+                  value: linkedTextFieldCell.linkedOptions[textFieldCell.options.indexOf($(event.target).val()) + 1],
+                });
+              }
+
+              this.saveData();
+              this.displayKneeboard();
+            });
+          });
+          break;
+      }
+
+    });
+  }
+
   updateKneeboardData() {
     this.kneeboardData[this.currentPageId] = [];
     $('.kneeboard-fields-container').find('input[type="text"], textarea').each((index, element) => {
@@ -622,7 +684,9 @@ class Kneeboard {
   }
 
   saveData() {
-    localStorage.setItem(this.kneeboardDataKey, JSON.stringify(this.kneeboardData));
+    const kneeboardData = JSON.parse(localStorage.getItem(this.kneeboardDataKey));
+    localStorage.setItem(this.kneeboardDataKey, JSON.stringify({ ...kneeboardData, ...this.kneeboardData }));
+
     localStorage.setItem(this.kneeboardPageKey, this.currentPageId);
   }
 

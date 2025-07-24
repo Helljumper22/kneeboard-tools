@@ -161,7 +161,6 @@ class KneeboardDrawUtils {
         padding: _textOptions.padding ?? 5,
         bold: _textOptions.bold ?? false,
         textOrientation: _textOptions.textOrientation ?? 'horizontal',
-        linkedOptions: _textOptions.linkedOptions ?? [],
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -177,9 +176,7 @@ class KneeboardDrawUtils {
           width -= textOptions.padding * 2
           height -= textOptions.padding * 2;
 
-          const linkedOptions = JSON.stringify(textOptions.linkedOptions);
-
-          $(`<textarea id="${id}" ${textOptions.linkedOptions.length > 0 ? "data-linked-options='" + linkedOptions + "'" : ""}></textarea>`)
+          $(`<textarea id="${id}"></textarea>`)
             .css({
               'top': `${y}px`,
               'left': `${x}px`,
@@ -212,11 +209,9 @@ class KneeboardDrawUtils {
                 .appendTo('.kneeboard-fields-container');
               break;
             default:
-              width -= textOptions.padding * 2
+              width -= textOptions.padding * 2;
 
-              const linkedOptions = JSON.stringify(textOptions.linkedOptions);
-
-              $(`<input type="text" id="${id}" ${textOptions.linkedOptions.length > 0 ? "data-linked-options='" + linkedOptions + "'" : ""}>`)
+              $(`<input type="text" id="${id}">`)
                 .css({
                   'top': `${y}px`,
                   'left': `${x}px`,
@@ -244,7 +239,6 @@ class KneeboardDrawUtils {
         padding: _selectOptions.padding ?? 5,
         bold: _selectOptions.bold ?? false,
         textAlign: _selectOptions.textAlign ?? (dropDownSide == 'left' ? 'right' : 'left'),
-        linkedFields: _selectOptions.linkedFields ?? []
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -323,17 +317,6 @@ class KneeboardDrawUtils {
           if ($(input).val() != text) {
 
             $(input).val(text).change();
-
-            if (type == 'linked-select' && selectOptions.linkedFields.length > 0) {
-              const optionIndex = $(event.currentTarget).index();
-              selectOptions.linkedFields.forEach((linkedFieldId) => {
-                const linkedField = $(`#${linkedFieldId}`);
-
-                const linkedOptions = JSON.parse($(linkedField).attr('data-linked-options'));
-
-                $(linkedField).val(linkedOptions[optionIndex]).change();
-              })
-            }
           }
 
           $(dropdown).hide();
