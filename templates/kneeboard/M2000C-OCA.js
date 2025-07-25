@@ -618,13 +618,6 @@ const M2000C_OCA_1 = {
         },
         // Row 32
         {
-            _name: 'JOKER quantity',
-            _description: 'JOKER quantity text',
-            text: 'JOKER',
-            position: [31, 32, 0, 4],
-            borderWidths: [2, 1, 1, 2],
-        },
-        {
             _name: 'Tanker callsign',
             _description: 'Tanker callsign text',
             text: 'C/S',
@@ -648,14 +641,6 @@ const M2000C_OCA_1 = {
             padding: 0,
         },
         // Row 33
-        {
-            _name: 'BINGO quantity',
-            _description: 'BINGO quantity text',
-            text: 'BINGO',
-            position: [32, 33, 0, 4],
-            borderWidths: [1, 1, 1, 2],
-            backgroundColor: M2000C_OCA_darkBackground
-        },
         {
             _name: 'Tanker freq',
             _description: 'Tanker freq text',
@@ -2567,8 +2552,18 @@ const M2000C_OCA_1 = {
         },
         // Row 32
         {
-            id: 'joker-quantity',
-            _description: 'JOKER quantity field',
+            id: 'fuel-1-name',
+            _description: 'Fuel 1 name field',
+            position: [31, 32, 0, 4],
+            borderWidths: [2, 1, 1, 2],
+            default: 'JOKER',
+            textAlign: 'center',
+            fontSize: '11',
+            bold: true,
+        },
+        {
+            id: 'fuel-1-quantity',
+            _description: 'Fuel 1 quantity field',
             position: [31, 32, 4, 7],
             borderWidths: [2, 2, 1, 1],
             textAlign: 'center',
@@ -2589,8 +2584,19 @@ const M2000C_OCA_1 = {
         },
         // Row 33
         {
-            id: 'bingo-quantity',
-            _description: 'Bingo quantity field',
+            id: 'fuel-2-name',
+            _description: 'Fuel 2 name field',
+            position: [32, 33, 0, 4],
+            borderWidths: [1, 1, 1, 2],
+            default: 'BINGO',
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground,
+            fontSize: '11',
+            bold: true,
+        },
+        {
+            id: 'fuel-2-quantity',
+            _description: 'Fuel 3 name field',
             position: [32, 33, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2612,8 +2618,8 @@ const M2000C_OCA_1 = {
         },
         // Row 34
         {
-            id: 'additional-fuel-quantity-name',
-            _description: 'Additional fuel quantity name field',
+            id: 'fuel-3-name',
+            _description: 'Fuel 3 name field',
             position: [33, 34, 0, 4],
             borderWidths: [1, 1, 2, 2],
             textAlign: 'center',
@@ -2621,8 +2627,8 @@ const M2000C_OCA_1 = {
             bold: true,
         },
         {
-            id: 'additional-fuel-quantity',
-            _description: 'Additional fuel quantity field',
+            id: 'fuel-3-quantity',
+            _description: 'Fuel 3 quantity field',
             position: [33, 34, 4, 7],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
