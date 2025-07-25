@@ -221,27 +221,28 @@ class Kneeboard {
     $(downloadModal).find('.download-kneeboard-button').off('click').on('click', () => {
       const kneeboardImages = {};
       this.kneeboardTemplate.pages.forEach((template, index) => {
-        this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
-        this.kneeboardDrawUtils.clearInputFields();
+        if (index == 0) {
+          this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
+          this.kneeboardDrawUtils.clearInputFields();
 
-        // Draw the kneeboard background.
-        this.displayStaticContent(this.kneeboardTemplate.pages[index]);
+          // Draw the kneeboard background.
+          this.displayStaticContent(this.kneeboardTemplate.pages[index]);
 
-        // Draw the data into the canvas.
-        this.runKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
-        $(downloadModal).removeClass('show');
+          // Draw the data into the canvas.
+          this.runKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
+          $(downloadModal).removeClass('show');
+        }
 
-        kneeboardImages[template.id] = $('.kneeboard-canvas')[0].toDataURL('image/png');
+        //kneeboardImages[template.id] = $('.kneeboard-canvas')[0].toDataURL('image/png');
       });
 
-      const archive = new JSZip();
+      /*const archive = new JSZip();
       for (const imageName in kneeboardImages) {
         if (Object.hasOwn(kneeboardImages, imageName)) {
 
           archive.file(`${imageName}.png`, kneeboardImages[imageName].split(',')[1], { base64: true });
         }
       }
-
 
       const fileName = $(downloadModal).find('.file-name').val();
       archive.generateAsync({ type: 'blob' }).then((content) => {
@@ -254,7 +255,7 @@ class Kneeboard {
 
       $(downloadModal).removeClass('show');
 
-      this.displayKneeboard();
+      this.displayKneeboard();*/
     });
   }
 
@@ -388,7 +389,7 @@ class Kneeboard {
             textFieldCell.options ?? [],
             textFieldCell.borderWidths ?? [1, 1, 1, 1],
             {
-              columns: textFieldCell.columns ?? 3,
+              selectColumns: textFieldCell.selectColumns ?? 3,
               padding: textFieldCell.padding ?? 5,
             },
             textFieldCell.dropdownSide ?? 'right'

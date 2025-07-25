@@ -377,7 +377,7 @@ class KneeboardDrawUtils {
   drawPathSelectField(rowStart, rowEnd, columnStart, columnEnd, id, options = [], borderWidths = [1, 1, 1, 1], _selectOptions = {}, dropDownSide = 'right') {
     if (this.checkRowsColumns(rowStart, rowEnd, columnStart, columnEnd)) {
       const selectOptions = {
-        columns: Math.round(_selectOptions.columns ?? 3),
+        selectColumns: Math.round(_selectOptions.selectColumns ?? 3),
         padding: _selectOptions.padding ?? 5,
       }
 
@@ -410,7 +410,7 @@ class KneeboardDrawUtils {
                 <input type="text" class="custom-path-select-input" id="${id}"/>
                 <span class="custom-path-select-arrow ${dropDownSide}">▼</span>
               </div>
-              <div class="custom-path-select-dropdown" style="width:${selectOptions.columns * 100}%">
+              <div class="custom-path-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
               ${customPathOptions.map((customPathOption) => customPathOption).join('')}
               </div>
             </div>`).css({
@@ -571,18 +571,18 @@ class KneeboardDrawUtils {
           case 'left':
             this.ctx.textAlign = 'left';
             textX = cellX + textOptions.padding;
-            textY = cellY + (cellHeight / 2);
+            textY = cellY + (cellHeight / 2) + 1;
             break;
           case 'right':
             this.ctx.textAlign = 'right';
             textX = cellX + cellWidth - textOptions.padding;
-            textY = cellY + (cellHeight / 2);
+            textY = cellY + (cellHeight / 2) + 1;
             break;
           case 'center':
           default:
             this.ctx.textAlign = 'center';
             textX = cellX + (cellWidth / 2);
-            textY = cellY + (cellHeight / 2);
+            textY = cellY + (cellHeight / 2) + 1;
             break;
         }
 

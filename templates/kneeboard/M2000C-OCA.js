@@ -3,6 +3,9 @@ const M2000C_OCA_darkBackground = '#D9D9D9'
 const M2000C_OCA_lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R'];
 const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'FL 4 L', 'FL 4 R'];
+const M2000C_OCA_recoveryOptions = ['SKY CLR', 'CLD BRK', 'IFR 1', 'IFR 2', 'IFR 3'];
+const M2000C_OCA_landingOptions = ['INDIV', 'FORM'];
+const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8F', '6+8B', '6+8K', '6+8+14F', '6+8B+4x250 kg'];
 const M2000C_OCA_riskLevelOptions = ['LOW', 'MEDIUM', 'HIGH'];
 const M2000C_OCA_yesNoOptions = ['Y', 'N'];
 const M2000C_OCA_wcsOptions = ['HOLD', 'TIGHT', 'FREE'];
@@ -417,9 +420,9 @@ const M2000C_OCA_1 = {
             backgroundColor: M2000C_OCA_darkBackground
         },
         {
-            _name: 'Climb type',
-            _description: 'Climb type text',
-            text: 'CLIMB',
+            _name: 'Transit formation',
+            _description: 'Transit formation text',
+            text: 'TRANSIT',
             position: [19, 20, 7, 9],
             borderWidths: [0, 2, 0, 2],
             textAlign: 'left',
@@ -442,29 +445,38 @@ const M2000C_OCA_1 = {
             backgroundColor: M2000C_OCA_darkBackground
         },
         {
-            _name: 'Join up type',
-            _description: 'Join up type text',
-            text: 'JOIN UP',
+            _name: 'Recovery type',
+            _description: 'Recovery type text',
+            text: 'RCVR',
             position: [21, 22, 7, 9],
             borderWidths: [0, 2, 0, 2],
             textAlign: 'left',
         },
         // Row 24
         {
-            _name: 'Transit formation',
-            _description: 'Transit formation text',
-            text: 'TRANSIT',
+            _name: 'Landing type',
+            _description: 'Landing type text',
+            text: 'LDG',
             position: [23, 24, 7, 9],
             borderWidths: [0, 2, 0, 2],
             textAlign: 'left',
         },
+        // Row 26-27
+        {
+            _name: 'Performance data',
+            _description: 'Performance data text',
+            text: 'PERF DATA',
+            position: [25, 27, 0, 6],
+            borderWidths: [2, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
+        },
         // Row 26
         {
-            _name: 'Descent type',
-            _description: 'Descent type text',
-            text: 'DESCENT',
-            position: [25, 26, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            _name: 'Performance data configuration',
+            _description: 'Performance data configuration text',
+            text: 'CONF',
+            position: [25, 26, 6, 9],
+            borderWidths: [2, 2, 0, 1],
             textAlign: 'left',
         },
         // Row 27
@@ -485,11 +497,27 @@ const M2000C_OCA_1 = {
         },
         // Row 28
         {
-            _name: 'Recovery type',
-            _description: 'Recovery type text',
-            text: 'RCVR',
-            position: [27, 28, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            _name: 'Performance data Jx',
+            _description: 'Performance data Jx text',
+            text: 'Jx',
+            position: [27, 28, 0, 1],
+            borderWidths: [1, 0, 0, 2],
+            textAlign: 'center',
+        },
+        {
+            _name: 'Performance data VOM PG',
+            _description: 'Performance data VOM PG text',
+            text: 'VOM PG',
+            position: [27, 28, 2, 4],
+            borderWidths: [1, 0, 0, 1],
+            textAlign: 'center',
+        },
+        {
+            _name: 'Performance data MLW FULL',
+            _description: 'Performance data MLW FULL text',
+            text: 'MLW FULL',
+            position: [27, 28, 6, 9],
+            borderWidths: [1, 2, 0, 1],
             textAlign: 'left',
         },
         {
@@ -502,11 +530,22 @@ const M2000C_OCA_1 = {
         },
         // Row 29
         {
-            _name: 'Civilian guard freq',
-            _description: 'Civilian guard freq text',
-            text: 'CIV GUARD',
-            position: [28, 29, 0, 3],
-            borderWidths: [1, 0, 1, 2]
+            _name: 'Performance data Rto',
+            _description: 'Performance data Rto text',
+            text: 'Rto',
+            position: [28, 29, 0, 1],
+            borderWidths: [0, 0, 0, 2],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Performance data VOM PC',
+            _description: 'Performance data VOM PC text',
+            text: 'VOM PC',
+            position: [28, 29, 2, 4],
+            borderWidths: [0, 0, 0, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Air defense package lead',
@@ -517,19 +556,27 @@ const M2000C_OCA_1 = {
         },
         // Row 30
         {
-            _name: 'Military guard freq',
-            _description: 'Military guard freq text',
-            text: 'MIL GUARD',
-            position: [29, 30, 0, 3],
-            borderWidths: [1, 0, 2, 2],
-            backgroundColor: M2000C_OCA_darkBackground
+            _name: 'Performance data VR',
+            _description: 'Performance data VR text',
+            text: 'VR',
+            position: [29, 30, 0, 1],
+            borderWidths: [0, 0, 0, 2],
+            textAlign: 'center',
         },
         {
-            _name: 'Landing type',
-            _description: 'Landing type text',
-            text: 'LDG',
-            position: [29, 30, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            _name: 'Performance data DMF HA',
+            _description: 'Performance data DMF HA text',
+            text: 'DMF HA',
+            position: [29, 30, 2, 4],
+            borderWidths: [0, 0, 0, 1],
+            textAlign: 'center',
+        },
+        {
+            _name: 'Performance data MLW CLEAN',
+            _description: 'Performance data MLW CLEAN text',
+            text: 'MLW CLEAN',
+            position: [29, 30, 6, 9],
+            borderWidths: [0, 2, 0, 1],
             textAlign: 'left',
         },
         {
@@ -542,11 +589,22 @@ const M2000C_OCA_1 = {
         },
         // Row 31
         {
-            _name: 'JOKER quantity',
-            _description: 'JOKER quantity text',
-            text: 'JOKER',
-            position: [30, 31, 0, 4],
-            borderWidths: [2, 1, 1, 2]
+            _name: 'Performance data Vlof',
+            _description: 'Performance data Vlof text',
+            text: 'Vlof',
+            position: [30, 31, 0, 1],
+            borderWidths: [0, 0, 2, 2],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
+        },
+        {
+            _name: 'Performance data DMF LA',
+            _description: 'Performance data DMF LA text',
+            text: 'DMF LA',
+            position: [30, 31, 2, 4],
+            borderWidths: [0, 0, 2, 1],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
         },
         // Row 32-34
         {
@@ -560,12 +618,11 @@ const M2000C_OCA_1 = {
         },
         // Row 32
         {
-            _name: 'BINGO quantity',
-            _description: 'BINGO quantity text',
-            text: 'BINGO',
+            _name: 'JOKER quantity',
+            _description: 'JOKER quantity text',
+            text: 'JOKER',
             position: [31, 32, 0, 4],
-            borderWidths: [1, 1, 1, 2],
-            backgroundColor: M2000C_OCA_darkBackground
+            borderWidths: [2, 1, 1, 2],
         },
         {
             _name: 'Tanker callsign',
@@ -592,11 +649,12 @@ const M2000C_OCA_1 = {
         },
         // Row 33
         {
-            _name: 'LOTO quantity',
-            _description: 'LOTO quantity text',
-            text: 'LOTO',
+            _name: 'BINGO quantity',
+            _description: 'BINGO quantity text',
+            text: 'BINGO',
             position: [32, 33, 0, 4],
-            borderWidths: [1, 1, 1, 2]
+            borderWidths: [1, 1, 1, 2],
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             _name: 'Tanker freq',
@@ -613,14 +671,6 @@ const M2000C_OCA_1 = {
             borderWidths: [1, 0, 1, 1]
         },
         // Row 34
-        {
-            _name: 'YOYO quantity',
-            _description: 'YOYO quantity text',
-            text: 'YOYO',
-            position: [33, 34, 0, 4],
-            borderWidths: [1, 1, 2, 2],
-            backgroundColor: M2000C_OCA_darkBackground
-        },
         {
             _name: 'Tanker tacan',
             _description: 'Tanker tacan text',
@@ -1321,6 +1371,7 @@ const M2000C_OCA_1 = {
             position: [9, 10, 0, 2],
             borderWidths: [1, 0, 1, 2],
             textAlign: 'center',
+            fontSize: '11',
             bold: true
         },
         {
@@ -1336,6 +1387,7 @@ const M2000C_OCA_1 = {
             position: [9, 10, 4, 7],
             borderWidths: [1, 0, 1, 1],
             textAlign: 'center',
+            fontSize: '11',
             bold: true
         },
         {
@@ -1351,6 +1403,7 @@ const M2000C_OCA_1 = {
             position: [9, 10, 9, 11],
             borderWidths: [1, 0, 1, 1],
             textAlign: 'center',
+            fontSize: '11',
             bold: true
         },
         {
@@ -1366,6 +1419,7 @@ const M2000C_OCA_1 = {
             position: [9, 10, 14, 16],
             borderWidths: [1, 0, 1, 1],
             textAlign: 'center',
+            fontSize: '11',
             bold: true
         },
         {
@@ -1396,6 +1450,7 @@ const M2000C_OCA_1 = {
             position: [10, 11, 14, 16],
             borderWidths: [1, 0, 2, 1],
             textAlign: 'center',
+            fontSize: '11',
             bold: true
         },
         {
@@ -1861,11 +1916,13 @@ const M2000C_OCA_1 = {
             textAlign: 'center',
         },
         {
-            id: 'climb-type',
-            _description: 'Climb type field',
+            id: 'transit-formation',
+            type: 'input-select',
+            _description: 'Transit formation field',
+            options: M2000C_OCA_formationOptions,
+            dropdownSide: 'left',
             position: [20, 21, 7, 9],
             borderWidths: [0, 2, 0, 2],
-            textAlign: 'right',
             padding: 2
         },
         {
@@ -1967,6 +2024,7 @@ const M2000C_OCA_1 = {
             position: [22, 23, 0, 3],
             borderWidths: [1, 0, 1, 2],
             textAlign: 'center',
+            fontSize: '11',
             bold: true,
         },
         {
@@ -1985,8 +2043,11 @@ const M2000C_OCA_1 = {
             textAlign: 'center',
         },
         {
-            id: 'join-up-type',
-            _description: 'Join up type field',
+            id: 'recovery-type',
+            type: 'input-select',
+            _description: 'Recovery type field',
+            options: M2000C_OCA_recoveryOptions,
+            dropdownSide: 'left',
             position: [22, 23, 7, 9],
             borderWidths: [0, 2, 0, 2],
             textAlign: 'right',
@@ -2035,7 +2096,9 @@ const M2000C_OCA_1 = {
             _description: 'Additional freq 2 name field',
             position: [23, 24, 0, 3],
             borderWidths: [1, 0, 1, 2],
+            default: 'CIV GUARD',
             textAlign: 'center',
+            fontSize: '11',
             bold: true,
             backgroundColor: M2000C_OCA_darkBackground
         },
@@ -2044,6 +2107,7 @@ const M2000C_OCA_1 = {
             _description: 'Additional freq 2 channel field',
             position: [23, 24, 3, 4],
             borderWidths: [1, 1, 1, 0],
+            default: 'V20',
             textAlign: 'center',
             padding: 0,
             backgroundColor: M2000C_OCA_darkBackground
@@ -2098,15 +2162,18 @@ const M2000C_OCA_1 = {
             id: 'additional-freq-3-name',
             _description: 'Additional freq 3 name field',
             position: [24, 25, 0, 3],
-            borderWidths: [1, 0, 1, 2],
+            borderWidths: [1, 0, 2, 2],
+            default: 'MIL GUARD',
             textAlign: 'center',
+            fontSize: '11',
             bold: true,
         },
         {
             id: 'additional-freq-3-channel',
             _description: 'Additional freq 3 channel field',
             position: [24, 25, 3, 4],
-            borderWidths: [1, 1, 1, 0],
+            borderWidths: [1, 1, 2, 0],
+            default: 'R20',
             textAlign: 'center',
             padding: 0,
         },
@@ -2114,17 +2181,18 @@ const M2000C_OCA_1 = {
             id: 'additional-freq-3-callsign',
             _description: 'Additional freq 3 callsign field',
             position: [24, 25, 4, 7],
-            borderWidths: [1, 2, 1, 1],
+            borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
         },
         {
-            id: 'transit-formation',
+            id: 'landing-type',
             type: 'input-select',
-            _description: 'Transit formation field',
-            options: M2000C_OCA_formationOptions,
+            _description: 'Landing type field',
+            options: M2000C_OCA_landingOptions,
             dropdownSide: 'left',
             position: [24, 25, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            borderWidths: [0, 2, 2, 2],
+            textAlign: 'right',
             padding: 2
         },
         {
@@ -2166,32 +2234,6 @@ const M2000C_OCA_1 = {
         },
         // Row 26
         {
-            id: 'additional-freq-4-name',
-            _description: 'Additional freq 4 name field',
-            position: [25, 26, 0, 3],
-            borderWidths: [1, 0, 1, 2],
-            textAlign: 'center',
-            bold: true,
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'additional-freq-4-channel',
-            _description: 'Additional freq 4 channel field',
-            position: [25, 26, 3, 4],
-            borderWidths: [1, 1, 1, 0],
-            textAlign: 'center',
-            padding: 0,
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'additional-freq-4-callsign',
-            _description: 'Additional freq 4 callsign field',
-            position: [25, 26, 4, 7],
-            borderWidths: [1, 2, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
             id: 'package-10-callsign',
             _description: 'Package 10 callsign field',
             position: [25, 26, 9, 12],
@@ -2230,35 +2272,26 @@ const M2000C_OCA_1 = {
         },
         // Row 27
         {
-            id: 'additional-freq-5-name',
-            _description: 'Additional freq 5 name field',
-            position: [26, 27, 0, 3],
-            borderWidths: [1, 0, 1, 2],
-            textAlign: 'center',
-            bold: true,
-        },
-        {
-            id: 'additional-freq-5-channel',
-            _description: 'Additional freq 5 channel field',
-            position: [26, 27, 3, 4],
-            borderWidths: [1, 1, 1, 0],
-            textAlign: 'center',
-            padding: 0,
-        },
-        {
-            id: 'additional-freq-5-callsign',
-            _description: 'Additional freq 5 callsign field',
-            position: [26, 27, 4, 7],
-            borderWidths: [1, 2, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'descent-type',
-            _description: 'Descent type field',
-            position: [26, 27, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            id: 'perf-data-conf',
+            type: 'linked-select',
+            _description: 'Performance data CONF field',
+            options: M2000C_OCA_confOptions,
+            dropdownSide: 'left',
+            linkedFields: [
+                'perf-data-jx',
+                'perf-data-rto',
+                'perf-data-vr',
+                'perf-data-vlof',
+                'perf-data-vom-pg',
+                'perf-data-vom-pc',
+                'perf-data-dmf-ha',
+                'perf-data-dmf-la',
+                'perf-data-mlw-full',
+                'perf-data-mlw-clean',
+            ],
+            position: [26, 27, 6, 9],
+            borderWidths: [0, 2, 1, 1],
             textAlign: 'right',
-            padding: 2
         },
         {
             id: 'mission-commader-callsign',
@@ -2277,30 +2310,44 @@ const M2000C_OCA_1 = {
         },
         // Row 28
         {
-            id: 'additional-freq-6-name',
-            _description: 'Additional freq 6 name field',
-            position: [27, 28, 0, 3],
-            borderWidths: [1, 0, 1, 2],
-            textAlign: 'center',
-            bold: true,
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'additional-freq-6-channel',
-            _description: 'Additional freq 6 channel field',
-            position: [27, 28, 3, 4],
-            borderWidths: [1, 1, 1, 0],
+            id: 'perf-data-jx',
+            _description: 'Performance data Jx field',
+            linkedOptions: [
+                '',
+                '0.69', // 6A
+                '0.62', // 6F
+                '0.50', // 6B
+                '0.47', // 6K
+                '0.60', // 6+8F
+                '0.49', // 6+8B
+                '0.47', // 6+8K
+                '0.56', // 6+8+14F
+                '0.45', // 6+8B+4x250 kg
+            ],
+            position: [27, 28, 1, 2],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: M2000C_OCA_darkBackground
         },
         {
-            id: 'additional-freq-6-callsign',
-            _description: 'Additional freq 6 callsign field',
-            position: [27, 28, 4, 7],
-            borderWidths: [1, 2, 1, 1],
+            id: 'perf-data-vom-pg',
+            _description: 'Performance data VOM PG field',
+            linkedOptions: [
+                '',
+                '520 - 0.93', // 6A
+                '505 - 0.91', // 6F
+                '480 - 0.88', // 6B
+                '465 - 0.85', // 6K
+                '490 - 0.89', // 6+8F
+                '472 - 0.86', // 6+8B
+                '445 - 0.83', // 6+8K
+                '465 - 0.85', // 6+8+14F
+                '445 - 0.83', // 6+8B+4x250 kg
+            ],
+            position: [27, 28, 4, 6],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
+            padding: 0,
         },
         {
             id: 'deputy-mission-commander-callsign',
@@ -2312,27 +2359,66 @@ const M2000C_OCA_1 = {
         },
         // Row 29
         {
-            id: 'civ-guard-freq-channel',
-            _description: 'Civilian guard freq channel field',
-            position: [28, 29, 3, 4],
-            borderWidths: [1, 1, 1, 0],
+            id: 'perf-data-rto',
+            _description: 'Performance data Rto field',
+            linkedOptions: [
+                '',
+                '147', // 6A
+                '143', // 6F
+                '133', // 6B
+                '129', // 6K
+                '142', // 6+8F
+                '132', // 6+8B
+                '128', // 6+8K
+                '139', // 6+8+14F
+                '128', // 6+8B+4x250 kg
+            ],
+            position: [28, 29, 1, 2],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground,
             padding: 0,
         },
         {
-            id: 'civ-guard-freq-callsign',
-            _description: 'Civilian guard freq callsign field',
-            position: [28, 29, 4, 7],
-            borderWidths: [1, 2, 1, 1],
+            id: 'perf-data-vom-pc',
+            _description: 'Performance data VOM PC field',
+            linkedOptions: [
+                '',
+                '580 - 0.95', // 6A
+                '575 - 0.93', // 6F
+                '565 - 0.91', // 6B
+                '560 - 0.89', // 6K
+                '570 - 0.91', // 6+8F
+                '562 - 0.90', // 6+8B
+                '555 - 0.87', // 6+8K
+                '560 - 0.89', // 6+8+14F
+                '555 - 0.87', // 6+8B+4x250 kg
+            ],
+            position: [28, 29, 4, 6],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0,
         },
         {
-            id: 'recovery-type',
-            _description: 'Recovery type field',
-            position: [28, 29, 7, 9],
-            borderWidths: [0, 2, 0, 2],
+            id: 'perf-data-mlw-full',
+            _description: 'Performance data MLW FULL field',
+            linkedOptions: [
+                '',
+                '2500 kg', // 6A
+                '2400 kg', // 6F
+                '2000 kg', // 6B
+                '1800 kg', // 6K
+                '2000 kg', // 6+8F
+                '1700 kg', // 6+8B
+                '1500 kg', // 6+8K
+                '1400 kg', // 6+8+14F
+                '700 kg', // 6+8B+4x250 kg
+            ],
+            position: [28, 29, 6, 9],
+            borderWidths: [0, 2, 0, 1],
             textAlign: 'right',
-            padding: 2
+            backgroundColor: M2000C_OCA_darkBackground,
         },
         {
             id: 'air-defense-package-lead-callsign',
@@ -2343,21 +2429,45 @@ const M2000C_OCA_1 = {
         },
         // Row 30
         {
-            id: 'mil-guard-freq-name',
-            _description: 'Military guard freq channel field',
-            position: [29, 30, 3, 4],
-            borderWidths: [1, 1, 2, 0],
+            id: 'perf-data-vr',
+            _description: 'Performance data VR field',
+            linkedOptions: [
+                '',
+                '120', // 6A
+                '120', // 6F
+                '138', // 6B
+                '145', // 6K
+                '120', // 6+8F
+                '141', // 6+8B
+                '147', // 6+8K
+                '124', // 6+8+14F
+                '149', // 6+8B+4x250 kg
+            ],
+            position: [29, 30, 1, 2],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
             padding: 0,
-            backgroundColor: M2000C_OCA_darkBackground
         },
         {
-            id: 'mil-guard-freq-channel',
-            _description: 'Military guard freq callsign field',
-            position: [29, 30, 4, 7],
-            borderWidths: [1, 2, 2, 1],
+            id: 'perf-data-dmf-ha',
+            _description: 'Performance data DMF HA field',
+            linkedOptions: [
+                '',
+                '0.90 - FL400', // 6A
+                '0.90 - FL400', // 6F
+                '0.90 - FL360', // 6B
+                '0.83 - FL300', // 6K
+                '0.90 - FL400', // 6+8F
+                '0.90 - FL360', // 6+8B
+                '0.81 - FL300', // 6+8K
+                '0.84 - FL360', // 6+8+14F
+                '0.81 - FL300', // 6+8B+4x250 kg
+            ],
+            position: [29, 30, 4, 6],
+            borderWidths: [0, 1, 0, 0],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
+            fontSize: 10,
+            padding: 0,
         },
         {
             id: 'strike-package-lead-callsign',
@@ -2369,19 +2479,66 @@ const M2000C_OCA_1 = {
         },
         // Row 31
         {
-            id: 'joker-quantity',
-            _description: 'JOKER quantity field',
-            position: [30, 31, 4, 7],
-            borderWidths: [2, 2, 1, 1],
+            id: 'perf-data-vlof',
+            _description: 'Performance data Vlof field',
+            linkedOptions: [
+                '',
+                '153', // 6A
+                '153', // 6F
+                '165', // 6B
+                '170', // 6K
+                '153', // 6+8F
+                '167', // 6+8B
+                '172', // 6+8K
+                '155', // 6+8+14F
+                '173', // 6+8B+4x250 kg
+            ],
+            position: [30, 31, 1, 2],
+            borderWidths: [0, 1, 2, 0],
             textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0,
         },
         {
-            id: 'landing-type',
-            _description: 'Landing type field',
-            position: [30, 31, 7, 9],
-            borderWidths: [0, 2, 2, 2],
+            id: 'perf-data-dmf-la',
+            _description: 'Performance data DMF LA field',
+            linkedOptions: [
+                '',
+                '360', // 6A
+                '375', // 6F
+                '385', // 6B
+                '385', // 6K
+                '370', // 6+8F
+                '385', // 6+8B
+                '380', // 6+8K
+                '365', // 6+8+14F
+                '380', // 6+8B+4x250 kg
+            ],
+            position: [30, 31, 4, 6],
+            borderWidths: [0, 1, 2, 0],
+            textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0,
+        },
+        {
+            id: 'perf-data-mlw-clean',
+            _description: 'Performance data MLW CLEAN field',
+            linkedOptions: [
+                '',
+                '2500 kg', // 6A
+                '2400 kg', // 6F
+                '2000 kg', // 6B
+                '1800 kg', // 6K
+                '2300 kg', // 6+8F
+                '1900 kg', // 6+8B
+                '1700 kg', // 6+8K
+                '2100 kg', // 6+8+14F
+                '1700 kg', // 6+8B+4x250 kg
+            ],
+            position: [30, 31, 6, 9],
+            borderWidths: [0, 2, 2, 1],
             textAlign: 'right',
-            padding: 2
+            backgroundColor: M2000C_OCA_darkBackground,
         },
         {
             id: 'additional-lead-type',
@@ -2389,6 +2546,7 @@ const M2000C_OCA_1 = {
             position: [30, 31, 9, 11],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
+            fontSize: '11',
             bold: true,
         },
         {
@@ -2409,12 +2567,11 @@ const M2000C_OCA_1 = {
         },
         // Row 32
         {
-            id: 'bingo-quantity',
-            _description: 'BINGO quantity field',
+            id: 'joker-quantity',
+            _description: 'JOKER quantity field',
             position: [31, 32, 4, 7],
-            borderWidths: [1, 2, 1, 1],
+            borderWidths: [2, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'tanker-callsign',
@@ -2432,11 +2589,12 @@ const M2000C_OCA_1 = {
         },
         // Row 33
         {
-            id: 'loto-quantity',
-            _description: 'LOTO quantity field',
+            id: 'bingo-quantity',
+            _description: 'Bingo quantity field',
             position: [32, 33, 4, 7],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
+            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'tanker-freq',
@@ -2454,12 +2612,20 @@ const M2000C_OCA_1 = {
         },
         // Row 34
         {
-            id: 'yoyo-quantity',
-            _description: 'YOYO quantity field',
+            id: 'additional-fuel-quantity-name',
+            _description: 'Additional fuel quantity name field',
+            position: [33, 34, 0, 4],
+            borderWidths: [1, 1, 2, 2],
+            textAlign: 'center',
+            fontSize: '11',
+            bold: true,
+        },
+        {
+            id: 'additional-fuel-quantity',
+            _description: 'Additional fuel quantity field',
             position: [33, 34, 4, 7],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
         },
         {
             id: 'tanker-tacan',
@@ -2523,7 +2689,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-11-name',
+            type: 'linked-text',
             _description: 'Nav point 11 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-11-name'],
+            ],
             position: [34, 35, 14, 18],
             borderWidths: [2, 2, 1, 1],
             textAlign: 'center',
@@ -2578,7 +2748,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-12-name',
+            type: 'linked-text',
             _description: 'Nav point 12 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-12-name'],
+            ],
             position: [35, 36, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2633,7 +2807,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-13-name',
+            type: 'linked-text',
             _description: 'Nav point 13 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-13-name'],
+            ],
             position: [36, 37, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2688,7 +2866,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-14-name',
+            type: 'linked-text',
             _description: 'Nav point 14 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-14-name'],
+            ],
             position: [37, 38, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2743,7 +2925,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-15-name',
+            type: 'linked-text',
             _description: 'Nav point 15 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-15-name'],
+            ],
             position: [38, 39, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2798,7 +2984,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-16-name',
+            type: 'linked-text',
             _description: 'Nav point 16 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-16-name'],
+            ],
             position: [39, 40, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2853,7 +3043,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-17-name',
+            type: 'linked-text',
             _description: 'Nav point 17 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-17-name'],
+            ],
             position: [40, 41, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2908,7 +3102,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-18-name',
+            type: 'linked-text',
             _description: 'Nav point 18 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-18-name'],
+            ],
             position: [41, 42, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -2963,7 +3161,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-19-name',
+            type: 'linked-text',
             _description: 'Nav point 19 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-19-name'],
+            ],
             position: [42, 43, 14, 18],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -3018,7 +3220,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'nav-point-20-name',
+            type: 'linked-text',
             _description: 'Nav point 20 name field',
+            linkedFields: [
+                ['M2000C-OCA-page-2', 'nav-point-20-name'],
+            ],
             position: [43, 44, 14, 18],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
@@ -3926,20 +4132,20 @@ const M2000C_OCA_2 = {
             type: 'path-select',
             _description: 'Hold path field',
             options: M2000C_OCA_racetrackPathList,
+            selectColumns: 6,
             position: [9, 15, 0, 2],
             borderWidths: [1, 0, 2, 2],
-            columns: 6,
-            default: 0
+            default: 0,
         },
         {
             id: 'cap-racetrack',
             type: 'path-select',
             _description: 'CAP path field',
             options: M2000C_OCA_racetrackPathList,
+            selectColumns: 6,
             position: [9, 15, 6, 8],
             borderWidths: [1, 0, 2, 2],
-            columns: 6,
-            default: 0
+            default: 0,
         },
         // Row 10
         {
@@ -4493,8 +4699,8 @@ const M2000C_OCA_2 = {
             _description: 'Shotgun state text field',
             position: [40, 41, 5, 9],
             borderWidths: [1, 2, 2, 2],
+            default: '0 2 2+',
             textAlign: 'center',
-            default: '0 2 2+'
         },
         // Row 42
         {
