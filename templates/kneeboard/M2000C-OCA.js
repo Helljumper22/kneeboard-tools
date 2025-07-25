@@ -1,6 +1,6 @@
 const M2000C_OCA_darkBackground = '#D9D9D9'
 
-const M2000C_OCA_lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R'];
+const M2000C_OCA_lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R', 'INDIV'];
 const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'FL 4 L', 'FL 4 R'];
 const M2000C_OCA_recoveryOptions = ['SKY CLR', 'CLD BRK', 'IFR 1', 'IFR 2', 'IFR 3'];
