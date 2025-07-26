@@ -693,8 +693,6 @@ class Kneeboard {
           break;
         case 'linked-select':
           $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('change', (event) => {
-            console.log($(event.target), textFieldCell);
-
             textFieldCell.linkedFields.forEach((linkedField) => {
               if (Array.isArray(linkedField)) {
                 const linkedTextFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
@@ -713,10 +711,10 @@ class Kneeboard {
                   value: linkedTextFieldCell.linkedOptions[textFieldCell.options.indexOf($(event.target).val()) + 1],
                 });
               }
-
-              this.saveData();
-              this.displayKneeboard();
             });
+
+            this.saveData();
+            this.displayKneeboard();
           });
           break;
       }
