@@ -2,7 +2,7 @@ const M2000C_OCA_darkBackground = '#D9D9D9'
 
 const M2000C_OCA_lineupOptions = ['ECHL L', 'ECHL R', 'BAN L', 'BAN R', 'STAG L', 'STAG R', 'INDIV'];
 const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
-const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'FL 4 L', 'FL 4 R'];
+const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'CARD L', 'CARD R', 'FL 4 L', 'FL 4 R'];
 const M2000C_OCA_recoveryOptions = ['SKY CLR', 'CLD BRK', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_landingOptions = ['INDIV', 'FORM'];
 const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8F', '6+8B', '6+8K', '6+8+14F', '6+8B+4x250 kg'];
@@ -1484,63 +1484,90 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'ramrod-0',
+            type: 'chained-text',
             _description: 'Ramrod 0 field',
+            chainedField: 'ramrod-1',
+            characterLimit: 1,
             position: [12, 14, 5, 6],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-1',
+            type: 'chained-text',
             _description: 'Ramrod 1 field',
+            chainedField: 'ramrod-2',
+            characterLimit: 1,
             position: [12, 14, 6, 7],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-2',
+            type: 'chained-text',
             _description: 'Ramrod 2 field',
+            chainedField: 'ramrod-3',
+            characterLimit: 1,
             position: [12, 14, 7, 8],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-3',
+            type: 'chained-text',
             _description: 'Ramrod 3 field',
+            chainedField: 'ramrod-4',
+            characterLimit: 1,
             position: [12, 14, 8, 9],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-4',
+            type: 'chained-text',
             _description: 'Ramrod 4 field',
+            chainedField: 'ramrod-5',
+            characterLimit: 1,
             position: [12, 14, 9, 10],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-5',
+            type: 'chained-text',
             _description: 'Ramrod 5 field',
+            chainedField: 'ramrod-6',
+            characterLimit: 1,
             position: [12, 14, 10, 11],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-6',
+            type: 'chained-text',
             _description: 'Ramrod 6 field',
+            chainedField: 'ramrod-7',
+            characterLimit: 1,
             position: [12, 14, 11, 12],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-7',
+            type: 'chained-text',
             _description: 'Ramrod 7 field',
+            chainedField: 'ramrod-8',
+            characterLimit: 1,
             position: [12, 14, 12, 13],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
         },
         {
             id: 'ramrod-8',
+            type: 'chained-text',
             _description: 'Ramrod 8 field',
+            chainedField: 'ramrod-9',
+            characterLimit: 1,
             position: [12, 14, 13, 14],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
@@ -1548,6 +1575,7 @@ const M2000C_OCA_1 = {
         {
             id: 'ramrod-9',
             _description: 'Ramrod 9 field',
+            characterLimit: 1,
             position: [12, 14, 14, 15],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
@@ -1555,7 +1583,10 @@ const M2000C_OCA_1 = {
         // Row 13
         {
             id: 'authenticate-1-top',
+            type: 'chained-text',
             _description: 'Authenticate 1 top field',
+            chainedField: 'authenticate-1-bottom',
+            characterLimit: 3,
             position: [12, 13, 15, 16],
             borderWidths: [1, 1, 0, 2],
             textAlign: 'center',
@@ -1563,7 +1594,10 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'authenticate-2-top',
+            type: 'chained-text',
             _description: 'Authenticate 2 top field',
+            chainedField: 'authenticate-2-bottom',
+            characterLimit: 3,
             position: [12, 13, 16, 17],
             borderWidths: [1, 1, 0, 1],
             textAlign: 'center',
@@ -1571,7 +1605,10 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'authenticate-3-top',
+            type: 'chained-text',
             _description: 'Authenticate 3 top field',
+            chainedField: 'authenticate-3-bottom',
+            characterLimit: 3,
             position: [12, 13, 17, 18],
             borderWidths: [1, 1, 0, 1],
             textAlign: 'center',
@@ -1579,7 +1616,10 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'authenticate-4-top',
+            type: 'chained-text',
             _description: 'Authenticate 4 top field',
+            chainedField: 'authenticate-4-bottom',
+            characterLimit: 3,
             position: [12, 13, 18, 19],
             borderWidths: [1, 2, 0, 1],
             textAlign: 'center',
@@ -1589,6 +1629,7 @@ const M2000C_OCA_1 = {
         {
             id: 'authenticate-1-bottom',
             _description: 'Authenticate 1 bottom field',
+            characterLimit: 1,
             position: [13, 14, 15, 16],
             borderWidths: [0, 1, 2, 2],
             textAlign: 'center',
@@ -1596,6 +1637,7 @@ const M2000C_OCA_1 = {
         {
             id: 'authenticate-2-bottom',
             _description: 'Authenticate 2 bottom field',
+            characterLimit: 1,
             position: [13, 14, 16, 17],
             borderWidths: [0, 1, 2, 1],
             textAlign: 'center',
@@ -1603,6 +1645,7 @@ const M2000C_OCA_1 = {
         {
             id: 'authenticate-3-bottom',
             _description: 'Authenticate 3 bottom field',
+            characterLimit: 1,
             position: [13, 14, 17, 18],
             borderWidths: [0, 1, 2, 1],
             textAlign: 'center',
@@ -1610,6 +1653,7 @@ const M2000C_OCA_1 = {
         {
             id: 'authenticate-4-bottom',
             _description: 'Authenticate 4 bottom field',
+            characterLimit: 1,
             position: [13, 14, 18, 19],
             borderWidths: [0, 2, 2, 1],
             textAlign: 'center',

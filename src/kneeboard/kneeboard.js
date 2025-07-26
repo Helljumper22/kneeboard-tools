@@ -221,22 +221,20 @@ class Kneeboard {
     $(downloadModal).find('.download-kneeboard-button').off('click').on('click', () => {
       const kneeboardImages = {};
       this.kneeboardTemplate.pages.forEach((template, index) => {
-        if (index == 0) {
-          this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
-          this.kneeboardDrawUtils.clearInputFields();
+        this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
+        this.kneeboardDrawUtils.clearInputFields();
 
-          // Draw the kneeboard background.
-          this.displayStaticContent(this.kneeboardTemplate.pages[index]);
+        // Draw the kneeboard background.
+        this.displayStaticContent(this.kneeboardTemplate.pages[index]);
 
-          // Draw the data into the canvas.
-          this.runKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
-          $(downloadModal).removeClass('show');
-        }
+        // Draw the data into the canvas.
+        this.runKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
+        $(downloadModal).removeClass('show');
 
-        //kneeboardImages[template.id] = $('.kneeboard-canvas')[0].toDataURL('image/png');
+        kneeboardImages[template.id] = $('.kneeboard-canvas')[0].toDataURL('image/png');
       });
 
-      /*const archive = new JSZip();
+      const archive = new JSZip();
       for (const imageName in kneeboardImages) {
         if (Object.hasOwn(kneeboardImages, imageName)) {
 
@@ -255,7 +253,7 @@ class Kneeboard {
 
       $(downloadModal).removeClass('show');
 
-      this.displayKneeboard();*/
+      this.displayKneeboard();
     });
   }
 
@@ -292,11 +290,17 @@ class Kneeboard {
     // Update kneeboard data when a field is changed.
     $('.kneeboard-fields-container').find('input[type=text], textarea').on('change', () => this.updateKneeboardData());
 
+    // Handle fields behavior
+    this.runFields(this.kneeboardTemplate.pages[this.currentPage]);
+
     // Handle special field display
-    this.runSpecialFields();
+    this.runSpecialFields(this.kneeboardTemplate.pages[this.currentPage]);
 
     // Handle linked fields
-    this.runLinkedFields();
+    this.runLinkedFields(this.kneeboardTemplate.pages[this.currentPage]);
+
+    // Handle chained fields
+    this.runChainedFields(this.kneeboardTemplate.pages[this.currentPage]);
 
     this.saveData();
   }
@@ -434,6 +438,7 @@ class Kneeboard {
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
               textOrientation: textFieldCell.textOrientation ?? null,
+              characterLimit: textFieldCell.characterLimit ?? 0,
             },
           );
           break;
@@ -574,15 +579,64 @@ class Kneeboard {
               break;
           }
 
-          $('.kneeboard-fields-container').find(`input#${kneeboardField.id}, textarea#${kneeboardField.id} `).val(kneeboardField.value);
+          const field = $('.kneeboard-fields-container').find(`input#${kneeboardField.id}, textarea#${kneeboardField.id} `);
+          $(field).val(kneeboardField.value);
+
+          if (!textFieldCell.type || textFieldCell.type == 'chained-text') {
+            let fontSize = textFieldCell.fontSize ?? 12;
+            const minFontSize = textFieldCell.minFontSize ?? 10;
+
+            while ($(field)[0].scrollWidth > $(field)[0].clientWidth && fontSize > minFontSize) {
+              fontSize--;
+              $(field).css('font-size', fontSize + 'px');
+            }
+          }
         }
       });
     }
   }
 
-  runSpecialFields() {
+  runFields(template) {
+    const defaultFontSize = 12;
+    const defaultMinFontSize = 10;
+
+    let currentFontSize = 0, fontSize = 0, minFontSize = 0;
+    template.textFieldCells.forEach((textFieldCell) => {
+      if (!textFieldCell.type || textFieldCell.type == 'chained-text') {
+        $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('input', (event) => {
+          currentFontSize = parseInt($(event.target).css('font-size'));
+          fontSize = textFieldCell.fontSize ?? defaultFontSize;
+          minFontSize = textFieldCell.minFontSize ?? defaultMinFontSize;
+
+          // Ensure the font size is within limits.
+          currentFontSize = Math.min(minFontSize, fontSize);
+          $(event.target).css('font-size', `${currentFontSize}px`);
+
+          console.log($(event.target)[0].scrollWidth, $(event.target)[0].clientWidth);
+
+          while ($(event.target)[0].scrollWidth <= $(event.target)[0].clientWidth && currentFontSize < fontSize) {
+            currentFontSize++;
+            $(event.target).css('font-size', currentFontSize + 'px');
+
+            if ($(event.target)[0].scrollWidth > $(event.target)[0].clientWidth) {
+              currentFontSize--;
+              $(event.target).css('font-size', currentFontSize + 'px');
+              break;
+            }
+          }
+
+          while ($(event.target)[0].scrollWidth > $(event.target)[0].clientWidth && currentFontSize > minFontSize) {
+            currentFontSize--;
+            $(event.target).css('font-size', currentFontSize + 'px');
+          }
+        });
+      }
+    });
+  }
+
+  runSpecialFields(template) {
     $('.special-field-format').on('focusin', (event) => {
-      const textFieldCell = this.kneeboardTemplate.pages[this.currentPage].textFieldCells.find((textFieldCell) => textFieldCell.id == $(event.target).attr('id'));
+      const textFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == $(event.target).attr('id'));
 
       $(event.target).on('focusout', (event) => {
         $(event.target).off('focusout');
@@ -612,8 +666,8 @@ class Kneeboard {
     });
   }
 
-  runLinkedFields() {
-    this.kneeboardTemplate.pages[this.currentPage].textFieldCells.forEach((textFieldCell) => {
+  runLinkedFields(template) {
+    template.textFieldCells.forEach((textFieldCell) => {
       switch (textFieldCell.type) {
         case 'linked-text':
           $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('change', (event) => {
@@ -643,7 +697,7 @@ class Kneeboard {
 
             textFieldCell.linkedFields.forEach((linkedField) => {
               if (Array.isArray(linkedField)) {
-                const linkedTextFieldCell = this.kneeboardTemplate.pages[this.currentPage].textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
+                const linkedTextFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
 
                 this.kneeboardData[linkedField[0]] = this.kneeboardData[linkedField[0]].filter((field) => field.id != linkedField[1]);
                 this.kneeboardData[linkedField[0]].push({
@@ -651,7 +705,7 @@ class Kneeboard {
                   value: linkedTextFieldCell.linkedOptions[textFieldCell.options.indexOf($(event.target).val()) + 1],
                 });
               } else {
-                const linkedTextFieldCell = this.kneeboardTemplate.pages[this.currentPage].textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
+                const linkedTextFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == linkedField);
 
                 this.kneeboardData[this.currentPageId] = this.kneeboardData[this.currentPageId].filter((field) => field.id != linkedField);
                 this.kneeboardData[this.currentPageId].push({
@@ -667,6 +721,47 @@ class Kneeboard {
           break;
       }
 
+    });
+  }
+
+  runChainedFields(template) {
+    template.textFieldCells.forEach((textFieldCell) => {
+      switch (textFieldCell.type) {
+        case 'chained-text':
+          $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('input', (event) => {
+            const fieldMaxLength = $(event.target).attr('maxlength');
+            if (fieldMaxLength && fieldMaxLength > 0 && $(event.target).val().length >= fieldMaxLength) {
+              if (textFieldCell.chainedField) {
+                $('.kneeboard-fields-container').find(`#${textFieldCell.chainedField}`).focus().select();
+              }
+            }
+          });
+
+          $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('paste', (event) => {
+            event.preventDefault();
+            let pastedText = (event.originalEvent || event).clipboardData.getData('text');
+
+            if (pastedText) {
+              let field = $(event.target);
+              let fieldMaxLength = $(field).attr('maxlength');
+
+              $(field).val(pastedText.slice(0, fieldMaxLength));
+              pastedText = pastedText.slice(fieldMaxLength)
+
+              let nextTextFieldCell = template.textFieldCells.find((cell) => cell.id == textFieldCell.chainedField);
+              while (pastedText.length > 0 && nextTextFieldCell) {
+                field = $('.kneeboard-fields-container').find(`#${nextTextFieldCell.id}`);
+                fieldMaxLength = $(field).attr('maxlength');
+
+                $(field).val(pastedText.slice(0, fieldMaxLength)).focus().change();
+                pastedText = pastedText.slice(fieldMaxLength);
+
+                nextTextFieldCell = template.textFieldCells.find((cell) => cell.id == nextTextFieldCell.chainedField);
+              }
+            }
+          });
+          break;
+      }
     });
   }
 

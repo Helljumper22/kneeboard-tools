@@ -161,6 +161,7 @@ class KneeboardDrawUtils {
         padding: _textOptions.padding ?? 5,
         bold: _textOptions.bold ?? false,
         textOrientation: _textOptions.textOrientation ?? 'horizontal',
+        characterLimit: _textOptions.characterLimit ?? 0,
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -194,7 +195,7 @@ class KneeboardDrawUtils {
         default:
           switch (textOptions.textOrientation) {
             case 'slanted':
-              $(`<input type="text" id="${id}" class="special-field-format">`)
+              $(`<input type="text" id="${id}" class="special-field-format" ${textOptions.characterLimit > 0 ? 'maxlength="' + textOptions.characterLimit + '"' : ''}>`)
                 .css({
                   'top': `${y}px`,
                   'left': `${x}px`,
@@ -211,7 +212,7 @@ class KneeboardDrawUtils {
             default:
               width -= textOptions.padding * 2;
 
-              $(`<input type="text" id="${id}">`)
+              $(`<input type="text" id="${id}" ${textOptions.characterLimit > 0 ? 'maxlength="' + textOptions.characterLimit + '"' : ''}>`)
                 .css({
                   'top': `${y}px`,
                   'left': `${x}px`,
