@@ -117,6 +117,10 @@ body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
                   width: auto;
                 }
 
+                .delete-coastline-button {
+                  height: 151px;
+                }
+
                 .delete-mob-button {
                   height: 231px;
                 }

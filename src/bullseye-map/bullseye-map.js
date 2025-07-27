@@ -3,6 +3,7 @@ defaultBullseyeLinesAngle = 30;
 
 bullseyeDataKey = 'bullseye-data';
 mobsDataKey = 'mobs-data';
+coastlinesDataKey = 'coastlines-data';
 bordersDataKey = 'borders-data';
 ringsDataKey = 'rings-data';
 areaPointsDataKey = 'area-points-data';
@@ -22,6 +23,7 @@ class BullseyeMap {
     this.mapDrawUtils = new MapDrawUtils();
 
     this.bullseye = {};
+    this.coastlines = [];
     this.mobs = [];
     this.borders = [];
     this.rings = [];
@@ -54,6 +56,7 @@ class BullseyeMap {
         this.resetFields();
 
         localStorage.setItem(bullseyeDataKey, JSON.stringify(mapData.bullseye));
+        localStorage.setItem(coastlinesDataKey, JSON.stringify(mapData.coastlines));
         localStorage.setItem(mobsDataKey, JSON.stringify(mapData.mobs));
         localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
         localStorage.setItem(ringsDataKey, JSON.stringify(mapData.rings));
@@ -153,6 +156,7 @@ class BullseyeMap {
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
       const mapData = {
         'bullseye': this.bullseye,
+        'coastlines': this.coastlines,
         'mobs': this.mobs,
         'borders': this.borders,
         'rings': this.rings,
@@ -256,13 +260,18 @@ class BullseyeMap {
 
     $('.cap-side').val(1);
 
+    $('.coastline:not(:first)').remove();
     $('.mob:not(:first)').remove();
     $('.border:not(:first)').remove();
     $('.ring:not(:first)').remove();
     $('.area-point:not(:first)').remove();
     $('.faor-point:not(:first)').remove();
     $('.gate:not(:first)').remove();
+    $('.arrow:not(:first)').remove();
+    $('.aircraft:not(:first)').remove();
     $('.nav-point:not(:first)').remove();
+    $('.cap-point:not(:first)').remove();
+    $('.point:not(:first)').remove();
   }
 
   addElement(event) {
@@ -277,6 +286,19 @@ class BullseyeMap {
     const colorPicker = newPoint.find('.color-picker');
     if (colorPicker.length > 0) {
       this.initColorPicker(colorPicker[0]);
+    }
+
+    // Pre-fill the start azimuth, start distance and color fields based on the previous field.
+    if (newPoint.is('.border, .coastline')) {
+      const secondToLastElement = $(elementContainer).find('.element:nth-last-child(2)');
+
+      $(newPoint).find('[class*="start-azimuth"]').val($(secondToLastElement).find('[class*="end-azimuth"]').val());
+      $(newPoint).find('[class*="start-distance"]').val($(secondToLastElement).find('[class*="end-distance"]').val());
+
+      const colorPicker = newPoint.find('.color-picker');
+      if (colorPicker.length > 0) {
+        $(newPoint).find('[class*="color"]')[0].jscolor.fromString($(secondToLastElement).find('[class*="color"]').attr('data-current-color'));
+      }
     }
   }
 
@@ -314,6 +336,9 @@ class BullseyeMap {
 
     // Draw bullseye
     if (this.bullseye.display) this.runBullseye();
+
+    // Draw coastlines
+    this.runCoastlines();
 
     // Draw mobs
     this.runMobs();
@@ -362,6 +387,27 @@ class BullseyeMap {
     this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
     this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
     this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
+
+    // Coastlines
+    this.coastlines = [];
+    $('.coastline').each((index, element) => {
+      const startAzimuth = parseFloat($(element).find('.coastline-start-azimuth').val());
+      const startDistance = parseFloat($(element).find('.coastline-start-distance').val());
+      const endAzimuth = parseFloat($(element).find('.coastline-end-azimuth').val());
+      const endDistance = parseFloat($(element).find('.coastline-end-distance').val());
+
+      if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
+        const startAngleRad = ((startAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const startX = startDistance * Math.cos(startAngleRad);
+        const startY = startDistance * Math.sin(startAngleRad);
+
+        const endAngleRad = ((endAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const endX = endDistance * Math.cos(endAngleRad);
+        const endY = endDistance * Math.sin(endAngleRad);
+
+        this.coastlines.push({ startAzimuth, startDistance, endAzimuth, endDistance, startX, startY, endX, endY });
+      }
+    });
 
     // MOBs
     this.mobs = [];
@@ -624,6 +670,14 @@ class BullseyeMap {
     // Initialize bounding box variables
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
 
+    // Include coastlines in bounding box
+    this.coastlines.forEach((coastline) => {
+      minX = Math.min(minX, coastline.startX, coastline.endX);
+      maxX = Math.max(maxX, coastline.startX, coastline.endX);
+      minY = Math.min(minY, coastline.startY, coastline.endY);
+      maxY = Math.max(maxY, coastline.startY, coastline.endY);
+    });
+
     // Include MOBs in bounding box
     this.mobs.forEach((mob) => {
       minX = Math.min(minX, mob.x);
@@ -768,6 +822,12 @@ class BullseyeMap {
     this.mapDrawUtils.drawBullseye(0, 0, 'black');
 
     this.mapDrawUtils.unclipCanvas();
+  }
+
+  runCoastlines() {
+    this.coastlines.forEach((coastline) => {
+      this.mapDrawUtils.drawCoastline(coastline.startX, coastline.startY, coastline.endX, coastline.endY, 'black', 2);
+    });
   }
 
   runMobs() {
@@ -1054,6 +1114,40 @@ class BullseyeMap {
       $('.lines-angle').val(30);
       $('.half-angle-lines').prop('checked', true);
       $('.map-orientation').val(0)
+    }
+
+    // Coastlines
+    try {
+      const coastlinesData = JSON.parse(localStorage.getItem(coastlinesDataKey));
+      if (coastlinesData) {
+        coastlinesData.forEach((coastlineData, index) => {
+          let coastlineElement;
+          if (index == 0) {
+            coastlineElement = $('.coastline').first();
+          } else {
+            coastlineElement = $('.coastline').first().clone();
+            $('.coastlines-container').append(coastlineElement);
+
+            coastlineElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            coastlineElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(coastlineElement).find('.coastline-start-azimuth').val(coastlineData.startAzimuth);
+          $(coastlineElement).find('.coastline-start-distance').val(coastlineData.startDistance);
+          $(coastlineElement).find('.coastline-end-azimuth').val(coastlineData.endAzimuth);
+          $(coastlineElement).find('.coastline-end-distance').val(coastlineData.endDistance);
+        });
+      }
+    } catch (error) {
+      const coastlines = $('.coastline:not(:first)');
+      const firstCoastline = $('.coastline').first();
+
+      $(firstCoastline).find('.coastline-start-azimuth').val('');
+      $(firstCoastline).find('.coastline-start-distance').val('');
+      $(firstCoastline).find('.coastline-end-azimuth').val('');
+      $(firstCoastline).find('.coastline-end-distance').val('');
+
+      coastlines.remove();
     }
 
     // MOBs
@@ -1517,6 +1611,7 @@ class BullseyeMap {
 
   saveData() {
     localStorage.setItem(bullseyeDataKey, JSON.stringify(this.bullseye));
+    localStorage.setItem(coastlinesDataKey, JSON.stringify(this.coastlines));
     localStorage.setItem(mobsDataKey, JSON.stringify(this.mobs));
     localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));
     localStorage.setItem(ringsDataKey, JSON.stringify(this.rings));

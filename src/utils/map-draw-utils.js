@@ -215,9 +215,7 @@ class MapDrawUtils {
     const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
 
     // If the line is shorter than half the crossSpacing, don't draw any crosses
-    if (lineLength < crossSpacing / 2) {
-      return;
-    }
+    if (lineLength < crossSpacing / 2) return;
 
     // Calculate the starting point for crosses (middle of the line)
     const middleX = startXPx + (endXPx - startXPx) / 2;
@@ -246,6 +244,52 @@ class MapDrawUtils {
       this.ctx.restore();
     }
   }
+
+  drawCoastline(startX, startY, endX, endY, color, strokeWidth = 2, tickSpacing = 10, tickLength = 10, tickDirection = 1) {
+    const startXPx = (startX * this.nmToPixels) + this.centerX;
+    const startYPx = (startY * this.nmToPixels) + this.centerY;
+    const endXPx = (endX * this.nmToPixels) + this.centerX;
+    const endYPx = (endY * this.nmToPixels) + this.centerY;
+
+    // Draw the main coastline line
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = strokeWidth;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(startXPx, startYPx);
+    this.ctx.lineTo(endXPx, endYPx);
+    this.ctx.stroke();
+
+    // Calculate angle and line length
+    const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+    const normalAngle = angle - (Math.PI / 4); // Perpendicular direction
+    const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
+
+    if (lineLength < tickSpacing / 2) return;
+
+    // Draw ticks along the line, centered
+    const middleX = startXPx + (endXPx - startXPx) / 2;
+    const middleY = startYPx + (endYPx - startYPx) / 2;
+
+    for (let i = -Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+      i <= Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+      i += tickSpacing) {
+      const baseX = middleX + i * Math.cos(angle);
+      const baseY = middleY + i * Math.sin(angle);
+
+      // Tick start and end points, pointing to one side (e.g., water side)
+      const tickStartX = baseX;
+      const tickStartY = baseY;
+      const tickEndX = baseX + tickDirection * tickLength * Math.cos(normalAngle);
+      const tickEndY = baseY + tickDirection * tickLength * Math.sin(normalAngle);
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(tickStartX, tickStartY);
+      this.ctx.lineTo(tickEndX, tickEndY);
+      this.ctx.stroke();
+    }
+  }
+
 
   drawInfiniteLine(x, y, angle, color, isDashed = false) {
     // Convert the starting point from nautical miles to pixels
@@ -331,6 +375,7 @@ class MapDrawUtils {
       case 'plus-top':
       case 'plus-bottom':
         this.ctx.strokeStyle = "black";
+        this.ctx.beginPath();
         this.ctx.moveTo((textHeight / 2), padding);
         this.ctx.lineTo(-(textHeight / 2), padding);
         this.ctx.moveTo(0, (textHeight / 2) + padding);
@@ -344,7 +389,7 @@ class MapDrawUtils {
         }
 
         this.ctx.fillStyle = "white";
-        this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
+        this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - padding);
         break;
       case 'octogone':
         const octo_x = -(padding) - ((textHeight * 1.2) / 2);
