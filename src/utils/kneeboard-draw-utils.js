@@ -156,6 +156,7 @@ class KneeboardDrawUtils {
     if (this.checkRowsColumns(rowStart, rowEnd, columnStart, columnEnd)) {
       const textOptions = {
         textAlign: _textOptions.textAlign ?? 'left',
+        textareaCenter: _textOptions.textareaCenter ?? false,
         fontSize: _textOptions.fontSize ?? 12,
         minFontSize: _textOptions.minFontSize ?? 10,
         padding: _textOptions.padding ?? 5,
@@ -173,11 +174,11 @@ class KneeboardDrawUtils {
       let height = ((rowEnd - rowStart) * cellHeight) - (borderWidths[0] / 2) - (borderWidths[2] / 2);
 
       switch (type) {
-        case 'text-area':
+        case 'textarea':
           width -= textOptions.padding * 2
           height -= textOptions.padding * 2;
 
-          $(`<textarea id="${id}"></textarea>`)
+          const textarea = $(`<textarea id="${id}"></textarea>`)
             .css({
               'top': `${y}px`,
               'left': `${x}px`,
@@ -190,6 +191,11 @@ class KneeboardDrawUtils {
               'font-weight': textOptions.bold ? 'bold' : 'normal'
             })
             .appendTo('.kneeboard-fields-container');
+
+          if (textOptions.textareaCenter) {
+            this.centerTextarea(textarea[0]);
+            $(textarea).on('input change', (event) => this.centerTextarea(event.currentTarget));
+          }
           break;
         case 'text':
         default:
@@ -240,6 +246,7 @@ class KneeboardDrawUtils {
         padding: _selectOptions.padding ?? 5,
         bold: _selectOptions.bold ?? false,
         textAlign: _selectOptions.textAlign ?? (dropDownSide == 'left' ? 'right' : 'left'),
+        selectColumns: _selectOptions.selectColumns ?? 1,
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -249,7 +256,6 @@ class KneeboardDrawUtils {
       const y = (rowStart * cellHeight) + (borderWidths[0] / 2);
       let width = ((columnEnd - columnStart) * cellWidth) - (borderWidths[3] / 2) - (borderWidths[1] / 2);
       let height = ((rowEnd - rowStart) * cellHeight) - (borderWidths[0] / 2) - (borderWidths[2] / 2);
-      /* */
 
       let selectContainer;
       switch (type) {
@@ -260,9 +266,29 @@ class KneeboardDrawUtils {
                 <input type="text" class="custom-select-input" id="${id}" style="padding: 0 ${selectOptions.padding}px" />
                 <span class="custom-select-arrow ${dropDownSide}">▼</span>
               </div>
-              <div class="custom-select-dropdown">
-                <div class="custom-select-option">&nbsp;</div>
-                ${options.map(option => `<div class="custom-select-option">${option}</div>`).join('')}
+              <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
+                <div class="custom-select-option" style="width: ${width}px">&nbsp;</div>
+                ${options.map(option => `<div class="custom-select-option" style="width: ${width}px">${option}</div>`).join('')}
+              </div>
+            </div>`).css({
+              'top': `${y}px`,
+              'left': `${x}px`,
+              'width': `${width}px`,
+              'height': `${height}px`,
+              'font-size': `${selectOptions.fontSize}px`,
+              'text-align': selectOptions.textAlign,
+              'font-weight': selectOptions.bold ? 'bold' : 'normal',
+            }).appendTo('.kneeboard-fields-container');
+          break;
+        case 'fields-select':
+          selectContainer =
+            $(`<div class="custom-select-container" id="${id}">
+              <div class="custom-select-display">
+                <input type="text" class="custom-fields-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px"/>
+                <span class="custom-select-arrow ${dropDownSide}">▼</span>
+              </div>
+              <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
+                ${options.map(option => `<div class="custom-select-option" style="width: ${width}px">${option}</div>`).join('')}
               </div>
             </div>`).css({
               'top': `${y}px`,
@@ -283,9 +309,9 @@ class KneeboardDrawUtils {
                 <input type="text" class="custom-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px"/>
                 <span class="custom-select-arrow ${dropDownSide}">▼</span>
               </div>
-              <div class="custom-select-dropdown">
-                <div class="custom-select-option">&nbsp;</div>
-                ${options.map(option => `<div class="custom-select-option">${option}</div>`).join('')}
+              <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
+                <div class="custom-select-option" style="width: ${width}px">&nbsp;</div>
+                ${options.map(option => `<div class="custom-select-option" style="width: ${width}px">${option}</div>`).join('')}
               </div>
             </div>`).css({
               'top': `${y}px`,
@@ -301,10 +327,10 @@ class KneeboardDrawUtils {
 
       const dropdown = $(selectContainer).find('.custom-select-dropdown');
       const arrow = $(selectContainer).find('.custom-select-arrow');
-      const input = $(selectContainer).find('.custom-select-input');
+      const input = $(selectContainer).find('.custom-select-input, .custom-fields-select-input');
 
       $(arrow).on('click', () => {
-        $(dropdown).toggle();
+        $(dropdown).toggleClass('show');
 
         // Delay binding the outside click to avoid immediate close
         setTimeout(() => {
@@ -320,14 +346,14 @@ class KneeboardDrawUtils {
             $(input).val(text).change();
           }
 
-          $(dropdown).hide();
+          $(dropdown).removeClass('show');
           $(document).off('click.custom-select-outside');
         });
       });
 
       const outsideClickHandler = (event) => {
         if (!$(event.target).closest(selectContainer).length) {
-          $(dropdown).hide();
+          $(dropdown).removeClass('show');
 
           $(document).off('click.custom-select-outside');
         }
@@ -465,6 +491,7 @@ class KneeboardDrawUtils {
       minFontSize: _textOptions.minFontSize ?? 10,
       padding: _textOptions.padding ?? 5,
       textAlign: _textOptions.textAlign ?? 'left',
+      textareaCenter: _textOptions.textareaCenter ?? false,
       bold: _textOptions.bold ?? false,
       textOrientation: _textOptions.textOrientation ?? 'horizontal',
     }
@@ -527,19 +554,70 @@ class KneeboardDrawUtils {
 
   drawText(cellX, cellY, cellWidth, cellHeight, text, type, textOptions) {
     this.ctx.font = `${textOptions.bold ? 'bold' : ''} ${textOptions.fontSize}px sans-serif`;
+    this.ctx.letterSpacing = '0.1px';
     this.ctx.textBaseline = 'middle';
     this.ctx.fillStyle = "black";
 
-    let textX = 0;
-    let textY = 0;
-    switch (type) {
-      case 'text-area':
-        textX = cellX + textOptions.padding;
-        textY = cellY + textOptions.fontSize;
-
+    let textX = 0, textY = 0;
+    switch (textOptions.textAlign) {
+      case 'left':
         this.ctx.textAlign = 'left';
+        textX = cellX + textOptions.padding;
+        textY = cellY + (cellHeight / 2) + 1;
+        break;
+      case 'right':
+        this.ctx.textAlign = 'right';
+        textX = cellX + cellWidth - textOptions.padding;
+        textY = cellY + (cellHeight / 2) + 1;
+        break;
+      case 'center':
+      default:
+        this.ctx.textAlign = 'center';
+        textX = cellX + (cellWidth / 2) - 1;
+        textY = cellY + (cellHeight / 2) + 1;
+        break;
+    }
+    switch (type) {
+      case 'textarea':
+        const rawLines = text.split('\n'); // First, split on manual line breaks
+        const lines = [];
 
-        const lines = text.split('\n');
+        rawLines.forEach((rawLine) => {
+          if (rawLine.trim() === '') {
+            lines.push(''); // Preserve intentional empty line
+            return;
+          }
+
+          let currentLine = '';
+          const words = rawLine.split(' ');
+
+          for (let i = 0; i < words.length; i++) {
+            const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+            const testWidth = this.ctx.measureText(testLine).width;
+
+            if (testWidth > cellWidth - (textOptions.padding * 2) && currentLine) {
+              lines.push(currentLine);
+              currentLine = words[i]; // Start new line with current word
+            } else {
+              currentLine = testLine;
+            }
+          }
+
+          if (currentLine) lines.push(currentLine);
+        });
+
+        if (textOptions.textareaCenter) {
+          textY -= ((lines.length * textOptions.fontSize) / 2) - (textOptions.fontSize * 0.5);
+        } else {
+          textY = cellY + (textOptions.fontSize) / 2 + textOptions.padding + 1;
+        }
+
+        lines.forEach((line, index) => {
+          this.ctx.fillText(line, textX, textY + index * textOptions.fontSize);
+        });
+
+
+        /*const lines = text.split('\n');
         let cursorY = textY;
 
         for (const line of lines) {
@@ -564,28 +642,10 @@ class KneeboardDrawUtils {
             this.ctx.fillText(currentLine.trim(), textX, cursorY);
             cursorY += textOptions.fontSize;
           }
-        }
+        }*/
         break;
       case 'text':
       default:
-        switch (textOptions.textAlign) {
-          case 'left':
-            this.ctx.textAlign = 'left';
-            textX = cellX + textOptions.padding;
-            textY = cellY + (cellHeight / 2) + 1;
-            break;
-          case 'right':
-            this.ctx.textAlign = 'right';
-            textX = cellX + cellWidth - textOptions.padding;
-            textY = cellY + (cellHeight / 2) + 1;
-            break;
-          case 'center':
-          default:
-            this.ctx.textAlign = 'center';
-            textX = cellX + (cellWidth / 2);
-            textY = cellY + (cellHeight / 2) + 1;
-            break;
-        }
 
         switch (textOptions.textOrientation) {
           case 'slanted':
@@ -655,7 +715,7 @@ class KneeboardDrawUtils {
             const maxLines = Math.round(cellHeight / this.cellHeight);
             const inputLines = text.split('\n').slice(0, maxLines);
 
-            textY -= ((inputLines.length * (textOptions.fontSize * 1.5)) / 2) - (textOptions.fontSize * 0.75);
+            textY -= ((inputLines.length * (textOptions.fontSize * 1.4)) / 2) - (textOptions.fontSize * 0.7);
 
             inputLines.forEach((inputLine, index) => {
               let metrics = this.ctx.measureText(inputLine);
@@ -806,5 +866,34 @@ class KneeboardDrawUtils {
       x: bbox.x,
       y: bbox.y
     };
+  }
+
+  centerTextarea(textArea) {
+    const style = window.getComputedStyle(textArea);
+    const lineHeight = parseFloat(style.lineHeight) + 1;
+    const boxHeight = textArea.clientHeight;
+
+    const text = $(textArea).val();
+    const lines = text.split('\n');
+
+    // Estimate number of visible lines (considering wrapping)
+    const context = document.createElement('canvas').getContext('2d');
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+
+    const paddingLeft = parseFloat(style.paddingLeft) + parseFloat(style.borderLeftWidth);
+    const paddingRight = parseFloat(style.paddingRight) + parseFloat(style.borderRightWidth);
+    const availableWidth = textArea.clientWidth - paddingLeft - paddingRight + 1;
+
+    let lineCount = 0;
+    for (const line of lines) {
+      const metrics = context.measureText(line.trim());
+      const lineWidth = metrics.width;
+      lineCount += Math.max(1, Math.ceil(lineWidth / availableWidth));
+    }
+
+    const totalTextHeight = lineCount * lineHeight;
+    const paddingTop = Math.max((boxHeight - totalTextHeight) / 2, 0);
+
+    $(textArea).css({ 'padding-top': `${paddingTop}px` });
   }
 }

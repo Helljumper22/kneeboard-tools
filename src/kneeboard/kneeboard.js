@@ -304,13 +304,14 @@ class Kneeboard {
       const kneeboardImages = {};
       this.kneeboardTemplate.pages.forEach((template, index) => {
         this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
+        this.kneeboardDrawUtils.clearCanvas();
         this.kneeboardDrawUtils.clearInputFields();
 
         // Draw the kneeboard background.
         this.displayStaticContent(this.kneeboardTemplate.pages[index]);
 
         // Draw the data into the canvas.
-        this.runKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
+        this.displayKneeboardData(this.kneeboardTemplate.pages[index], this.kneeboardData[template.id]);
         $(downloadModal).removeClass('show');
 
         kneeboardImages[template.id] = $('.kneeboard-canvas')[0].toDataURL('image/png');
@@ -358,15 +359,19 @@ class Kneeboard {
 
   displayKneeboard() {
     this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[this.currentPage].rows, this.kneeboardTemplate.pages[this.currentPage].columns);
-
-    // Draw the kneeboard background.
-    this.displayStaticContent(this.kneeboardTemplate.pages[this.currentPage]);
-
-    this.displayFields(this.kneeboardTemplate.pages[this.currentPage]);
+    this.kneeboardDrawUtils.clearCanvas();
+    this.kneeboardDrawUtils.clearInputFields();
 
     // Get saved data from local storage.
     this.getStorageData();
 
+    // Draw the kneeboard background.
+    this.displayStaticContent(this.kneeboardTemplate.pages[this.currentPage]);
+
+    // Display the data fields
+    this.displayFields(this.kneeboardTemplate.pages[this.currentPage], this.kneeboardData[this.currentPageId]);
+
+    // Display the saved data into the data fields.
     this.displayData(this.kneeboardTemplate.pages[this.currentPage], this.kneeboardData[this.currentPageId]);
 
     // Update kneeboard data when a field is changed.
@@ -374,6 +379,9 @@ class Kneeboard {
 
     // Handle fields behavior
     this.runFields(this.kneeboardTemplate.pages[this.currentPage]);
+
+    // Handle fields select fields
+    this.runFieldsSelectFields(this.kneeboardTemplate.pages[this.currentPage]);
 
     // Handle special field display
     this.runSpecialFields(this.kneeboardTemplate.pages[this.currentPage]);
@@ -388,8 +396,6 @@ class Kneeboard {
   }
 
   displayStaticContent(template) {
-    this.kneeboardDrawUtils.clearCanvas();
-
     template.textCells?.forEach((textCell) => {
       if (textCell.type == 'path') {
         this.kneeboardDrawUtils.drawSvgShape(
@@ -437,9 +443,7 @@ class Kneeboard {
     });
   }
 
-  displayFields(template) {
-    this.kneeboardDrawUtils.clearInputFields();
-
+  displayFields(template, kneeboardData) {
     template.textFieldCells.forEach((textFieldCell) => {
       switch (textFieldCell.type) {
         case 'path-field':
@@ -499,11 +503,47 @@ class Kneeboard {
               textAlign: textFieldCell.textAlign ?? null,
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
+              selectColumns: textFieldCell.selectColumns ?? 1,
             },
             textFieldCell.dropdownSide ?? 'right'
           );
           break;
-        case 'text-area':
+        case 'fields-select':
+          this.kneeboardDrawUtils.drawSelectField(
+            textFieldCell.position[0],
+            textFieldCell.position[1],
+            textFieldCell.position[2],
+            textFieldCell.position[3],
+            textFieldCell.id,
+            textFieldCell.type,
+            textFieldCell.options ?? [],
+            textFieldCell.borderWidths ?? [1, 1, 1, 1],
+            {
+              fontSize: textFieldCell.fontSize ?? 12,
+              minFontSize: textFieldCell.minFontSize ?? 10,
+              textAlign: textFieldCell.textAlign ?? null,
+              padding: textFieldCell.padding ?? 5,
+              bold: textFieldCell.bold ?? false,
+            },
+            textFieldCell.dropdownSide ?? 'right'
+          );
+
+          let selectedFieldsIndex = 0;
+          if (kneeboardData && kneeboardData.length > 0) {
+            const fieldsSelectData = kneeboardData.find((kneeboardField) => kneeboardField.id == textFieldCell.id);
+
+            if (fieldsSelectData) {
+              selectedFieldsIndex = textFieldCell.options.indexOf(fieldsSelectData.value);
+              selectedFieldsIndex = selectedFieldsIndex == -1 ? 0 : selectedFieldsIndex;
+            }
+          }
+
+          if (textFieldCell.fields[selectedFieldsIndex]) {
+            this.displayStaticContent(textFieldCell.fields[selectedFieldsIndex]);
+            this.displayFields(textFieldCell.fields[selectedFieldsIndex], kneeboardData);
+          }
+          break;
+        case 'textarea':
         default:
           this.kneeboardDrawUtils.drawTextField(
             textFieldCell.position[0],
@@ -515,6 +555,7 @@ class Kneeboard {
             textFieldCell.borderWidths ?? [1, 1, 1, 1],
             {
               fontSize: textFieldCell.fontSize ?? 12,
+              textareaCenter: textFieldCell.textareaCenter ?? false,
               minFontSize: textFieldCell.minFontSize ?? 10,
               textAlign: textFieldCell.textAlign ?? 'left',
               padding: textFieldCell.padding ?? 5,
@@ -528,10 +569,30 @@ class Kneeboard {
     });
   }
 
-  runKneeboardData(template, kneeboardData) {
+  displayKneeboardData(template, kneeboardData) {
     if (kneeboardData && kneeboardData.length > 0) {
       kneeboardData.forEach((kneeboardField) => {
-        const textFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == kneeboardField.id);
+        let textFieldCell = null;
+        for (const cell of template.textFieldCells) {
+          if (cell.id === kneeboardField.id) {
+            textFieldCell = cell;
+            break;
+          }
+
+          if (cell.type === 'fields-select') {
+            for (const field of cell.fields || []) {
+              for (const nestedCell of field.textFieldCells || []) {
+                if (nestedCell.id === kneeboardField.id) {
+                  textFieldCell = nestedCell;
+                  break;
+                }
+              }
+              if (textFieldCell) break;
+            }
+          }
+
+          if (textFieldCell) break;
+        }
 
         if (textFieldCell) {
           switch (textFieldCell.type) {
@@ -571,6 +632,12 @@ class Kneeboard {
                 },
               );
               break;
+            case 'fields-select':
+              const selectedFieldsIndex = textFieldCell.options.indexOf(kneeboardField.value);
+              if (textFieldCell.fields[selectedFieldsIndex]) {
+                this.displayStaticContent(textFieldCell.fields[selectedFieldsIndex]);
+              }
+              break;
             default:
               let textAlign = 'left';
               if (!textFieldCell.textAlign && (textFieldCell.type == 'input-select' || textFieldCell.type == 'select')) {
@@ -595,6 +662,7 @@ class Kneeboard {
                   fontSize: textFieldCell.fontSize ?? 12,
                   minFontSize: textFieldCell.minFontSize ?? 10,
                   textAlign,
+                  textareaCenter: textFieldCell.textareaCenter ?? false,
                   bold: textFieldCell.bold ?? false,
                   textOrientation: textFieldCell.textOrientation ?? 'horizontal',
                   padding: textFieldCell.padding
@@ -625,7 +693,27 @@ class Kneeboard {
   displayData(template, kneeboardData) {
     if (kneeboardData && kneeboardData.length > 0) {
       kneeboardData.forEach((kneeboardField) => {
-        const textFieldCell = template.textFieldCells.find((textFieldCell) => textFieldCell.id == kneeboardField.id);
+        let textFieldCell = null;
+        for (const cell of template.textFieldCells) {
+          if (cell.id === kneeboardField.id) {
+            textFieldCell = cell;
+            break;
+          }
+
+          if (cell.type === 'fields-select') {
+            for (const field of cell.fields || []) {
+              for (const nestedCell of field.textFieldCells || []) {
+                if (nestedCell.id === kneeboardField.id) {
+                  textFieldCell = nestedCell;
+                  break;
+                }
+              }
+              if (textFieldCell) break;
+            }
+          }
+
+          if (textFieldCell) break;
+        }
 
         if (textFieldCell) {
           switch (textFieldCell.type) {
@@ -662,7 +750,7 @@ class Kneeboard {
           }
 
           const field = $('.kneeboard-fields-container').find(`input#${kneeboardField.id}, textarea#${kneeboardField.id} `);
-          $(field).val(kneeboardField.value);
+          $(field).val(kneeboardField.value).change();
 
           if (!textFieldCell.type || textFieldCell.type == 'chained-text') {
             let fontSize = textFieldCell.fontSize ?? 12;
@@ -717,6 +805,23 @@ class Kneeboard {
 
             textWidth = this.utils.getTextWidth($(event.target).val(), currentFontSize);
           }
+        });
+      }
+    });
+  }
+
+  runFieldsSelectFields(template, kneeboardData) {
+    template.textFieldCells.forEach((textFieldCell) => {
+      if (textFieldCell.type == 'fields-select') {
+        $('.kneeboard-fields-container').find(`#${textFieldCell.id}`).on('change', (event) => {
+          textFieldCell.fields.forEach((fields) => {
+            fields.textFieldCells.forEach((textFieldCell) => {
+              this.kneeboardData[this.currentPageId] = this.kneeboardData[this.currentPageId].filter((kneeboardField) => kneeboardField.id != textFieldCell.id);
+            });
+          });
+
+          this.saveData();
+          this.displayKneeboard();
         });
       }
     });

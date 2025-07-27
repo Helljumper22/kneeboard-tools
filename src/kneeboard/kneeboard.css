@@ -73,6 +73,12 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
           }
         }
 
+        textarea {
+          box-sizing: border-box;
+          overflow: hidden;
+          resize: none;
+        }
+
         .custom-select-container {
           display: flex;
           align-items: stretch;
@@ -87,7 +93,8 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
             width: 100%;
 
             .custom-select-input,
-            .custom-path-select-input {
+            .custom-path-select-input,
+            .custom-fields-select-input {
               flex: 1;
               width: 100%;
               text-align: inherit;
@@ -99,7 +106,8 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
               }
             }
 
-            .custom-path-select-input {
+            .custom-path-select-input,
+            .custom-fields-select-input {
               display: none;
             }
 
@@ -139,35 +147,22 @@ body .container .tabs-container .tabs .tab[attr-tab="kneeboard-tab"] {
             z-index: 1000;
             color: black;
             user-select: none;
-
-            .custom-select-option,
-            .custom-path-select-option {
-              padding: 4px 2px;
-              cursor: pointer;
-
-              &:hover {
-                background-color: #ddd;
-              }
-            }
-          }
-
-          .custom-select-dropdown {
-            width: 100%;
-
-            &.show {
-              display: block;
-            }
-          }
-
-          .custom-path-select-dropdown {
             flex-wrap: wrap;
 
             &.show {
               display: flex;
             }
 
+            .custom-select-option,
             .custom-path-select-option {
               box-sizing: border-box;
+              align-content: center;
+              padding: 4px 2px;
+              cursor: pointer;
+
+              &:hover {
+                background-color: #ddd;
+              }
 
               svg {
                 height: 100%;

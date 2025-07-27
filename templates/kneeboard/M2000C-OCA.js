@@ -1952,6 +1952,7 @@ const M2000C_OCA_1 = {
             type: 'input-select',
             _description: 'Transit formation field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             dropdownSide: 'left',
             position: [20, 21, 7, 9],
             borderWidths: [0, 2, 0, 2],
@@ -2331,11 +2332,12 @@ const M2000C_OCA_1 = {
             position: [26, 27, 11, 13],
             borderWidths: [2, 2, 1, 1],
             textAlign: 'center',
+            padding: 0
         },
         // Rows 28-31
         {
             id: 'Package-notes',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Pacakge notes field',
             position: [27, 31, 13, 19],
             borderWidths: [1, 2, 2, 2],
@@ -2387,7 +2389,8 @@ const M2000C_OCA_1 = {
             position: [27, 28, 11, 13],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0
         },
         // Row 29
         {
@@ -2458,6 +2461,7 @@ const M2000C_OCA_1 = {
             position: [28, 29, 11, 13],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
+            padding: 0,
         },
         // Row 30
         {
@@ -2507,7 +2511,8 @@ const M2000C_OCA_1 = {
             position: [29, 30, 11, 13],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
+            backgroundColor: M2000C_OCA_darkBackground,
+            padding: 0
         },
         // Row 31
         {
@@ -2587,6 +2592,7 @@ const M2000C_OCA_1 = {
             position: [30, 31, 11, 13],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
+            padding: 0
         },
         // Row 32-34
         {
@@ -3822,6 +3828,870 @@ const M2000C_OCA_2 = {
         },
         // Row 2
         {
+            id: 'targeting-fields-select',
+            type: 'fields-select',
+            _description: 'Targeting fields select field',
+            options: ['INDIV', 'PAIR', 'FLIGHT', 'ALL'],
+            fields: [
+                {
+                    textFieldCells: [
+                        // Row 3
+                        {
+                            id: 'pilot-1-targeting',
+                            _description: 'Pilot 1 targeting text field',
+                            position: [2, 3, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 4
+                        {
+                            id: 'pilot-2-targeting',
+                            _description: 'Pilot 2 targeting text field',
+                            position: [3, 4, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 5
+                        {
+                            id: 'pilot-3-targeting',
+                            _description: 'Pilot 3 targeting text field',
+                            position: [4, 5, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 6
+                        {
+                            id: 'pilot-4-targeting',
+                            _description: 'Pilot 4 targeting text field',
+                            position: [5, 6, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 7
+                        {
+                            id: 'pilot-5-targeting',
+                            _description: 'Pilot 5 targeting text field',
+                            position: [6, 7, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 8
+                        {
+                            id: 'pilot-6-targeting',
+                            _description: 'Pilot 6 targeting text field',
+                            position: [7, 8, 1, 3],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [2, 3, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [4, 5, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 targeting background',
+                            _description: 'Pilot 5-6 targeting background',
+                            position: [6, 7, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-4
+                        {
+                            id: 'pilot-1-2-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-2 targeting text field',
+                            position: [2, 4, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 5-6
+                        {
+                            id: 'pilot-3-4-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 3-4 targeting text field',
+                            position: [4, 6, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 targeting text field',
+                            position: [6, 8, 1, 3],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [2, 3, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [4, 5, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 targeting background',
+                            _description: 'Pilot 5-6 targeting background',
+                            position: [6, 7, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-6
+                        {
+                            id: 'pilot-1-4-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-4 targeting text field',
+                            position: [2, 6, 1, 3],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 targeting text field',
+                            position: [6, 8, 1, 3],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [2, 3, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 targeting background',
+                            _description: 'Pilot 1-2 targeting background',
+                            position: [4, 5, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 targeting background',
+                            _description: 'Pilot 5-6 targeting background',
+                            position: [6, 7, 1, 3],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-8
+                        {
+                            id: 'pilot-1-6-targeting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-6 targeting text field',
+                            position: [2, 8, 1, 3],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                }
+            ],
+            position: [1, 2, 1, 3],
+            borderWidths: [0, 0, 0, 0],
+            default: 'INDIV',
+        },
+        {
+            id: 'sorting-fields-select',
+            type: 'fields-select',
+            _description: 'Sorting fields select field',
+            options: ['INDIV', 'PAIR', 'FLIGHT', 'ALL'],
+            fields: [
+                {
+                    textFieldCells: [
+                        // Row 3
+                        {
+                            id: 'pilot-1-sorting',
+                            _description: 'Pilot 1 sorting text field',
+                            position: [2, 3, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 4
+                        {
+                            id: 'pilot-2-sorting',
+                            _description: 'Pilot 2 sorting text field',
+                            position: [3, 4, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 5
+                        {
+                            id: 'pilot-3-sorting',
+                            _description: 'Pilot 3 sorting text field',
+                            position: [4, 5, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 6
+                        {
+                            id: 'pilot-4-sorting',
+                            _description: 'Pilot 4 sorting text field',
+                            position: [5, 6, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 7
+                        {
+                            id: 'pilot-5-sorting',
+                            _description: 'Pilot 5 sorting text field',
+                            position: [6, 7, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 8
+                        {
+                            id: 'pilot-6-sorting',
+                            _description: 'Pilot 6 sorting text field',
+                            position: [7, 8, 3, 5],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [2, 3, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [4, 5, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 sorting background',
+                            _description: 'Pilot 5-6 sorting background',
+                            position: [6, 7, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-4
+                        {
+                            id: 'pilot-1-2-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-2 sorting text field',
+                            position: [2, 4, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 5-6
+                        {
+                            id: 'pilot-3-4-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 3-4 sorting text field',
+                            position: [4, 6, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 sorting text field',
+                            position: [6, 8, 3, 5],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [2, 3, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [4, 5, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 sorting background',
+                            _description: 'Pilot 5-6 sorting background',
+                            position: [6, 7, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-6
+                        {
+                            id: 'pilot-1-4-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-4 sorting text field',
+                            position: [2, 6, 3, 5],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 sorting text field',
+                            position: [6, 8, 3, 5],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [2, 3, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 sorting background',
+                            _description: 'Pilot 1-2 sorting background',
+                            position: [4, 5, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 sorting background',
+                            _description: 'Pilot 5-6 sorting background',
+                            position: [6, 7, 3, 5],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-8
+                        {
+                            id: 'pilot-1-6-sorting',
+                            type: 'textarea',
+                            _description: 'Pilot 1-6 sorting text field',
+                            position: [2, 8, 3, 5],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                }
+            ],
+            position: [1, 2, 3, 5],
+            borderWidths: [0, 0, 0, 0],
+            default: 'INDIV',
+        },
+        {
+            id: 'lock-phi-fields-select',
+            type: 'fields-select',
+            _description: 'Lock Φ fields select field',
+            options: ['INDIV', 'PAIR', 'FLIGHT', 'ALL'],
+            fields: [
+                {
+                    textFieldCells: [
+                        // Row 3
+                        {
+                            id: 'pilot-1-lock-phi',
+                            _description: 'Pilot 1 lock phi text field',
+                            position: [2, 3, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 4
+                        {
+                            id: 'pilot-2-lock-phi',
+                            _description: 'Pilot 2 lock phi text field',
+                            position: [3, 4, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 5
+                        {
+                            id: 'pilot-3-lock-phi',
+                            _description: 'Pilot 3 lock phi text field',
+                            position: [4, 5, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 6
+                        {
+                            id: 'pilot-4-lock-phi',
+                            _description: 'Pilot 4 lock phi text field',
+                            position: [5, 6, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 7
+                        {
+                            id: 'pilot-5-lock-phi',
+                            _description: 'Pilot 5 lock phi text field',
+                            position: [6, 7, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 8
+                        {
+                            id: 'pilot-6-shot-phi',
+                            _description: 'Pilot 6 shot phi text field',
+                            position: [7, 8, 5, 8],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [2, 3, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [4, 5, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 lock phi background',
+                            _description: 'Pilot 5-6 lock phi background',
+                            position: [6, 7, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-4
+                        {
+                            id: 'pilot-1-2-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-2 lock phi text field',
+                            position: [2, 4, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 5-6
+                        {
+                            id: 'pilot-3-4-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 3-4 lock phi text field',
+                            position: [4, 6, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 lock phi text field',
+                            position: [6, 8, 5, 8],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [2, 3, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [4, 5, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 lock phi background',
+                            _description: 'Pilot 5-6 lock phi background',
+                            position: [6, 7, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-6
+                        {
+                            id: 'pilot-1-4-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-4 lock phi text field',
+                            position: [2, 6, 5, 8],
+                            borderWidths: [1, 1, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 lock phi text field',
+                            position: [6, 8, 5, 8],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [2, 3, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 lock phi background',
+                            _description: 'Pilot 1-2 lock phi background',
+                            position: [4, 5, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 lock phi background',
+                            _description: 'Pilot 5-6 lock phi background',
+                            position: [6, 7, 5, 8],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-8
+                        {
+                            id: 'pilot-1-6-lock-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-6 lock phi text field',
+                            position: [2, 8, 5, 8],
+                            borderWidths: [1, 1, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                }
+            ],
+            position: [1, 2, 5, 8],
+            borderWidths: [0, 0, 0, 0],
+            default: 'INDIV',
+        },
+        {
+            id: 'shot-phi-fields-select',
+            type: 'fields-select',
+            _description: 'Shot Φ fields select field',
+            options: ['INDIV', 'PAIR', 'FLIGHT', 'ALL'],
+            fields: [
+                {
+                    textFieldCells: [
+                        // Row 3
+                        {
+                            id: 'pilot-1-shot-phi',
+                            _description: 'Pilot 1 shot phi text field',
+                            position: [2, 3, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 4
+                        {
+                            id: 'pilot-2-shot-phi',
+                            _description: 'Pilot 2 shot phi text field',
+                            position: [3, 4, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 5
+                        {
+                            id: 'pilot-3-shot-phi',
+                            _description: 'Pilot 3 shot phi text field',
+                            position: [4, 5, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 6
+                        {
+                            id: 'pilot-4-shot-phi',
+                            _description: 'Pilot 4 shot phi text field',
+                            position: [5, 6, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                        },
+                        // Row 7
+                        {
+                            id: 'pilot-5-shot-phi',
+                            _description: 'Pilot 5 shot phi text field',
+                            position: [6, 7, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 8
+                        {
+                            id: 'pilot-6-shot-phi',
+                            _description: 'Pilot 6 shot phi text field',
+                            position: [7, 8, 8, 11],
+                            borderWidths: [1, 2, 2, 1],
+                            textAlign: 'center',
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [2, 3, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [4, 5, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 shot phi background',
+                            _description: 'Pilot 5-6 shot phi background',
+                            position: [6, 7, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-4
+                        {
+                            id: 'pilot-1-2-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-2 shot phi text field',
+                            position: [2, 4, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 5-6
+                        {
+                            id: 'pilot-3-4-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 3-4 shot phi text field',
+                            position: [4, 6, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 shot phi text field',
+                            position: [6, 8, 8, 11],
+                            borderWidths: [1, 2, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [2, 3, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [4, 5, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 shot phi background',
+                            _description: 'Pilot 5-6 shot phi background',
+                            position: [6, 7, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-6
+                        {
+                            id: 'pilot-1-4-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-4 shot phi text field',
+                            position: [2, 6, 8, 11],
+                            borderWidths: [1, 2, 1, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                        // Row 7-8
+                        {
+                            id: 'pilot-5-6-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 5-6 shot phi text field',
+                            position: [6, 8, 8, 11],
+                            borderWidths: [1, 2, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                },
+                {
+                    textCells: [
+                        // Row 3
+                        {
+                            name: 'Pilot 1-2 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [2, 3, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 5
+                        {
+                            name: 'Pilot 3-4 shot phi background',
+                            _description: 'Pilot 1-2 shot phi background',
+                            position: [4, 5, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                        // Row 7
+                        {
+                            name: 'Pilot 5-6 shot phi background',
+                            _description: 'Pilot 5-6 shot phi background',
+                            position: [6, 7, 8, 11],
+                            borderWidths: [0, 0, 0, 0],
+                            backgroundColor: M2000C_OCA_darkBackground
+                        },
+                    ],
+                    textFieldCells: [
+                        // Row 3-8
+                        {
+                            id: 'pilot-1-6-shot-phi',
+                            type: 'textarea',
+                            _description: 'Pilot 1-6 shot phi text field',
+                            position: [2, 8, 8, 11],
+                            borderWidths: [1, 2, 2, 1],
+                            textAlign: 'center',
+                            textareaCenter: true,
+                        },
+                    ]
+                }
+            ],
+            position: [1, 2, 8, 11],
+            borderWidths: [0, 0, 0, 0],
+            default: 'INDIV',
+        },
+        {
             id: 'threat-1-name',
             _description: 'Threat 1 name text field',
             position: [1, 2, 11, 15],
@@ -3957,72 +4827,12 @@ const M2000C_OCA_2 = {
             textAlign: 'center',
             backgroundColor: M2000C_OCA_darkBackground
         },
-        {
-            id: 'pilot-1-target',
-            _description: 'Pilot 1 target text field',
-            position: [2, 3, 1, 3],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-1-sorting',
-            _description: 'Pilot 1 sorting text field',
-            position: [2, 3, 3, 5],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-1-lock-phi',
-            _description: 'Pilot 1 lock phi text field',
-            position: [2, 3, 5, 8],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-1-shot-phi',
-            _description: 'Pilot 1 shot phi text field',
-            position: [2, 3, 8, 11],
-            borderWidths: [1, 2, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
         // Row 4
         {
             id: 'pilot-2-number',
             _description: 'Pilot 2 number text field',
             position: [3, 4, 0, 1],
             borderWidths: [1, 1, 1, 2],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-2-target',
-            _description: 'Pilot 2 target text field',
-            position: [3, 4, 1, 3],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-2-sorting',
-            _description: 'Pilot 2 sorting text field',
-            position: [3, 4, 3, 5],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-2-lock-phi',
-            _description: 'Pilot 2 lock phi text field',
-            position: [3, 4, 5, 8],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-2-shot-phi',
-            _description: 'Pilot 2 shot phi text field',
-            position: [3, 4, 8, 11],
-            borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
         },
         // Row 5
@@ -4034,72 +4844,12 @@ const M2000C_OCA_2 = {
             textAlign: 'center',
             backgroundColor: M2000C_OCA_darkBackground
         },
-        {
-            id: 'pilot-3-target',
-            _description: 'Pilot 3 target text field',
-            position: [4, 5, 1, 3],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-3-sorting',
-            _description: 'Pilot 3 sorting text field',
-            position: [4, 5, 3, 5],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-3-lock-phi',
-            _description: 'Pilot 3 lock phi text field',
-            position: [4, 5, 5, 8],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-3-shot-phi',
-            _description: 'Pilot 3 shot phi text field',
-            position: [4, 5, 8, 11],
-            borderWidths: [1, 2, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
         // Row 6
         {
             id: 'pilot-4-number',
             _description: 'Pilot 4 number text field',
             position: [5, 6, 0, 1],
             borderWidths: [1, 1, 1, 2],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-4-target',
-            _description: 'Pilot 4 target text field',
-            position: [5, 6, 1, 3],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-4-sorting',
-            _description: 'Pilot 4 sorting text field',
-            position: [5, 6, 3, 5],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-4-lock-phi',
-            _description: 'Pilot 4 lock phi text field',
-            position: [5, 6, 5, 8],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-4-shot-phi',
-            _description: 'Pilot 4 shot phi text field',
-            position: [5, 6, 8, 11],
-            borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
         },
         // Row 7
@@ -4111,72 +4861,12 @@ const M2000C_OCA_2 = {
             textAlign: 'center',
             backgroundColor: M2000C_OCA_darkBackground
         },
-        {
-            id: 'pilot-5-target',
-            _description: 'Pilot 5 target text field',
-            position: [6, 7, 1, 3],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-5-sorting',
-            _description: 'Pilot 5 sorting text field',
-            position: [6, 7, 3, 5],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-5-lock-phi',
-            _description: 'Pilot 5 lock phi text field',
-            position: [6, 7, 5, 8],
-            borderWidths: [1, 1, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
-        {
-            id: 'pilot-5-shot-phi',
-            _description: 'Pilot 5 shot phi text field',
-            position: [6, 7, 8, 11],
-            borderWidths: [1, 2, 1, 1],
-            textAlign: 'center',
-            backgroundColor: M2000C_OCA_darkBackground
-        },
         // Row 8
         {
             id: 'pilot-6-number',
             _description: 'Pilot 6 number text field',
             position: [7, 8, 0, 1],
             borderWidths: [1, 1, 2, 2],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-6-target',
-            _description: 'Pilot 6 target text field',
-            position: [7, 8, 1, 3],
-            borderWidths: [1, 1, 2, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-6-sorting',
-            _description: 'Pilot 6 sorting text field',
-            position: [7, 8, 3, 5],
-            borderWidths: [1, 1, 2, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-6-lock-phi',
-            _description: 'Pilot 6 lock phi text field',
-            position: [7, 8, 5, 8],
-            borderWidths: [1, 1, 2, 1],
-            textAlign: 'center',
-        },
-        {
-            id: 'pilot-6-shot-phi',
-            _description: 'Pilot 6 shot phi text field',
-            position: [7, 8, 8, 11],
-            borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
         },
         // Row 10 - 15
@@ -4334,6 +5024,7 @@ const M2000C_OCA_2 = {
             type: 'input-select',
             _description: 'Hold formation field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             dropdownSide: 'left',
             position: [10, 11, 3, 5],
             borderWidths: [0, 2, 0, 0],
@@ -4344,6 +5035,7 @@ const M2000C_OCA_2 = {
             type: 'input-select',
             _description: 'CAP formation field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             dropdownSide: 'left',
             position: [10, 11, 9, 11],
             borderWidths: [0, 2, 0, 0],
@@ -4436,36 +5128,38 @@ const M2000C_OCA_2 = {
         },
         {
             id: 'risk-level-flow',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Risk level flow text field',
             linkedOptions: [
                 '',
-                '\nNever below DAP',
-                '\nSpiked > DAP\nNaked > MAR',
-                '\nSpiked > MAR\nNaked < MAR'
+                'Never below DAP',
+                'Spiked > DAP\nNaked > MAR',
+                'Spiked > MAR\nNaked < MAR'
             ],
             position: [16, 19, 3, 6],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
+            textareaCenter: true,
         },
         {
             id: 'risk-level-targeting-ratio',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Risk level targeting ratio text field',
             linkedOptions: [
                 '',
-                '\n2v1 contact\n2v1 group if not heavy',
+                '2v1 contact\n2v1 group if not heavy',
                 '1v1 contact\n1v1 group if not heavy\n & not Alamo A/C capable',
-                '\n1vX'
+                '1vX'
             ],
             position: [16, 19, 6, 11],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
+            textareaCenter: true,
         },
         // Row 19-27
         {
             id: 'gameplan',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Gameplan text field',
             position: [18, 27, 11, 19],
             borderWidths: [1, 2, 2, 2],
@@ -4473,52 +5167,55 @@ const M2000C_OCA_2 = {
         // Row 21-23
         {
             id: 'risk-level-aircraft-merge-ratio',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Risk level aircraft-merge ratio text field',
             linkedOptions: [
                 '',
-                '\nAvoid if possible',
-                '\nYes but 2v1',
-                '\nYes 1vX',
+                'Avoid if possible',
+                'Yes but 2v1',
+                'Yes 1vX',
             ],
             position: [20, 23, 0, 3],
             borderWidths: [1, 1, 2, 2],
             textAlign: 'center',
+            textareaCenter: true,
         },
         {
             id: 'risk-level-vid-ratio',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Risk level VID ratio text field',
             linkedOptions: [
                 '',
-                '\n2v1 contact',
-                '\n2v1 group if not heavy',
-                '\n1v1',
+                '2v1 contact',
+                '2v1 group if not heavy',
+                '1v1',
             ],
             position: [20, 23, 3, 6],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center',
+            textareaCenter: true,
         },
         {
             id: 'risk-level-min-rage-recommit',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Risk level min range recommit text field',
             linkedOptions: [
                 '',
-                '\nNaked/Nails > MAR + 10nm\n\nSpiked > MAP + 15nm',
-                '\n\n> MAR + 10nm',
-                '\nNaked if < MAR\nSpiked > MAR + 5nm',
+                'Naked/Nails > MAR + 10nm\nSpiked > MAP + 15nm',
+                '> MAR + 10nm',
+                'Naked if < MAR\nSpiked > MAR + 5nm',
             ],
             position: [20, 23, 6, 11],
             borderWidths: [1, 2, 2, 1],
             textAlign: 'center',
+            textareaCenter: true,
             fontSize: 11,
             padding: 0
         },
         // Row 25-26
         {
             id: 'commit-criterias-ingress',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Commit criterias ingress text field',
             position: [24, 26, 2, 5],
             borderWidths: [1, 1, 1, 1],
@@ -4526,7 +5223,7 @@ const M2000C_OCA_2 = {
         },
         {
             id: 'commit-criterias-cap',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Commit criterias CAP text field',
             position: [24, 26, 5, 8],
             borderWidths: [1, 1, 1, 1],
@@ -4534,7 +5231,7 @@ const M2000C_OCA_2 = {
         },
         {
             id: 'commit-criterias-egress',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Commit criterias egress text field',
             position: [24, 26, 8, 11],
             borderWidths: [1, 2, 1, 1],
@@ -4546,6 +5243,7 @@ const M2000C_OCA_2 = {
             type: 'input-select',
             _description: 'Commit formation ingress text field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             position: [26, 28, 2, 5],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
@@ -4555,6 +5253,7 @@ const M2000C_OCA_2 = {
             type: 'input-select',
             _description: 'Commit formation CAP text field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             position: [26, 28, 5, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
@@ -4564,6 +5263,7 @@ const M2000C_OCA_2 = {
             type: 'input-select',
             _description: 'Commit formation egress text field',
             options: M2000C_OCA_formationOptions,
+            selectColumns: 2,
             position: [26, 28, 8, 11],
             borderWidths: [1, 2, 1, 1],
             textAlign: 'center',
@@ -4571,29 +5271,29 @@ const M2000C_OCA_2 = {
         // Row 29-34
         {
             id: 'tactic-ingress',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Tactic ingress text field',
             position: [28, 34, 2, 5],
             borderWidths: [1, 1, 2, 1],
-            type: 'text-area',
+            type: 'textarea',
         },
         {
             id: 'tactic-cap',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Tactic CAP text field',
             position: [28, 34, 5, 8],
             borderWidths: [1, 1, 2, 1],
         },
         {
             id: 'tactic-egress',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Tactic egress text field',
             position: [28, 34, 8, 11],
             borderWidths: [1, 2, 2, 1],
         },
         {
             id: 'flow',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Flow text field',
             position: [28, 34, 11, 19],
             borderWidths: [1, 2, 2, 2],
@@ -4629,14 +5329,14 @@ const M2000C_OCA_2 = {
         // Row 36-44
         {
             id: 'roes',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Rules of engagement text field',
             position: [35, 44, 9, 13],
             borderWidths: [0, 2, 2, 2],
         },
         {
             id: 'code-words',
-            type: 'text-area',
+            type: 'textarea',
             _description: 'Code words text field',
             position: [35, 44, 13, 19],
             borderWidths: [1, 2, 2, 2],
