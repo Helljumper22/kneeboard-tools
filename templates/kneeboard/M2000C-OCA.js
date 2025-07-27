@@ -23,10 +23,12 @@ const M2000C_OCA_racetrack22ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM
 const M2000C_OCA_racetrack22ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM8 25 6 29 10 29ZM5 19 4 20 5 21 6 20 5 19M38 60 36 56 40 56ZM32 60 30 56 34 56Z";
 const M2000C_OCA_racetrack4ShipPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M32 25 30 29 34 29ZM28 29 30 33 26 33ZM38 25 36 29 40 29ZM42 29 40 33 44 33ZM35 19 34 20 35 21 36 20 35 19";
 const M2000C_OCA_racetrack4ShipRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM-2 29 0 33-4 33ZM9 25 7 29 11 29ZM13 29 11 33 15 33ZM5 19 4 20 5 21 6 20 5 19";
+const M2000C_OCA_racetrack4ShipBoxPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM35 18 33 20 35 22 37 20 35 18M32 25 30 29 34 29ZM32 31 34 35 30 35ZM38 25 36 29 40 29ZM38 31 36 35 40 35ZM35 19 34 20 35 21 36 20 35 19";
+const M2000C_OCA_racetrack4ShipBoxRightHandPath = "M5 20A1 1 0 0135 20L35 65A1 1 0 015 65ZM5 18 3 20 5 22 7 20 5 18M2 25 0 29 4 29ZM2 31 4 35 0 35ZM9 25 7 29 11 29ZM9 31 7 35 11 35ZM5 19 4 20 5 21 6 20 5 19";
 
 const M2000C_OCA_racetrackPathList = [
-    M2000C_OCA_racetrackPath, M2000C_OCA_racetrack1ShipPath, M2000C_OCA_racetrack11ShipPath, M2000C_OCA_racetrack2ShipPath, M2000C_OCA_racetrack22ShipPath, M2000C_OCA_racetrack4ShipPath,
-    M2000C_OCA_racetrackRightHandPath, M2000C_OCA_racetrack1ShipRightHandPath, M2000C_OCA_racetrack11ShipRightHandPath, M2000C_OCA_racetrack2ShipRightHandPath, M2000C_OCA_racetrack22ShipRightHandPath, M2000C_OCA_racetrack4ShipRightHandPath
+    M2000C_OCA_racetrackPath, M2000C_OCA_racetrack1ShipPath, M2000C_OCA_racetrack11ShipPath, M2000C_OCA_racetrack2ShipPath, M2000C_OCA_racetrack22ShipPath, M2000C_OCA_racetrack4ShipPath, M2000C_OCA_racetrack4ShipBoxPath,
+    M2000C_OCA_racetrackRightHandPath, M2000C_OCA_racetrack1ShipRightHandPath, M2000C_OCA_racetrack11ShipRightHandPath, M2000C_OCA_racetrack2ShipRightHandPath, M2000C_OCA_racetrack22ShipRightHandPath, M2000C_OCA_racetrack4ShipRightHandPath, M2000C_OCA_racetrack4ShipBoxRightHandPath
 ];
 
 const M2000C_OCA_1 = {
@@ -1261,7 +1263,8 @@ const M2000C_OCA_1 = {
             id: 'pilot-6-callsign',
             _description: 'Pilot 6 callsign field',
             position: [7, 8, 5, 7],
-            borderWidths: [1, 1, 2, 1]
+            borderWidths: [1, 1, 2, 1],
+            textAlign: 'center'
         },
         {
             id: 'pilot-6-number',
@@ -4182,7 +4185,7 @@ const M2000C_OCA_2 = {
             type: 'path-select',
             _description: 'Hold path field',
             options: M2000C_OCA_racetrackPathList,
-            selectColumns: 6,
+            selectColumns: 7,
             position: [9, 15, 0, 2],
             borderWidths: [1, 0, 2, 2],
             default: 0,
@@ -4192,7 +4195,7 @@ const M2000C_OCA_2 = {
             type: 'path-select',
             _description: 'CAP path field',
             options: M2000C_OCA_racetrackPathList,
-            selectColumns: 6,
+            selectColumns: 7,
             position: [9, 15, 6, 8],
             borderWidths: [1, 0, 2, 2],
             default: 0,

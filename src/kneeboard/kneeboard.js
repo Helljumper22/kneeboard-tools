@@ -20,6 +20,8 @@ class Kneeboard {
 
     this.runPagination();
 
+    this.runArrowNavigation();
+
     this.displayKneeboard();
 
     // Import data from JSON file
@@ -94,6 +96,86 @@ class Kneeboard {
 
         if (this.currentPage > 0) {
           $('.kneeboard-container').find('.previous-arrow').removeClass('hide');
+        }
+      }
+    });
+  }
+
+  runArrowNavigation() {
+    $(document).on('keydown', (event) => {
+      const textFieldCells = this.kneeboardTemplate.pages[this.currentPage].textFieldCells;
+      if (!event.altKey) return;
+
+      const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+      if (arrowKeys.includes(event.key)) {
+        event.preventDefault();
+
+        const currentId = $(':focus').attr('id');
+        const currentCell = textFieldCells.find((textFieldCell) => textFieldCell.id === currentId);
+        if (currentCell) {
+          let nextCellCandidates = [];
+          switch (event.key) {
+            case 'ArrowLeft':
+              nextCellCandidates = textFieldCells.filter(c =>
+                c.position[3] <= currentCell.position[2]
+                && c.position[1] > currentCell.position[0]
+                && c.position[0] < currentCell.position[1]
+              );
+
+              nextCellCandidates.sort((a, b) => {
+                const dxA = a.position[2] - currentCell.position[2];
+                const dxB = b.position[2] - currentCell.position[2];
+
+                return Math.abs(dxA) - Math.abs(dxB);
+              });
+              break;
+            case 'ArrowRight':
+              nextCellCandidates = textFieldCells.filter(c =>
+                c.position[2] >= currentCell.position[3]
+                && c.position[1] > currentCell.position[0]
+                && c.position[0] < currentCell.position[1]
+              );
+
+              nextCellCandidates.sort((a, b) => {
+                const dxA = a.position[2] - currentCell.position[2];
+                const dxB = b.position[2] - currentCell.position[2];
+
+                return Math.abs(dxA) - Math.abs(dxB);
+              });
+              break;
+            case 'ArrowUp':
+              nextCellCandidates = textFieldCells.filter(c =>
+                c.position[1] <= currentCell.position[0]
+                && c.position[3] > currentCell.position[2]
+                && c.position[2] < currentCell.position[3]
+              );
+
+              nextCellCandidates.sort((a, b) => {
+                const dyA = a.position[0] - currentCell.position[0];
+                const dyB = b.position[0] - currentCell.position[0];
+
+                return Math.abs(dyA) - Math.abs(dyB);
+              });
+              break;
+            case 'ArrowDown':
+              nextCellCandidates = textFieldCells.filter(c =>
+                c.position[0] >= currentCell.position[1]
+                && c.position[3] > currentCell.position[2]
+                && c.position[2] < currentCell.position[3]
+              );
+
+              nextCellCandidates.sort((a, b) => {
+                const dyA = a.position[0] - currentCell.position[0];
+                const dyB = b.position[0] - currentCell.position[0];
+
+                return Math.abs(dyA) - Math.abs(dyB);
+              });
+              break;
+          }
+
+          if (nextCellCandidates.length > 0) {
+            $(`#${nextCellCandidates[0].id}`).focus().select();
+          }
         }
       }
     });
@@ -586,9 +668,14 @@ class Kneeboard {
             let fontSize = textFieldCell.fontSize ?? 12;
             const minFontSize = textFieldCell.minFontSize ?? 10;
 
-            while ($(field)[0].scrollWidth > $(field)[0].clientWidth && fontSize > minFontSize) {
+            let textWidth = this.utils.getTextWidth($(field).val(), fontSize);
+            const fieldWidth = $(field).width();
+
+            while (textWidth > fieldWidth && fontSize > minFontSize) {
               fontSize--;
               $(field).css('font-size', fontSize + 'px');
+
+              textWidth = this.utils.getTextWidth($(field).val(), fontSize);
             }
           }
         }
@@ -612,22 +699,23 @@ class Kneeboard {
           currentFontSize = Math.min(minFontSize, fontSize);
           $(event.target).css('font-size', `${currentFontSize}px`);
 
-          console.log($(event.target)[0].scrollWidth, $(event.target)[0].clientWidth);
+          let textWidth = this.utils.getTextWidth($(event.target).val(), currentFontSize);
+          const fieldWidth = $(event.target).width();
 
-          while ($(event.target)[0].scrollWidth <= $(event.target)[0].clientWidth && currentFontSize < fontSize) {
+          while (textWidth < fieldWidth && currentFontSize < fontSize) {
             currentFontSize++;
-            $(event.target).css('font-size', currentFontSize + 'px');
 
-            if ($(event.target)[0].scrollWidth > $(event.target)[0].clientWidth) {
-              currentFontSize--;
+            textWidth = this.utils.getTextWidth($(event.target).val(), currentFontSize);
+            if (textWidth < fieldWidth) {
               $(event.target).css('font-size', currentFontSize + 'px');
-              break;
             }
           }
 
-          while ($(event.target)[0].scrollWidth > $(event.target)[0].clientWidth && currentFontSize > minFontSize) {
+          while (textWidth > fieldWidth && currentFontSize > minFontSize) {
             currentFontSize--;
             $(event.target).css('font-size', currentFontSize + 'px');
+
+            textWidth = this.utils.getTextWidth($(event.target).val(), currentFontSize);
           }
         });
       }

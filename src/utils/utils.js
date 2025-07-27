@@ -293,4 +293,17 @@ class Utils {
             return false;
         }
     }
+
+    getTextWidth(txt, fontSize) {
+        var id = 'text-width-tester';
+        let tag = $(`#${id}`);
+        if (!$(tag).length) {
+            tag = $('<span id="' + id + '" style="display:none;font-size:' + fontSize + ';">' + txt + '</span>');
+            $('body').append(tag);
+        } else {
+            $(tag).css({ 'font-size': fontSize }).html(txt);
+        }
+
+        return $(tag).width();
+    }
 }
