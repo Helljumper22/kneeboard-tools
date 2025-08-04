@@ -25,6 +25,8 @@ class App {
     const activeTab = localStorage.getItem(this.activeTabKey);
     if (activeTab) {
       $(`.tab-button[attr-tab="${activeTab}"], .tab[attr-tab="${activeTab}"]`).addClass('selected');
+    } else {
+      $(`.tab-button[attr-tab="bullseye-map-tab"], .tab[attr-tab="bullseye-map-tab"]`).addClass('selected');
     }
 
     $('.tab-button').click((event) => {
