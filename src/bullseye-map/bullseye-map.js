@@ -3,6 +3,7 @@ defaultBullseyeLinesAngle = 30;
 
 bullseyeDataKey = 'bullseye-data';
 mobsDataKey = 'mobs-data';
+baseLinesDataKey = 'base-lines-data';
 coastlinesDataKey = 'coastlines-data';
 bordersDataKey = 'borders-data';
 ringsDataKey = 'rings-data';
@@ -23,6 +24,7 @@ class BullseyeMap {
     this.mapDrawUtils = new MapDrawUtils();
 
     this.bullseye = {};
+    this.baseLines = {};
     this.coastlines = [];
     this.mobs = [];
     this.borders = [];
@@ -56,6 +58,7 @@ class BullseyeMap {
         this.resetFields();
 
         localStorage.setItem(bullseyeDataKey, JSON.stringify(mapData.bullseye));
+        localStorage.setItem(baseLinesDataKey, JSON.stringify(mapData.baseLines));
         localStorage.setItem(coastlinesDataKey, JSON.stringify(mapData.coastlines));
         localStorage.setItem(mobsDataKey, JSON.stringify(mapData.mobs));
         localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
@@ -156,6 +159,7 @@ class BullseyeMap {
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
       const mapData = {
         'bullseye': this.bullseye,
+        'baseLines': this.baseLines,
         'coastlines': this.coastlines,
         'mobs': this.mobs,
         'borders': this.borders,
@@ -260,8 +264,13 @@ class BullseyeMap {
     $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
     $('.gate-name-angle').val($('.gate-name-angle').prop('max') / 2);
 
+    $('.display-base-lines').prop('checked', false);
+    $('.base-lines-location').val('top-left');
+    $('.base-lines-magnetic-declination').val(0);
+
     $('.cap-side').val(1);
 
+    $('.ring-range-indicator:not(:first)').remove();
     $('.coastline:not(:first)').remove();
     $('.mob:not(:first)').remove();
     $('.border:not(:first)').remove();
@@ -346,6 +355,9 @@ class BullseyeMap {
     // Draw bullseye
     if (this.bullseye.display) this.runBullseye();
 
+    // Draw base lines
+    this.runBaseLines();
+
     // Draw coastlines
     this.runCoastlines();
 
@@ -400,6 +412,11 @@ class BullseyeMap {
     $('.ring-range-angle').each((index, element) => {
       this.bullseye.ringsRangeAngle.push($(element).val());
     })
+
+    // Coastlines
+    this.baseLines.display = $('.display-base-lines').is(':checked');
+    this.baseLines.location = $('.base-lines-location').val();
+    this.baseLines.magneticDeclination = $('.base-lines-magnetic-declination').val();
 
     // Coastlines
     this.coastlines = [];
@@ -837,6 +854,12 @@ class BullseyeMap {
     this.mapDrawUtils.unclipCanvas();
   }
 
+  runBaseLines() {
+    if (this.baseLines.display) {
+      this.mapDrawUtils.drawBaseLines(this.baseLines.location, this.baseLines.magneticDeclination, this.bullseye.mapOrientation);
+    }
+  }
+
   runCoastlines() {
     this.coastlines.forEach((coastline) => {
       this.mapDrawUtils.drawCoastline(coastline.startX, coastline.startY, coastline.endX, coastline.endY, 'black', 2);
@@ -1143,6 +1166,20 @@ class BullseyeMap {
       $('.lines-angle').val(30);
       $('.half-angle-lines').prop('checked', true);
       $('.map-orientation').val(0)
+    }
+
+    // Base lines
+    try {
+      const baseLinesData = JSON.parse(localStorage.getItem(baseLinesDataKey));
+      if (baseLinesData) {
+        $('.display-base-lines').prop('checked', baseLinesData.display);
+        $('.base-lines-location').val(baseLinesData.location);
+        $('.base-lines-magnetic-declination').val(baseLinesData.magneticDeclination);
+      }
+    } catch (error) {
+      $('.display-base-lines').prop('checked', false);
+      $('.base-lines-location').val('top-left');
+      $('.base-lines-magnetic-declination').val('0');
     }
 
     // Coastlines
@@ -1640,6 +1677,7 @@ class BullseyeMap {
 
   saveData() {
     localStorage.setItem(bullseyeDataKey, JSON.stringify(this.bullseye));
+    localStorage.setItem(baseLinesDataKey, JSON.stringify(this.baseLines));
     localStorage.setItem(coastlinesDataKey, JSON.stringify(this.coastlines));
     localStorage.setItem(mobsDataKey, JSON.stringify(this.mobs));
     localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));

@@ -99,6 +99,114 @@ class MapDrawUtils {
     this.ctx.fill();
   }
 
+  drawBaseLines(location, magneticDeclination, mapOrientation) {
+    const base_xPx = 60;
+    const base_yPx = 60;
+    const height = 60;
+
+    let xPx = 0, yPx = 0;
+    switch (location) {
+      case 'top-left':
+        xPx = base_xPx
+        yPx = base_yPx;
+        break;
+      case 'top-right':
+        xPx = this.width - base_xPx
+        yPx = base_yPx;
+        break;
+      case 'bottom-left':
+        xPx = base_xPx
+        yPx = this.height - base_yPx;
+        break;
+      case 'bottom-right':
+        xPx = this.width - base_xPx
+        yPx = this.height - base_yPx;
+        break;
+    }
+
+    this.ctx.font = `12px sans-serif`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.strokeStyle = 'black';
+    this.ctx.fillStyle = 'black';
+    this.ctx.lineWidth = 2;
+
+    this.ctx.save();
+
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(mapOrientation * (Math.PI / 180));
+
+    // True north line
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, (height / 2));
+    this.ctx.lineTo(0, -(height / 2));
+    this.ctx.stroke();
+
+    // True north line star
+    const spikes = 5;
+    const outerRadius = 3;
+    const innerRadius = 1.5;
+    const step = Math.PI / spikes;
+    var rot = Math.PI / 2 * 3;
+    const starPositionX = 0;
+    const starPositionY = -(height / 2) - 7
+    var x = starPositionX;
+    var y = starPositionY;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(starPositionX, starPositionY - outerRadius)
+    for (var i = 0; i < spikes; i++) {
+      x = starPositionX + Math.cos(rot) * outerRadius;
+      y = starPositionY + Math.sin(rot) * outerRadius;
+      this.ctx.lineTo(x, y)
+      rot += step
+
+      x = starPositionX + Math.cos(rot) * innerRadius;
+      y = starPositionY + Math.sin(rot) * innerRadius;
+      this.ctx.lineTo(x, y)
+      rot += step
+    }
+
+    this.ctx.lineTo(starPositionX, starPositionY - outerRadius);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    // Magnetic north line
+    this.ctx.translate(0, (height / 2));
+    this.ctx.moveTo(0, 0);
+    this.ctx.rotate(magneticDeclination * (Math.PI / 180) + Math.PI);
+    this.ctx.lineTo(0, height);
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(1, height - 1);
+    this.ctx.lineTo(5, height - 10);
+    this.ctx.lineTo(1, height - 10);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    this.ctx.restore();
+
+    this.ctx.save();
+
+    // Magnetic declinaison text
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(mapOrientation * (Math.PI / 180));
+
+    let magneticDeclinationText = '';
+    if (magneticDeclination > 0) {
+      magneticDeclinationText = `+${magneticDeclination}°`;
+    } else if (magneticDeclination == 0) {
+      magneticDeclinationText = `+0°`;
+    } else {
+      magneticDeclinationText = `${magneticDeclination}°`;
+    }
+
+    this.ctx.fillText(magneticDeclinationText, 0, + (height / 2) + 10);
+
+    this.ctx.restore();
+  }
+
   drawBullseye(x, y, color, radius = 8) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;

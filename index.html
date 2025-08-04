@@ -131,6 +131,34 @@
                   </div>
                 </fieldset>
 
+                <!-- Base Lines -->
+                <fieldset id="base-lines-fields" class="collapsed">
+                  <div class="fieldset-header">
+                    <span class="fieldset-title">Base Lines</span>
+                    <button class="toggle-fieldset">▼</button>
+                  </div>
+                  <div class="fieldset-subcontainer">
+                    <div class="field">
+                      <label>Display base lines</label>
+                      <input type="checkbox" class="display-base-lines update-field" />
+                    </div>
+                    <div class="field">
+                      <label>Location</label>
+                      <select class="base-lines-location update-field">
+                        <option value="top-left" selected>Top left</option>
+                        <option value="top-right">Top right</option>
+                        <option value="bottom-left">Bottom left</option>
+                        <option value="bottom-right">Bottom right</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label>Magnetic declination</label>
+                      <input type="number" class="base-lines-magnetic-declination update-field" />
+                    </div>
+                  </div>
+                </fieldset>
+
+
                 <!-- Coastlines -->
                 <fieldset id="coastlines-fields" class="collapsed">
                   <div class="fieldset-header">
