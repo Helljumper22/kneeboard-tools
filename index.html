@@ -102,12 +102,8 @@
                       <input type="range" class="bullseye-name-angle update-field" min="0" max="360" />
                     </div>
                     <div class="field">
-                      <label>Ring range (nm)</label>
-                      <input type="number" class="rings-range update-field" value="20" />
-                    </div>
-                    <div class="field">
-                      <label>Ring range position</label>
-                      <input type="range" class="ring-range-angle update-field" min="0" max="360" />
+                      <label>Map orientation (°)</label>
+                      <input type="number" class="map-orientation update-field" value="0" />
                     </div>
                     <div class="field">
                       <label>Line angles* (°)</label>
@@ -118,9 +114,19 @@
                       <input type="checkbox" class="half-angle-lines update-field" checked />
                     </div>
                     <div class="field">
-                      <label>Map orientation (°)</label>
-                      <input type="number" class="map-orientation update-field" value="0" />
+                      <label>Ring range (nm)</label>
+                      <input type="number" class="rings-range update-field" value="20" />
                     </div>
+                    <div class="ring-range-indicator-container element-container">
+                      <div class="ring-range-indicator element">
+                        <div class="field">
+                          <label>Ring range position</label>
+                          <input type="range" class="ring-range-angle update-field" min="0" max="360" />
+                        </div>
+                        <button class="delete-ring-range-indicator-button delete-button">-</button>
+                      </div>
+                    </div>
+                    <button class="add-ring-range-indicator-button add-button">Add Ring Range indicator</button>
                     <span class="asterisk-text">* Rounded to closest divider of 90.</span>
                   </div>
                 </fieldset>

@@ -117,6 +117,10 @@ body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
                   width: auto;
                 }
 
+                .delete-ring-range-indicator-button {
+                  height: 30px;
+                }
+
                 .delete-coastline-button {
                   height: 151px;
                 }
@@ -171,7 +175,6 @@ body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
                 }
 
                 &:not(:first-child) {
-                  padding: 10px 20px;
                   border-top: 1px solid white;
 
                   .delete-button,

@@ -253,8 +253,10 @@ class BullseyeMap {
     $('.half-angle-lines').prop('checked', true);
 
     $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-    $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
-    $('.map-orienation').val(0);
+    $('.map-orientation').val('0');
+    $('.rings-range').val(defaultBullseyeRingsRange);
+    /*$('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
+    $('.lines-angle').val(defaultBullseyeLinesAngle);*/
     $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
     $('.gate-name-angle').val($('.gate-name-angle').prop('max') / 2);
 
@@ -276,6 +278,11 @@ class BullseyeMap {
 
   addElement(event) {
     const elementContainer = $(event.target).siblings('.element-container').first();
+
+    if ($(elementContainer).hasClass('ring-range-indicator-container') && $(elementContainer).find('.ring-range-indicator').length >= 4) {
+      return;
+    }
+
     const newPoint = $(elementContainer).find('.element').first().clone();
     newPoint.find('input').val('');
     $(elementContainer).append(newPoint);
@@ -300,6 +307,8 @@ class BullseyeMap {
         $(newPoint).find('[class*="color"]')[0].jscolor.fromString($(secondToLastElement).find('[class*="color"]').attr('data-current-color'));
       }
     }
+
+    this.updateMap();
   }
 
   deleteElement(event) {
@@ -382,11 +391,15 @@ class BullseyeMap {
     this.bullseye.limitToArea = $('.limit-bullseye-to-area').is(':checked');
     this.bullseye.name = $('.bullseye-name').val();
     this.bullseye.nameAngle = parseInt($('.bullseye-name-angle').val());
-    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
-    this.bullseye.ringsRangeAngle = parseInt($('.ring-range-angle').val())
+    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
     this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
     this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
-    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
+    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
+
+    this.bullseye.ringsRangeAngle = [];
+    $('.ring-range-angle').each((index, element) => {
+      this.bullseye.ringsRangeAngle.push($(element).val());
+    })
 
     // Coastlines
     this.coastlines = [];
@@ -925,21 +938,23 @@ class BullseyeMap {
 
     // Draw bullseye rings range
     if (this.bullseye.display) {
-      const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
-      const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
-      for (let i = 1; i <= ringCount + 1; i++) {
-        const radius = i * this.bullseye.ringsRange;
+      this.bullseye.ringsRangeAngle.forEach((rangeAngle) => {
+        const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
+        const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
+        for (let i = 1; i <= ringCount + 1; i++) {
+          const radius = i * this.bullseye.ringsRange;
 
-        const ringsRangeAngle = Math.round(this.bullseye.ringsRangeAngle / linesAngle) * linesAngle;
+          const ringsRangeAngle = Math.round(rangeAngle / linesAngle) * linesAngle;
 
-        const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const ringTextX = radius * Math.cos(angleRad);
-        const ringTextY = radius * Math.sin(angleRad);
+          const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+          const ringTextX = radius * Math.cos(angleRad);
+          const ringTextY = radius * Math.sin(angleRad);
 
-        if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
-          this.mapDrawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
+          if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
+            this.mapDrawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
+          }
         }
-      }
+      });
     }
 
     // Draw bullseye angles
@@ -1098,11 +1113,25 @@ class BullseyeMap {
         $('.limit-bullseye-to-area').prop('checked', bullseyeData.limitToArea);
         $('.bullseye-name').val(bullseyeData.name);
         $('.bullseye-name-angle').val(bullseyeData.nameAngle);
-        $('.rings-range').val(bullseyeData.ringsRange);
-        $('.ring-range-angle').val(bullseyeData.ringsRangeAngle)
+        $('.map-orientation').val(bullseyeData.mapOrientation);
         $('.lines-angle').val(bullseyeData.linesAngle);
         $('.half-angle-lines').prop('checked', bullseyeData.halfAnglesLines);
-        $('.map-orientation').val(bullseyeData.mapOrientation);
+        $('.rings-range').val(bullseyeData.ringsRange);
+
+        bullseyeData.ringsRangeAngle.forEach((coastlineData, index) => {
+          let ringsRangeAngleElement;
+          if (index == 0) {
+            ringsRangeAngleElement = $('.ring-range-indicator').first();
+          } else {
+            ringsRangeAngleElement = $('.ring-range-indicator').first().clone();
+            $('.ring-range-indicator-container').append(ringsRangeAngleElement);
+
+            ringsRangeAngleElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            ringsRangeAngleElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(ringsRangeAngleElement).find('.ring-range-angle').val(coastlineData);
+        });
       }
     } catch (error) {
       $('.display-bullseye').prop('checked', true);
