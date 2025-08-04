@@ -3,9 +3,12 @@ defaultBullseyeLinesAngle = 30;
 
 bullseyeDataKey = 'bullseye-data';
 mobsDataKey = 'mobs-data';
+baseLinesDataKey = 'base-lines-data';
+coastlinesDataKey = 'coastlines-data';
 bordersDataKey = 'borders-data';
 ringsDataKey = 'rings-data';
 areaPointsDataKey = 'area-points-data';
+faorPointsDataKey = 'faor-points-data';
 gatesDataKey = 'gates-data';
 arrowsDataKey = 'arrows-data';
 aircraftDataKey = 'aircraft-data';
@@ -15,16 +18,19 @@ pointsDataKey = 'points-data';
 
 fieldsetsDataKey = 'fieldsets-data';
 
-class BullseyeMapGenerator {
+class BullseyeMap {
   constructor() {
     this.utils = new Utils();
-    this.drawUtils = new DrawUtils();
+    this.mapDrawUtils = new MapDrawUtils();
 
     this.bullseye = {};
+    this.baseLines = {};
+    this.coastlines = [];
     this.mobs = [];
     this.borders = [];
     this.rings = [];
     this.areaPoints = [];
+    this.faorPoints = [];
     this.gates = [];
     this.arrows = [];
     this.aircraft = [];
@@ -45,17 +51,20 @@ class BullseyeMapGenerator {
     this.getData();
 
     // Import data from JSON file
-    $('.import-map-button').on('click', async () => {
-      const mapData = await this.utils.importMap();
+    $('.import-map-button').off('click').on('click', async () => {
+      const mapData = await this.utils.importData('.json');
 
       if (mapData) {
         this.resetFields();
 
         localStorage.setItem(bullseyeDataKey, JSON.stringify(mapData.bullseye));
+        localStorage.setItem(baseLinesDataKey, JSON.stringify(mapData.baseLines));
+        localStorage.setItem(coastlinesDataKey, JSON.stringify(mapData.coastlines));
         localStorage.setItem(mobsDataKey, JSON.stringify(mapData.mobs));
         localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
         localStorage.setItem(ringsDataKey, JSON.stringify(mapData.rings));
         localStorage.setItem(areaPointsDataKey, JSON.stringify(mapData.areaPoints));
+        localStorage.setItem(faorPointsDataKey, JSON.stringify(mapData.faorPoints));
         localStorage.setItem(gatesDataKey, JSON.stringify(mapData.gates));
         localStorage.setItem(arrowsDataKey, JSON.stringify(mapData.arrows));
         localStorage.setItem(aircraftDataKey, JSON.stringify(mapData.aircraft));
@@ -70,14 +79,13 @@ class BullseyeMapGenerator {
     });
 
     // Export data to JSON file.
-    $('.show-export-map-modal-button').on('click', () => this.showExportModal());
-
+    $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
 
     // Export map as png.
-    $('.show-download-map-modal-button').on('click', () => this.showDownloadModal());
+    $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
 
     // Reset all fields.
-    $('.reset-fields-button').on('click', () => {
+    $('.reset-map-fields-button').off('click').on('click', () => {
       if (window.confirm('Are you sure ? All data will be lost.')) {
         this.resetFields();
 
@@ -104,13 +112,13 @@ class BullseyeMapGenerator {
     });
 
     // Add element to list.
-    $('.add-button').on('click', (event) => this.addElement(event));
+    $('.add-button').off('click').on('click', (event) => this.addElement(event));
 
     // Delete element from list.
-    $('.delete-button').on('click', (event) => this.deleteElement(event));
+    $('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
 
     // Update map when a field is changed.
-    $('.update-field').on('input', () => this.updateMap());
+    $('.update-field').off('input').on('input', () => this.updateMap());
 
     // Get the current state of the fieldsets.
     this.fieldsetsData = [];
@@ -122,7 +130,7 @@ class BullseyeMapGenerator {
     });
 
     // Display or hide the fieldsets.
-    $('.toggle-fieldset').on('click', (event) => {
+    $('.toggle-fieldset').off('click').on('click', (event) => {
       const fieldset = $(event.target).closest('fieldset');
       fieldset.toggleClass('collapsed');
 
@@ -142,25 +150,22 @@ class BullseyeMapGenerator {
     $(exportModal).find('.file-name').val('');
     $(exportModal).addClass('show');
 
-    $(exportModal).on('click', (event) => {
+    $(exportModal).off('click').on('click', (event) => {
       if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
-        $(exportModal).find('.export-map-button').off('click')
-        $(exportModal).find('.close-button').off('click');
-
         $(exportModal).removeClass('show');
       }
     });
 
-    $(exportModal).find('.export-map-button').on('click', () => {
-      $(exportModal).find('.download-map-button').off('click')
-      $(exportModal).find('.close-button').off('click');
-
+    $(exportModal).find('.export-data-button').off('click').on('click', () => {
       const mapData = {
         'bullseye': this.bullseye,
+        'baseLines': this.baseLines,
+        'coastlines': this.coastlines,
         'mobs': this.mobs,
         'borders': this.borders,
         'rings': this.rings,
         'areaPoints': this.areaPoints,
+        'faorPoints': this.faorPoints,
         'gates': this.gates,
         'arrows': this.arrows,
         'aircraft': this.aircraft,
@@ -184,28 +189,22 @@ class BullseyeMapGenerator {
     $(downloadModal).find('.file-name').val('');
     $(downloadModal).addClass('show');
 
-    $(downloadModal).on('click', (event) => {
+    $(downloadModal).off('click').on('click', (event) => {
       if (!$(event.target).closest('.modal-content').length || $(event.target).hasClass('close-button')) {
-        $(downloadModal).find('.download-map-button').off('click')
-        $(downloadModal).find('.close-button').off('click');
-
         $(downloadModal).removeClass('show');
       }
     });
 
-    $(downloadModal).find('.download-map-button').on('click', () => {
-      $(downloadModal).find('.download-map-button').off('click')
-      $(downloadModal).find('.close-button').off('click');
-
+    $(downloadModal).find('.download-map-button').off('click').on('click', () => {
       if ($(downloadModal).find('.format-a4').is(':checked')) {
-        this.drawUtils.canvas.width = 800;
-        this.drawUtils.canvas.height = 1131;
+        this.mapDrawUtils.canvas.width = 800;
+        this.mapDrawUtils.canvas.height = 1131;
 
         this.updateMap();
       }
 
       if (!$(downloadModal).find('.transparent-background').is(':checked')) {
-        this.drawUtils.drawBackground('white');
+        this.mapDrawUtils.drawBackground('white');
       }
 
       const fileName = $(downloadModal).find('.file-name').val();
@@ -213,8 +212,8 @@ class BullseyeMapGenerator {
 
       $(downloadModal).removeClass('show');
 
-      this.drawUtils.canvas.width = 800;
-      this.drawUtils.canvas.height = 800;
+      this.mapDrawUtils.canvas.width = 800;
+      this.mapDrawUtils.canvas.height = 800;
 
       this.updateMap();
     });
@@ -258,34 +257,67 @@ class BullseyeMapGenerator {
     $('.half-angle-lines').prop('checked', true);
 
     $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-    $('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
-    $('.map-orienation').val(0);
+    $('.map-orientation').val('0');
+    $('.rings-range').val(defaultBullseyeRingsRange);
+    /*$('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
+    $('.lines-angle').val(defaultBullseyeLinesAngle);*/
     $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
     $('.gate-name-angle').val($('.gate-name-angle').prop('max') / 2);
 
+    $('.display-base-lines').prop('checked', false);
+    $('.base-lines-location').val('top-left');
+    $('.base-lines-magnetic-declination').val(0);
+
     $('.cap-side').val(1);
 
+    $('.ring-range-indicator:not(:first)').remove();
+    $('.coastline:not(:first)').remove();
     $('.mob:not(:first)').remove();
     $('.border:not(:first)').remove();
     $('.ring:not(:first)').remove();
     $('.area-point:not(:first)').remove();
+    $('.faor-point:not(:first)').remove();
     $('.gate:not(:first)').remove();
+    $('.arrow:not(:first)').remove();
+    $('.aircraft:not(:first)').remove();
     $('.nav-point:not(:first)').remove();
+    $('.cap-point:not(:first)').remove();
+    $('.point:not(:first)').remove();
   }
 
   addElement(event) {
     const elementContainer = $(event.target).siblings('.element-container').first();
+
+    if ($(elementContainer).hasClass('ring-range-indicator-container') && $(elementContainer).find('.ring-range-indicator').length >= 4) {
+      return;
+    }
+
     const newPoint = $(elementContainer).find('.element').first().clone();
     newPoint.find('input').val('');
     $(elementContainer).append(newPoint);
 
-    newPoint.find('.update-field').on('input', () => this.updateMap());
-    newPoint.find('.delete-button').on('click', (event) => this.deleteElement(event));
+    newPoint.find('.update-field').off('input').on('input', () => this.updateMap());
+    newPoint.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
 
     const colorPicker = newPoint.find('.color-picker');
     if (colorPicker.length > 0) {
       this.initColorPicker(colorPicker[0]);
     }
+
+    // Pre-fill the start azimuth, start distance and color fields based on the previous field.
+    if (newPoint.is('.border, .coastline')) {
+      const secondToLastElement = $(elementContainer).find('.element:nth-last-child(2)');
+
+      $(newPoint).find('[class*="start-azimuth"]').val($(secondToLastElement).find('[class*="end-azimuth"]').val());
+      $(newPoint).find('[class*="start-distance"]').val($(secondToLastElement).find('[class*="end-distance"]').val());
+
+      const colorPicker = newPoint.find('.color-picker');
+      if (colorPicker.length > 0) {
+        $(newPoint).find('[class*="color"]')[0].jscolor.fromString($(secondToLastElement).find('[class*="color"]').attr('data-current-color'));
+      }
+    }
+
+    this.updateMap();
   }
 
   deleteElement(event) {
@@ -314,14 +346,20 @@ class BullseyeMapGenerator {
 
     this.getInputParameters();
 
-    this.drawUtils.clearCanvas();
-    this.drawUtils.setToForeground();
+    this.mapDrawUtils.clearCanvas();
+    this.mapDrawUtils.setToForeground();
 
     // Recalculate scale and redraw map
     this.runScale();
 
     // Draw bullseye
     if (this.bullseye.display) this.runBullseye();
+
+    // Draw base lines
+    this.runBaseLines();
+
+    // Draw coastlines
+    this.runCoastlines();
 
     // Draw mobs
     this.runMobs();
@@ -334,6 +372,9 @@ class BullseyeMapGenerator {
 
     // Draw area points
     this.runAreaPoints();
+
+    // Draw area points
+    this.runFaorPoints();
 
     // Draw gates
     this.runGates();
@@ -362,11 +403,41 @@ class BullseyeMapGenerator {
     this.bullseye.limitToArea = $('.limit-bullseye-to-area').is(':checked');
     this.bullseye.name = $('.bullseye-name').val();
     this.bullseye.nameAngle = parseInt($('.bullseye-name-angle').val());
-    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
-    this.bullseye.ringsRangeAngle = parseInt($('.ring-range-angle').val())
+    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
     this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
     this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
-    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
+    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
+
+    this.bullseye.ringsRangeAngle = [];
+    $('.ring-range-angle').each((index, element) => {
+      this.bullseye.ringsRangeAngle.push($(element).val());
+    })
+
+    // Coastlines
+    this.baseLines.display = $('.display-base-lines').is(':checked');
+    this.baseLines.location = $('.base-lines-location').val();
+    this.baseLines.magneticDeclination = $('.base-lines-magnetic-declination').val();
+
+    // Coastlines
+    this.coastlines = [];
+    $('.coastline').each((index, element) => {
+      const startAzimuth = parseFloat($(element).find('.coastline-start-azimuth').val());
+      const startDistance = parseFloat($(element).find('.coastline-start-distance').val());
+      const endAzimuth = parseFloat($(element).find('.coastline-end-azimuth').val());
+      const endDistance = parseFloat($(element).find('.coastline-end-distance').val());
+
+      if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
+        const startAngleRad = ((startAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const startX = startDistance * Math.cos(startAngleRad);
+        const startY = startDistance * Math.sin(startAngleRad);
+
+        const endAngleRad = ((endAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const endX = endDistance * Math.cos(endAngleRad);
+        const endY = endDistance * Math.sin(endAngleRad);
+
+        this.coastlines.push({ startAzimuth, startDistance, endAzimuth, endDistance, startX, startY, endX, endY });
+      }
+    });
 
     // MOBs
     this.mobs = [];
@@ -445,6 +516,22 @@ class BullseyeMapGenerator {
         const y = distance * Math.sin(angleRad);
 
         this.areaPoints.push({ name, azimuth, distance, x, y });
+      }
+    });
+
+    // FAOR points
+    this.faorPoints = [];
+    $('.faor-point').each((index, element) => {
+      const name = $(element).find('.faor-point-name').val();
+      const azimuth = parseFloat($(element).find('.faor-point-azimuth').val());
+      const distance = parseFloat($(element).find('.faor-point-distance').val());
+
+      if (!isNaN(azimuth) && !isNaN(distance)) {
+        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        const x = distance * Math.cos(angleRad);
+        const y = distance * Math.sin(angleRad);
+
+        this.faorPoints.push({ name, azimuth, distance, x, y });
       }
     });
 
@@ -613,6 +700,14 @@ class BullseyeMapGenerator {
     // Initialize bounding box variables
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
 
+    // Include coastlines in bounding box
+    this.coastlines.forEach((coastline) => {
+      minX = Math.min(minX, coastline.startX, coastline.endX);
+      maxX = Math.max(maxX, coastline.startX, coastline.endX);
+      minY = Math.min(minY, coastline.startY, coastline.endY);
+      maxY = Math.max(maxY, coastline.startY, coastline.endY);
+    });
+
     // Include MOBs in bounding box
     this.mobs.forEach((mob) => {
       minX = Math.min(minX, mob.x);
@@ -643,6 +738,14 @@ class BullseyeMapGenerator {
       maxX = Math.max(maxX, areaPoint.x);
       minY = Math.min(minY, areaPoint.y);
       maxY = Math.max(maxY, areaPoint.y);
+    });
+
+    // Include area points in bounding box
+    this.faorPoints.forEach((faorPoint) => {
+      minX = Math.min(minX, faorPoint.x);
+      maxX = Math.max(maxX, faorPoint.x);
+      minY = Math.min(minY, faorPoint.y);
+      maxY = Math.max(maxY, faorPoint.y);
     });
 
     // Include gates in bounding box
@@ -715,21 +818,21 @@ class BullseyeMapGenerator {
     if (this.furthestPoint == 0) this.furthestPoint = this.defaultScale;
 
     // Update the scale in DrawUtils
-    this.drawUtils.setScale(this.furthestPoint);
+    this.mapDrawUtils.setScale(this.furthestPoint);
 
     // Update DrawUtils center
-    this.drawUtils.setCenter(centerX, centerY);
+    this.mapDrawUtils.setCenter(centerX, centerY);
   }
 
   runBullseye() {
-    if (this.bullseye.limitToArea) this.drawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
 
     // Draw cardinal lines
     const linesAngle = this.bullseye.halfAnglesLines ? this.utils.getClosestDivisorTo90(this.bullseye.linesAngle) / 2 : this.utils.getClosestDivisorTo90(this.bullseye.linesAngle);
     let dashed = false;
     for (let angle = 0; angle < 180; angle += linesAngle) {
       const angleRad = (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      this.drawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
+      this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
 
       if (this.bullseye.halfAnglesLines) {
         dashed = !dashed;
@@ -742,35 +845,47 @@ class BullseyeMapGenerator {
     for (let i = 1; i <= ringCount + 1; i++) {
       const radius = i * this.bullseye.ringsRange;
 
-      this.drawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
+      this.mapDrawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
     }
 
     // Draw bullseye dot
-    this.drawUtils.drawBullseye(0, 0, 'black');
+    this.mapDrawUtils.drawBullseye(0, 0, 'black');
 
-    this.drawUtils.unclipCanvas();
+    this.mapDrawUtils.unclipCanvas();
+  }
+
+  runBaseLines() {
+    if (this.baseLines.display) {
+      this.mapDrawUtils.drawBaseLines(this.baseLines.location, this.baseLines.magneticDeclination, this.bullseye.mapOrientation);
+    }
+  }
+
+  runCoastlines() {
+    this.coastlines.forEach((coastline) => {
+      this.mapDrawUtils.drawCoastline(coastline.startX, coastline.startY, coastline.endX, coastline.endY, 'black', 2);
+    });
   }
 
   runMobs() {
     this.mobs.forEach((mob) => {
-      this.drawUtils.drawAirbase(mob.x, mob.y, (mob.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), mob.color);
+      this.mapDrawUtils.drawAirbase(mob.x, mob.y, (mob.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), mob.color);
     });
   }
 
   runBorders() {
     this.borders.forEach((border) => {
-      this.drawUtils.drawBorder(border.startX, border.startY, border.endX, border.endY, border.color, 3);
+      this.mapDrawUtils.drawBorder(border.startX, border.startY, border.endX, border.endY, border.color, 3);
     });
   }
 
   runRings() {
-    if (this.bullseye.limitToArea) this.drawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
 
     this.rings.forEach((ring) => {
-      this.drawUtils.drawRing(ring.x, ring.y, ring.radius, ring.color, 2);
+      this.mapDrawUtils.drawRing(ring.x, ring.y, ring.radius, ring.color, 2);
     });
 
-    this.drawUtils.unclipCanvas();
+    this.mapDrawUtils.unclipCanvas();
   }
 
   runAreaPoints() {
@@ -780,26 +895,40 @@ class BullseyeMapGenerator {
         const startPoint = this.areaPoints[i];
         const endPoint = this.areaPoints[(i + 1) % this.areaPoints.length]; // Wrap around to the first point
 
-        this.drawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3);
+        this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3);
+      }
+    }
+  }
+
+  runFaorPoints() {
+    if (this.faorPoints.length > 1) {
+      // Draw dashed lines between points to form a polygon
+      for (let i = 0; i < this.faorPoints.length; i++) {
+        if (i == 0 || this.faorPoints.length > 2) {
+          const startPoint = this.faorPoints[i];
+          const endPoint = this.faorPoints[(i + 1) % this.faorPoints.length]; // Wrap around to the first point
+
+          this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 2, 'dashed');
+        }
       }
     }
   }
 
   runGates() {
     this.gates.forEach((gate) => {
-      this.drawUtils.drawGate(gate.x, gate.y, 15, (gate.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), gate.color)
+      this.mapDrawUtils.drawGate(gate.x, gate.y, 15, (gate.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), gate.color)
     });
   }
 
   runArrows() {
     this.arrows.forEach((arrow) => {
-      this.drawUtils.drawArrow(arrow.x, arrow.y, (arrow.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), arrow.length, arrow.width, arrow.color);
+      this.mapDrawUtils.drawArrow(arrow.x, arrow.y, (arrow.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), arrow.length, arrow.width, arrow.color);
     });
   }
 
   runAircraft() {
     this.aircraft.forEach((aircraft) => {
-      this.drawUtils.drawAircraft(aircraft.x, aircraft.y, (aircraft.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), aircraft.quantity, aircraft.color);
+      this.mapDrawUtils.drawAircraft(aircraft.x, aircraft.y, (aircraft.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), aircraft.quantity, aircraft.color);
     });
   }
 
@@ -810,7 +939,7 @@ class BullseyeMapGenerator {
         const startPoint = this.navPoints[i];
         const endPoint = this.navPoints[(i + 1)];
 
-        this.drawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3, 'double');
+        this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3, 'double');
       }
     }
   }
@@ -820,7 +949,7 @@ class BullseyeMapGenerator {
       if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
         if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
           // Draw CAP racetrack.
-          this.drawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, (capPoint.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), capPoint.leftSide, capPoint.color);
+          this.mapDrawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, (capPoint.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), capPoint.leftSide, capPoint.color);
         }
       }
     });
@@ -832,21 +961,23 @@ class BullseyeMapGenerator {
 
     // Draw bullseye rings range
     if (this.bullseye.display) {
-      const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
-      const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
-      for (let i = 1; i <= ringCount + 1; i++) {
-        const radius = i * this.bullseye.ringsRange;
+      this.bullseye.ringsRangeAngle.forEach((rangeAngle) => {
+        const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
+        const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
+        for (let i = 1; i <= ringCount + 1; i++) {
+          const radius = i * this.bullseye.ringsRange;
 
-        const ringsRangeAngle = Math.round(this.bullseye.ringsRangeAngle / linesAngle) * linesAngle;
+          const ringsRangeAngle = Math.round(rangeAngle / linesAngle) * linesAngle;
 
-        const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const ringTextX = radius * Math.cos(angleRad);
-        const ringTextY = radius * Math.sin(angleRad);
+          const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+          const ringTextX = radius * Math.cos(angleRad);
+          const ringTextY = radius * Math.sin(angleRad);
 
-        if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
-          this.drawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
+          if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
+            this.mapDrawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
+          }
         }
-      }
+      });
     }
 
     // Draw bullseye angles
@@ -871,7 +1002,7 @@ class BullseyeMapGenerator {
 
           } else {
             // Display the bullseye angle text at the border of the canvas 
-            const corners = this.drawUtils.getCanvasCorners(20);
+            const corners = this.mapDrawUtils.getCanvasCorners(20);
             corners.forEach((corner, index) => {
               const nextCorner = corners[(index + 1) % corners.length];
 
@@ -888,7 +1019,7 @@ class BullseyeMapGenerator {
 
             const textAngle = (angle + 90) % 360;
             if (!displayedAngles.includes(textAngle)) {
-              this.drawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), 0, 0);
+              this.mapDrawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), 0, 0);
 
               displayedAngles.push(textAngle);
             }
@@ -901,54 +1032,59 @@ class BullseyeMapGenerator {
       }
     }
 
-    if (this.bullseye.limitToArea) this.drawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
+    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
 
     // Draw bullseye name
     if (this.bullseye.name != '' && this.bullseye.display) {
       const angleRad = ((this.bullseye.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      this.drawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 16, 25, angleRad, 0, 0);
+      this.mapDrawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 16, 25, angleRad, 0, 0);
     }
 
-    this.drawUtils.unclipCanvas();
+    this.mapDrawUtils.unclipCanvas();
 
     // Draw MOB names
     this.mobs.forEach((mob) => {
       const angleRad = ((mob.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      if (mob.name != '') this.drawUtils.drawText(mob.x, mob.y, mob.name, 'no-border', 14, 20, angleRad, 0, 0);
+      if (mob.name != '') this.mapDrawUtils.drawText(mob.x, mob.y, mob.name, 'no-border', 14, 20, angleRad, 0, 0);
     });
 
     // Draw border names
     this.borders.forEach((border) => {
-      if (border.name != '') this.drawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
+      if (border.name != '') this.mapDrawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
     });
 
     // Draw ring names
     this.rings.forEach((ring) => {
-      if (ring.name != '') this.drawUtils.drawText(ring.x, ring.y, ring.name);
+      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name, 'plus-bottom');
     });
 
     // Draw area points name
     this.areaPoints.forEach((areaPoint) => {
-      if (areaPoint.name != '') this.drawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
+      if (areaPoint.name != '') this.mapDrawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
+    });
+
+    // Draw FAOR points name
+    this.faorPoints.forEach((faorPoint) => {
+      if (faorPoint.name != '') this.mapDrawUtils.drawText(faorPoint.x, faorPoint.y, faorPoint.name);
     });
 
     // Draw gate names
     this.gates.forEach((gate) => {
       if (gate.name != '') {
         const angleRad = ((gate.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        this.drawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
+        this.mapDrawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
       }
     });
 
     // Draw aircraft names
     this.aircraft.forEach((aircraft) => {
       const angleRad = ((aircraft.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      if (aircraft.name != '') this.drawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
+      if (aircraft.name != '') this.mapDrawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
     });
 
     // Draw nav points name
     this.navPoints.forEach((navPoint) => {
-      if (navPoint.name != '') this.drawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
+      if (navPoint.name != '') this.mapDrawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
     });
 
     // Draw CAP names and CAP points name.
@@ -963,12 +1099,12 @@ class BullseyeMapGenerator {
               capNameAngle -= Math.PI;
             }
 
-            this.drawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
+            this.mapDrawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
           }
         }
 
         if (capPoint.pointName != '') {
-          this.drawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
+          this.mapDrawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
         }
       }
     });
@@ -987,7 +1123,7 @@ class BullseyeMapGenerator {
           break;
       }
 
-      this.drawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
+      this.mapDrawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
     });
   }
 
@@ -1000,11 +1136,25 @@ class BullseyeMapGenerator {
         $('.limit-bullseye-to-area').prop('checked', bullseyeData.limitToArea);
         $('.bullseye-name').val(bullseyeData.name);
         $('.bullseye-name-angle').val(bullseyeData.nameAngle);
-        $('.rings-range').val(bullseyeData.ringsRange);
-        $('.ring-range-angle').val(bullseyeData.ringsRangeAngle)
+        $('.map-orientation').val(bullseyeData.mapOrientation);
         $('.lines-angle').val(bullseyeData.linesAngle);
         $('.half-angle-lines').prop('checked', bullseyeData.halfAnglesLines);
-        $('.map-orientation').val(bullseyeData.mapOrientation);
+        $('.rings-range').val(bullseyeData.ringsRange);
+
+        bullseyeData.ringsRangeAngle.forEach((coastlineData, index) => {
+          let ringsRangeAngleElement;
+          if (index == 0) {
+            ringsRangeAngleElement = $('.ring-range-indicator').first();
+          } else {
+            ringsRangeAngleElement = $('.ring-range-indicator').first().clone();
+            $('.ring-range-indicator-container').append(ringsRangeAngleElement);
+
+            ringsRangeAngleElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            ringsRangeAngleElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(ringsRangeAngleElement).find('.ring-range-angle').val(coastlineData);
+        });
       }
     } catch (error) {
       $('.display-bullseye').prop('checked', true);
@@ -1016,6 +1166,54 @@ class BullseyeMapGenerator {
       $('.lines-angle').val(30);
       $('.half-angle-lines').prop('checked', true);
       $('.map-orientation').val(0)
+    }
+
+    // Base lines
+    try {
+      const baseLinesData = JSON.parse(localStorage.getItem(baseLinesDataKey));
+      if (baseLinesData) {
+        $('.display-base-lines').prop('checked', baseLinesData.display);
+        $('.base-lines-location').val(baseLinesData.location);
+        $('.base-lines-magnetic-declination').val(baseLinesData.magneticDeclination);
+      }
+    } catch (error) {
+      $('.display-base-lines').prop('checked', false);
+      $('.base-lines-location').val('top-left');
+      $('.base-lines-magnetic-declination').val('0');
+    }
+
+    // Coastlines
+    try {
+      const coastlinesData = JSON.parse(localStorage.getItem(coastlinesDataKey));
+      if (coastlinesData) {
+        coastlinesData.forEach((coastlineData, index) => {
+          let coastlineElement;
+          if (index == 0) {
+            coastlineElement = $('.coastline').first();
+          } else {
+            coastlineElement = $('.coastline').first().clone();
+            $('.coastlines-container').append(coastlineElement);
+
+            coastlineElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            coastlineElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(coastlineElement).find('.coastline-start-azimuth').val(coastlineData.startAzimuth);
+          $(coastlineElement).find('.coastline-start-distance').val(coastlineData.startDistance);
+          $(coastlineElement).find('.coastline-end-azimuth').val(coastlineData.endAzimuth);
+          $(coastlineElement).find('.coastline-end-distance').val(coastlineData.endDistance);
+        });
+      }
+    } catch (error) {
+      const coastlines = $('.coastline:not(:first)');
+      const firstCoastline = $('.coastline').first();
+
+      $(firstCoastline).find('.coastline-start-azimuth').val('');
+      $(firstCoastline).find('.coastline-start-distance').val('');
+      $(firstCoastline).find('.coastline-end-azimuth').val('');
+      $(firstCoastline).find('.coastline-end-distance').val('');
+
+      coastlines.remove();
     }
 
     // MOBs
@@ -1030,8 +1228,8 @@ class BullseyeMapGenerator {
             mobElement = $('.mob').first().clone();
             $('.mobs-container').append(mobElement);
 
-            mobElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            mobElement.find('.update-field').on('input', () => this.updateMap());
+            mobElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            mobElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = mobElement.find('.color-picker');
             if (colorPicker) {
@@ -1073,8 +1271,8 @@ class BullseyeMapGenerator {
             borderElement = $('.border').first().clone();
             $('.borders-container').append(borderElement);
 
-            borderElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            borderElement.find('.update-field').on('input', () => this.updateMap());
+            borderElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            borderElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = borderElement.find('.color-picker');
             if (colorPicker) {
@@ -1116,8 +1314,8 @@ class BullseyeMapGenerator {
             ringElement = $('.ring').first().clone();
             $('.rings-container').append(ringElement);
 
-            ringElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            ringElement.find('.update-field').on('input', () => this.updateMap());
+            ringElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            ringElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = ringElement.find('.color-picker');
             if (colorPicker) {
@@ -1157,8 +1355,8 @@ class BullseyeMapGenerator {
             areaPointElement = $('.area-point').first().clone();
             $('.area-points-container').append(areaPointElement);
 
-            areaPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            areaPointElement.find('.update-field').on('input', () => this.updateMap());
+            areaPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            areaPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(areaPointElement).find('.area-point-name').val(areaPointData.name);
@@ -1177,6 +1375,38 @@ class BullseyeMapGenerator {
       areaPoints.remove();
     }
 
+    // FAOR points
+    try {
+      const faorPointsData = JSON.parse(localStorage.getItem(faorPointsDataKey));
+      if (faorPointsData) {
+        faorPointsData.forEach((faorPointsData, index) => {
+          let faorPointElement;
+          if (index == 0) {
+            faorPointElement = $('.faor-point').first();
+          } else {
+            faorPointElement = $('.faor-point').first().clone();
+            $('.faor-points-container').append(faorPointElement);
+
+            faorPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            faorPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
+          }
+
+          $(faorPointElement).find('.faor-point-name').val(faorPointsData.name);
+          $(faorPointElement).find('.faor-point-azimuth').val(faorPointsData.azimuth);
+          $(faorPointElement).find('.faor-point-distance').val(faorPointsData.distance);
+        });
+      }
+    } catch (error) {
+      const faorPoints = $('.faor-point:not(:first)');
+      const firstFaorPoint = $('.faor-point').first();
+
+      $(firstFaorPoint).find('.faor-point-name').val('');
+      $(firstFaorPoint).find('.faor-point-azimuth').val('');
+      $(firstFaorPoint).find('.faor-point-distance').val('');
+
+      faorPoints.remove();
+    }
+
     // Gates
     try {
       const gatesData = JSON.parse(localStorage.getItem(gatesDataKey));
@@ -1189,8 +1419,8 @@ class BullseyeMapGenerator {
             gateElement = $('.gate').first().clone();
             $('.gates-container').append(gateElement);
 
-            gateElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            gateElement.find('.update-field').on('input', () => this.updateMap());
+            gateElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            gateElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = gateElement.find('.color-picker');
             if (colorPicker) {
@@ -1232,8 +1462,8 @@ class BullseyeMapGenerator {
             arrowElement = $('.arrow').first().clone();
             $('.arrow-container').append(arrowElement);
 
-            arrowElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            arrowElement.find('.update-field').on('input', () => this.updateMap());
+            arrowElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            arrowElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = arrowElement.find('.color-picker');
             if (colorPicker) {
@@ -1275,8 +1505,8 @@ class BullseyeMapGenerator {
             aircraftElement = $('.aircraft').first().clone();
             $('.aircraft-container').append(aircraftElement);
 
-            aircraftElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            aircraftElement.find('.update-field').on('input', () => this.updateMap());
+            aircraftElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            aircraftElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = aircraftElement.find('.color-picker');
             if (colorPicker) {
@@ -1320,8 +1550,8 @@ class BullseyeMapGenerator {
             navPointElement = $('.nav-point').first().clone();
             $('.nav-points-container').append(navPointElement);
 
-            navPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            navPointElement.find('.update-field').on('input', () => this.updateMap());
+            navPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            navPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(navPointElement).find('.nav-point-name').val(navPointData.name);
@@ -1352,8 +1582,8 @@ class BullseyeMapGenerator {
             capPointElement = $('.cap-point').first().clone();
             $('.cap-points-container').append(capPointElement);
 
-            capPointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            capPointElement.find('.update-field').on('input', () => this.updateMap());
+            capPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            capPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
 
             const colorPicker = capPointElement.find('.color-picker');
             if (colorPicker) {
@@ -1401,8 +1631,8 @@ class BullseyeMapGenerator {
             pointElement = $('.point').first().clone();
             $('.points-container').append(pointElement);
 
-            pointElement.find('.delete-button').on('click', (event) => this.deleteElement(event));
-            pointElement.find('.update-field').on('input', () => this.updateMap());
+            pointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
+            pointElement.find('.update-field').off('input').on('input', () => this.updateMap());
           }
 
           $(pointElement).find('.point-name').val(pointData.name);
@@ -1447,10 +1677,13 @@ class BullseyeMapGenerator {
 
   saveData() {
     localStorage.setItem(bullseyeDataKey, JSON.stringify(this.bullseye));
+    localStorage.setItem(baseLinesDataKey, JSON.stringify(this.baseLines));
+    localStorage.setItem(coastlinesDataKey, JSON.stringify(this.coastlines));
     localStorage.setItem(mobsDataKey, JSON.stringify(this.mobs));
     localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));
     localStorage.setItem(ringsDataKey, JSON.stringify(this.rings));
     localStorage.setItem(areaPointsDataKey, JSON.stringify(this.areaPoints));
+    localStorage.setItem(faorPointsDataKey, JSON.stringify(this.faorPoints));
     localStorage.setItem(gatesDataKey, JSON.stringify(this.gates));
     localStorage.setItem(arrowsDataKey, JSON.stringify(this.arrows));
     localStorage.setItem(aircraftDataKey, JSON.stringify(this.aircraft));
@@ -1459,7 +1692,3 @@ class BullseyeMapGenerator {
     localStorage.setItem(pointsDataKey, JSON.stringify(this.points));
   }
 }
-
-$(document).ready(function () {
-  const bullseyeMap = new BullseyeMapGenerator();
-});

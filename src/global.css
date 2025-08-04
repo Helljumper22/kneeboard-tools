@@ -1,0 +1,377 @@
+:root {
+  --black-background: #1e1e1e;
+  --grey-background: #2b2b2b;
+  --button-background: #444;
+  --button-hover-background: #555;
+}
+
+body {
+  font-family: Arial;
+  background: var(--black-background);
+  color: white;
+  margin: 0;
+  padding: 0;
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      background: var(--black-background);
+      border-right: 1px solid #444;
+      box-sizing: border-box;
+      width: 100%;
+
+      .header-title {
+        text-align: center;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+      }
+    }
+
+    .tabs-container {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--black-background);
+      height: 100%;
+
+      .tabs-button-container {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        padding: 0 20px;
+
+        &:before {
+          position: absolute;
+          content: " ";
+          width: 100%;
+          bottom: 0;
+          left: 0;
+          border-bottom: 1px solid #DDDD;
+          z-index: 1;
+        }
+
+        .tab-button {
+          position: relative;
+          background-color: var(--button-background);
+          margin: 0 -1px;
+          padding: 5px 10px;
+          border-radius: 4px 4px 0 0;
+          cursor: pointer;
+          border-top: 1px solid #DDDD;
+          border-left: 1px solid #DDDD;
+          border-right: 1px solid #DDDD;
+
+          &::before,
+          &::after {
+            border: 1px solid #DDDD;
+            position: absolute;
+            bottom: 0px;
+            width: 15px;
+            height: 15px;
+            content: " ";
+          }
+
+          &::before {
+            left: -16px;
+            border-bottom-right-radius: 13px;
+            border-width: 0 1px 1px 0;
+            box-shadow: 4px 4px 0 var(--button-background);
+          }
+
+          &::after {
+            right: -16px;
+            border-bottom-left-radius: 13px;
+            border-width: 0 0 1px 1px;
+            box-shadow: -4px 4px 0 var(--button-background);
+          }
+
+          &.selected {
+            background-color: var(--grey-background);
+            z-index: 2;
+
+            &::before,
+            &::after {
+              border: 1px solid #DDDD;
+              position: absolute;
+              bottom: 0px;
+              width: 15px;
+              height: 15px;
+              content: " ";
+              z-index: 2;
+            }
+
+            &::before {
+              left: -16px;
+              border-bottom-right-radius: 13px;
+              border-width: 0 1px 1px 0;
+              box-shadow: 4px 4px 0 var(--grey-background);
+            }
+
+            &::after {
+              right: -16px;
+              border-bottom-left-radius: 13px;
+              border-width: 0 0 1px 1px;
+              box-shadow: -4px 4px 0 var(--grey-background);
+            }
+          }
+        }
+
+
+        .disclaimer {
+          display: flex;
+          margin: auto 0 auto auto;
+        }
+      }
+
+      .tabs {
+        display: flex;
+        overflow: hidden;
+        z-index: 3;
+        height: 100%;
+
+        .tab {
+          display: none;
+          background: var(--grey-background);
+          flex: auto;
+          overflow: hidden;
+          height: 100%;
+
+          &.selected {
+            display: flex;
+            overflow-y: auto;
+          }
+
+          .tab-content {
+            display: flex;
+            flex: auto;
+
+            .sidebar {
+              display: flex;
+              flex-direction: column;
+              width: 500px;
+              min-width: 500px;
+              background: #2b2b2b;
+              border-right: 1px solid #444;
+              height: auto;
+              overflow-y: scroll;
+
+              .sidebar-header {
+                position: sticky;
+                top: 0;
+                background: #2b2b2b;
+                padding: 10px 20px;
+                border-bottom: 1px solid #444;
+                z-index: 10;
+
+                .sidebar-title {
+                  width: 100%;
+                  text-align: center;
+                  font-size: 20px;
+                  margin-bottom: 10px;
+                  margin-top: 0;
+                }
+
+                .disclaimer {
+                  font-size: small;
+                }
+
+                .kneeboard-select-container {
+                  display: flex;
+                  flex-direction: row;
+                  gap: 10px;
+                  margin: 5px 0;
+                  justify-content: center;
+                  align-items: center;
+
+                  .kneeboard-select {
+                    margin: 5px 0;
+                    padding: 5px;
+                  }
+                }
+
+                .header-buttons {
+                  margin-top: 20px;
+                  display: grid;
+                  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                  gap: 10px;
+                }
+
+                .header-text {
+                  margin-top: 15px;
+                  font-size: 0.8em;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .disclaimer {
+    font-size: small;
+  }
+
+  .field {
+    display: flex;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+
+    label {
+      display: inline-block;
+      width: 150px;
+      font-size: 14px;
+    }
+
+    input,
+    select {
+      width: 140px;
+      padding: 5px;
+      font-size: 14px;
+      margin: 5px 0;
+
+      &[type=checkbox] {
+        width: 155px;
+      }
+
+      &[type="range"] {
+        cursor: pointer;
+        height: 16px;
+        padding: 0 5px;
+        border-radius: 1px;
+        border: 1px solid rgb(118, 118, 118);
+        background: white;
+        outline: none;
+        appearance: none;
+
+        &::-webkit-slider-thumb {
+          cursor: pointer;
+          appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #005CC8;
+        }
+
+        &::-moz-range-thumb {
+          cursor: pointer;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #005CC8;
+        }
+      }
+    }
+
+    select {
+      width: 154px;
+    }
+
+    .color-picker {
+      width: 155px;
+      height: 30px;
+      margin: 5px 0;
+      border-radius: 1px;
+    }
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+
+    &:hover {
+      background: #555;
+    }
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+
+    &.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      position: relative;
+      background: #232323;
+      color: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      min-width: 320px;
+      max-width: 90vw;
+      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+      text-align: center;
+
+      .close-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 21px;
+        height: 21px;
+        margin: 2px;
+        padding: 2px;
+        cursor: pointer;
+      }
+
+      .modal-inner-content,
+      .modal-loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .field {
+          &.hide {
+            display: none;
+          }
+
+          label,
+          input {
+            width: 160px;
+            text-align: left;
+
+            &[type=checkbox] {
+              width: 174px
+            }
+          }
+
+          select {
+            width: 174px;
+          }
+        }
+
+        .modal-button {
+          margin-top: 10px;
+        }
+
+        &.hide {
+          display: none;
+        }
+      }
+    }
+  }
+}

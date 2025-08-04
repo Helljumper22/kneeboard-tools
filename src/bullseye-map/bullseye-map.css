@@ -1,54 +1,9 @@
-body {
-  font-family: sans-serif;
-  background: #1e1e1e;
-  color: white;
-  margin: 0;
-  padding: 0;
-
-  .container {
-    display: flex;
-    height: 100vh;
+body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
+  .tab-content {
+    height: 100%;
 
     .sidebar {
-      display: flex;
-      flex-direction: column;
-      width: 500px;
-      background: #2b2b2b;
-      border-right: 1px solid #444;
-      box-sizing: border-box;
-      overflow-y: auto;
-
-      .sidebar-header {
-        position: sticky;
-        top: 0;
-        background: #2b2b2b;
-        padding: 20px;
-        border-bottom: 1px solid #444;
-        z-index: 10;
-
-        .sidebar-title {
-          width: 100%;
-          text-align: center;
-          font-size: 20px;
-          margin-bottom: 10px;
-        }
-
-        .disclaimer {
-          font-size: small;
-        }
-
-        .header-buttons {
-          margin-top: 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-
-          .header-button-line {
-            display: flex;
-            justify-content: space-between;
-          }
-        }
-      }
+      height: 100%;
 
       .input-fields-container {
         display: flex;
@@ -162,6 +117,14 @@ body {
                   width: auto;
                 }
 
+                .delete-ring-range-indicator-button {
+                  height: 30px;
+                }
+
+                .delete-coastline-button {
+                  height: 151px;
+                }
+
                 .delete-mob-button {
                   height: 231px;
                 }
@@ -174,7 +137,8 @@ body {
                   height: 191px;
                 }
 
-                .delete-area-point-button {
+                .delete-area-point-button,
+                .delete-faor-point-button {
                   height: 111px;
                 }
 
@@ -211,7 +175,6 @@ body {
                 }
 
                 &:not(:first-child) {
-                  padding: 10px 20px;
                   border-top: 1px solid white;
 
                   .delete-button,
@@ -246,176 +209,82 @@ body {
           margin-top: 10px;
         }
       }
-
-      button {
-        padding: 8px 16px;
-        font-size: 14px;
-        cursor: pointer;
-        background: #444;
-        color: white;
-        border: none;
-        border-radius: 4px;
-
-        &:hover {
-          background: #555;
-        }
-      }
-    }
-  }
-}
-
-.map-container {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #1e1e1e;
-
-  .map-canvas {
-    background: white;
-    border: 1px solid black;
-  }
-}
-
-.field {
-  display: flex;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-
-  label {
-    display: inline-block;
-    width: 150px;
-    font-size: 14px;
-  }
-
-  input,
-  select {
-    width: 140px;
-    padding: 5px;
-    font-size: 14px;
-    margin: 5px 0;
-
-    &[type=checkbox] {
-      width: 155px;
     }
 
-    &[type="range"] {
-      cursor: pointer;
-      height: 16px;
-      padding: 0 5px;
-      border-radius: 1px;
-      border: 1px solid rgb(118, 118, 118);
-      background: white;
-      outline: none;
-      appearance: none;
-
-      &::-webkit-slider-thumb {
-        cursor: pointer;
-        appearance: none;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #005CC8;
-      }
-
-      &::-moz-range-thumb {
-        cursor: pointer;
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #005CC8;
-      }
-    }
-  }
-
-  select {
-    width: 154px;
-  }
-
-  .color-picker {
-    width: 155px;
-    height: 30px;
-    margin: 5px 0;
-    border-radius: 1px;
-  }
-}
-
-button {
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  background: #444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  width: 130px;
-
-  &:hover {
-    background: #555;
-  }
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-
-  &.show {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .modal-content {
-    position: relative;
-    background: #232323;
-    color: #fff;
-    padding: 25px;
-    border-radius: 8px;
-    min-width: 320px;
-    max-width: 90vw;
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
-    text-align: center;
-
-    .close-button {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 21px;
-      height: 21px;
-      margin: 2px;
-      padding: 2px;
-      cursor: pointer;
-    }
-
-    .modal-inner-content {
+    .map-container {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #1e1e1e;
+      width: 100%;
+
+      .map-canvas {
+        background: white;
+        border: 1px solid black;
+      }
+    }
+
+    .field {
+      display: flex;
+      height: 40px;
       align-items: center;
       justify-content: center;
 
-      label,
-      input {
-        width: 160px;
-        text-align: left;
+      label {
+        display: inline-block;
+        width: 150px;
+        font-size: 14px;
+      }
+
+      input,
+      select {
+        width: 140px;
+        padding: 5px;
+        font-size: 14px;
+        margin: 5px 0;
 
         &[type=checkbox] {
-          width: 174px
+          width: 155px;
+        }
+
+        &[type="range"] {
+          cursor: pointer;
+          height: 16px;
+          padding: 0 5px;
+          border-radius: 1px;
+          border: 1px solid rgb(118, 118, 118);
+          background: white;
+          outline: none;
+          appearance: none;
+
+          &::-webkit-slider-thumb {
+            cursor: pointer;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #005CC8;
+          }
+
+          &::-moz-range-thumb {
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #005CC8;
+          }
         }
       }
 
-      .modal-button {
-        margin-top: 10px;
+      select {
+        width: 154px;
+      }
+
+      .color-picker {
+        width: 155px;
+        height: 30px;
+        margin: 5px 0;
+        border-radius: 1px;
       }
     }
   }

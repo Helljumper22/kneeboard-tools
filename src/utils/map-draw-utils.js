@@ -1,10 +1,10 @@
-class DrawUtils {
+class MapDrawUtils {
   constructor() {
     this.canvas = $('.map-canvas')[0];
     this.ctx = this.canvas.getContext('2d');
 
-    this.width = 800;
-    this.height = 800;
+    this.height = 700;
+    this.width = 700;
 
     this.centerX = this.width / 2;
     this.centerY = this.height / 2;
@@ -99,6 +99,114 @@ class DrawUtils {
     this.ctx.fill();
   }
 
+  drawBaseLines(location, magneticDeclination, mapOrientation) {
+    const base_xPx = 60;
+    const base_yPx = 60;
+    const height = 60;
+
+    let xPx = 0, yPx = 0;
+    switch (location) {
+      case 'top-left':
+        xPx = base_xPx
+        yPx = base_yPx;
+        break;
+      case 'top-right':
+        xPx = this.width - base_xPx
+        yPx = base_yPx;
+        break;
+      case 'bottom-left':
+        xPx = base_xPx
+        yPx = this.height - base_yPx;
+        break;
+      case 'bottom-right':
+        xPx = this.width - base_xPx
+        yPx = this.height - base_yPx;
+        break;
+    }
+
+    this.ctx.font = `12px sans-serif`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.strokeStyle = 'black';
+    this.ctx.fillStyle = 'black';
+    this.ctx.lineWidth = 2;
+
+    this.ctx.save();
+
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(mapOrientation * (Math.PI / 180));
+
+    // True north line
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, (height / 2));
+    this.ctx.lineTo(0, -(height / 2));
+    this.ctx.stroke();
+
+    // True north line star
+    const spikes = 5;
+    const outerRadius = 3;
+    const innerRadius = 1.5;
+    const step = Math.PI / spikes;
+    var rot = Math.PI / 2 * 3;
+    const starPositionX = 0;
+    const starPositionY = -(height / 2) - 7
+    var x = starPositionX;
+    var y = starPositionY;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(starPositionX, starPositionY - outerRadius)
+    for (var i = 0; i < spikes; i++) {
+      x = starPositionX + Math.cos(rot) * outerRadius;
+      y = starPositionY + Math.sin(rot) * outerRadius;
+      this.ctx.lineTo(x, y)
+      rot += step
+
+      x = starPositionX + Math.cos(rot) * innerRadius;
+      y = starPositionY + Math.sin(rot) * innerRadius;
+      this.ctx.lineTo(x, y)
+      rot += step
+    }
+
+    this.ctx.lineTo(starPositionX, starPositionY - outerRadius);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    // Magnetic north line
+    this.ctx.translate(0, (height / 2));
+    this.ctx.moveTo(0, 0);
+    this.ctx.rotate(magneticDeclination * (Math.PI / 180) + Math.PI);
+    this.ctx.lineTo(0, height);
+    this.ctx.stroke();
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(1, height - 1);
+    this.ctx.lineTo(5, height - 10);
+    this.ctx.lineTo(1, height - 10);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    this.ctx.restore();
+
+    this.ctx.save();
+
+    // Magnetic declinaison text
+    this.ctx.translate(xPx, yPx);
+    this.ctx.rotate(mapOrientation * (Math.PI / 180));
+
+    let magneticDeclinationText = '';
+    if (magneticDeclination > 0) {
+      magneticDeclinationText = `+${magneticDeclination}°`;
+    } else if (magneticDeclination == 0) {
+      magneticDeclinationText = `+0°`;
+    } else {
+      magneticDeclinationText = `${magneticDeclination}°`;
+    }
+
+    this.ctx.fillText(magneticDeclinationText, 0, + (height / 2) + 10);
+
+    this.ctx.restore();
+  }
+
   drawBullseye(x, y, color, radius = 8) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
@@ -135,6 +243,22 @@ class DrawUtils {
     this.ctx.lineWidth = strokeWidth;
 
     switch (type) {
+      case 'dashed':
+        const length = Math.hypot(endXPx - startXPx, endYPx - startYPx); // Get the Euclidean distance
+
+        const desiredDashLength = 5;
+        const dashCount = Math.floor(length / (desiredDashLength * 2)) || 1;
+        const dashLength = Math.round(length / (dashCount * 2));
+
+        this.ctx.setLineDash([dashLength, dashLength]);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+
+        this.ctx.setLineDash([]);
+        break;
       case 'simple':
         this.ctx.beginPath();
         this.ctx.moveTo(startXPx, startYPx);
@@ -199,9 +323,7 @@ class DrawUtils {
     const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
 
     // If the line is shorter than half the crossSpacing, don't draw any crosses
-    if (lineLength < crossSpacing / 2) {
-      return;
-    }
+    if (lineLength < crossSpacing / 2) return;
 
     // Calculate the starting point for crosses (middle of the line)
     const middleX = startXPx + (endXPx - startXPx) / 2;
@@ -230,6 +352,52 @@ class DrawUtils {
       this.ctx.restore();
     }
   }
+
+  drawCoastline(startX, startY, endX, endY, color, strokeWidth = 2, tickSpacing = 10, tickLength = 10, tickDirection = 1) {
+    const startXPx = (startX * this.nmToPixels) + this.centerX;
+    const startYPx = (startY * this.nmToPixels) + this.centerY;
+    const endXPx = (endX * this.nmToPixels) + this.centerX;
+    const endYPx = (endY * this.nmToPixels) + this.centerY;
+
+    // Draw the main coastline line
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = strokeWidth;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(startXPx, startYPx);
+    this.ctx.lineTo(endXPx, endYPx);
+    this.ctx.stroke();
+
+    // Calculate angle and line length
+    const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+    const normalAngle = angle - (Math.PI / 4); // Perpendicular direction
+    const lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
+
+    if (lineLength < tickSpacing / 2) return;
+
+    // Draw ticks along the line, centered
+    const middleX = startXPx + (endXPx - startXPx) / 2;
+    const middleY = startYPx + (endYPx - startYPx) / 2;
+
+    for (let i = -Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+      i <= Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+      i += tickSpacing) {
+      const baseX = middleX + i * Math.cos(angle);
+      const baseY = middleY + i * Math.sin(angle);
+
+      // Tick start and end points, pointing to one side (e.g., water side)
+      const tickStartX = baseX;
+      const tickStartY = baseY;
+      const tickEndX = baseX + tickDirection * tickLength * Math.cos(normalAngle);
+      const tickEndY = baseY + tickDirection * tickLength * Math.sin(normalAngle);
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(tickStartX, tickStartY);
+      this.ctx.lineTo(tickEndX, tickEndY);
+      this.ctx.stroke();
+    }
+  }
+
 
   drawInfiniteLine(x, y, angle, color, isDashed = false) {
     // Convert the starting point from nautical miles to pixels
@@ -312,6 +480,94 @@ class DrawUtils {
 
     let textX = 0, textY = 0;
     switch (type) {
+      case 'plus-top':
+      case 'plus-bottom':
+        this.ctx.strokeStyle = "black";
+        this.ctx.beginPath();
+        this.ctx.moveTo((textHeight / 2), padding);
+        this.ctx.lineTo(-(textHeight / 2), padding);
+        this.ctx.moveTo(0, (textHeight / 2) + padding);
+        this.ctx.lineTo(0, -(textHeight / 2) + padding);
+        this.ctx.stroke();
+
+        if (type == 'plus-top') {
+          textY -= textHeight - padding * 2;
+        } else {
+          textY += textHeight + padding * 2;
+        }
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - padding);
+        break;
+      case 'octogone':
+        const octo_x = -(padding) - ((textHeight * 1.2) / 2);
+        const octo_y = (-padding * 2) - ((textHeight * 1.2) / 2);
+        const octo_w = boxHeight * 1.2;
+        const octo_h = boxHeight * 1.2;
+
+        // Octagon "cut" size
+        const octo_cut = Math.min(octo_w, octo_h) * 0.3; // adjust cut ratio as needed
+
+        // Define 8 points of the octagon
+        const points = [
+          [octo_x + octo_cut, octo_y],                  // Top-left inner
+          [octo_x + octo_w - octo_cut, octo_y],         // Top-right inner
+          [octo_x + octo_w, octo_y + octo_cut],         // Right-top inner
+          [octo_x + octo_w, octo_y + octo_h - octo_cut],// Right-bottom inner
+          [octo_x + octo_w - octo_cut, octo_y + octo_h],// Bottom-right inner
+          [octo_x + octo_cut, octo_y + octo_h],         // Bottom-left inner
+          [octo_x, octo_y + octo_h - octo_cut],         // Left-bottom inner
+          [octo_x, octo_y + octo_cut],                  // Left-top inner
+        ];
+
+        // Draw octagon
+        this.ctx.beginPath();
+        this.ctx.moveTo(points[0][0], points[0][1]);
+        for (let i = 1; i < points.length; i++) {
+          this.ctx.lineTo(points[i][0], points[i][1]);
+        }
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fill();
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+
+        if (text.length > 2) {
+          this.ctx.fillStyle = "white";
+          this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
+        }
+        break;
+      case 'rounded-square':
+        const rs_radius = 6; // Corner radius
+        const rs_x = -textWidth / 2;
+        const rs_y = -padding - textHeight / 2;
+        const rs_w = boxWidth;
+        const rs_h = boxHeight;
+
+        // Begin rounded rectangle path
+        this.ctx.beginPath();
+        this.ctx.moveTo(rs_x + rs_radius, rs_y);
+        this.ctx.lineTo(rs_x + rs_w - rs_radius, rs_y);
+        this.ctx.quadraticCurveTo(rs_x + rs_w, rs_y, rs_x + rs_w, rs_y + rs_radius);
+        this.ctx.lineTo(rs_x + rs_w, rs_y + rs_h - rs_radius);
+        this.ctx.quadraticCurveTo(rs_x + rs_w, rs_y + rs_h, rs_x + rs_w - rs_radius, rs_y + rs_h);
+        this.ctx.lineTo(rs_x + rs_radius, rs_y + rs_h);
+        this.ctx.quadraticCurveTo(rs_x, rs_y + rs_h, rs_x, rs_y + rs_h - rs_radius);
+        this.ctx.lineTo(rs_x, rs_y + rs_radius);
+        this.ctx.quadraticCurveTo(rs_x, rs_y, rs_x + rs_radius, rs_y);
+        this.ctx.closePath();
+
+        this.ctx.fillStyle = "white";
+        this.ctx.fill();
+        this.ctx.strokeStyle = "black";
+        this.ctx.lineWidth = 1;
+        this.ctx.stroke();
+
+        textX = padding;
+        textY = padding;
+        break;
       case 'square':
         // Draw black square with white background
         this.ctx.fillStyle = "white";
@@ -346,7 +602,7 @@ class DrawUtils {
 
         if (text.length > 2) {
           this.ctx.fillStyle = "white";
-          this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight);
+          this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - (padding / 3));
         }
         break;
       case 'no-border':
@@ -504,7 +760,6 @@ class DrawUtils {
   }
 
   drawAircraft(x, y, angle, quantity, color) {
-    console.log(quantity);
     const length = 20;
     const width = 15;
     const offsetDistance = 8;
