@@ -5,7 +5,9 @@ const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'CARD L', 'CARD R', 'FL 4 L', 'FL 4 R'];
 const M2000C_OCA_recoveryOptions = ['SKY CLR', 'CLD BRK', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_landingOptions = ['INDIV', 'FORM'];
-const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8F', '6+8B', '6+8K', '6+8+14F', '6+8B+4x250 kg'];
+const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8A', '6+8F', '6+8B', '6+8K', '6+8+8F', '6+8+14A', '6+8+14F', '6+8B+4x250 kg'];
+const M2000C_OCA_targetingOptions = ['L/S/H', 'T/S/L', 'L/X/H', 'T/X/L'];
+const M2000C_OCA_sortingOptions = ['L/S/H', 'T/S/L', 'T/S/H', 'L/S/L'];
 const M2000C_OCA_riskLevelOptions = ['LOW', 'MEDIUM', 'HIGH'];
 const M2000C_OCA_yesNoOptions = ['Y', 'N'];
 const M2000C_OCA_wcsOptions = ['HOLD', 'TIGHT', 'FREE'];
@@ -2352,9 +2354,12 @@ const M2000C_OCA_1 = {
                 '0.62', // 6F
                 '0.50', // 6B
                 '0.47', // 6K
+                '0.65', // 6+8A
                 '0.60', // 6+8F
                 '0.49', // 6+8B
                 '0.47', // 6+8K
+                '0.57', // 6+8+8F
+                '0.61', // 6+8+14A
                 '0.56', // 6+8+14F
                 '0.45', // 6+8B+4x250 kg
             ],
@@ -2372,9 +2377,12 @@ const M2000C_OCA_1 = {
                 '505 - 0.91', // 6F
                 '480 - 0.88', // 6B
                 '465 - 0.85', // 6K
+                '505 - 0.91', // 6+8A
                 '490 - 0.89', // 6+8F
-                '472 - 0.86', // 6+8B
+                '470 - 0.86', // 6+8B
                 '445 - 0.83', // 6+8K
+                '475 - 0.87', // 6+8+8F
+                '480 - 0.88', // 6+8+14A
                 '465 - 0.85', // 6+8+14F
                 '445 - 0.83', // 6+8B+4x250 kg
             ],
@@ -2402,9 +2410,12 @@ const M2000C_OCA_1 = {
                 '143', // 6F
                 '133', // 6B
                 '129', // 6K
+                '146', // 6+8A
                 '142', // 6+8F
                 '132', // 6+8B
                 '128', // 6+8K
+                '141', // 6+8+8F
+                '144', // 6+8+14A
                 '139', // 6+8+14F
                 '128', // 6+8B+4x250 kg
             ],
@@ -2423,9 +2434,12 @@ const M2000C_OCA_1 = {
                 '575 - 0.93', // 6F
                 '565 - 0.91', // 6B
                 '560 - 0.89', // 6K
+                '575 - 0.93', // 6+8A
                 '570 - 0.91', // 6+8F
-                '562 - 0.90', // 6+8B
+                '560 - 0.90', // 6+8B
                 '555 - 0.87', // 6+8K
+                '565 - 0.90', // 6+8+8F
+                '565 - 0.90', // 6+8+14A
                 '560 - 0.89', // 6+8+14F
                 '555 - 0.87', // 6+8B+4x250 kg
             ],
@@ -2444,9 +2458,12 @@ const M2000C_OCA_1 = {
                 '2400 kg', // 6F
                 '2000 kg', // 6B
                 '1800 kg', // 6K
+                '2200 kg', // 6+8A
                 '2000 kg', // 6+8F
                 '1700 kg', // 6+8B
                 '1500 kg', // 6+8K
+                '1800 kg', // 6+8+8F
+                '1500 kg', // 6+8+14A
                 '1400 kg', // 6+8+14F
                 '700 kg', // 6+8B+4x250 kg
             ],
@@ -2473,9 +2490,12 @@ const M2000C_OCA_1 = {
                 '120', // 6F
                 '138', // 6B
                 '145', // 6K
+                '120', // 6+8A
                 '120', // 6+8F
                 '141', // 6+8B
                 '147', // 6+8K
+                '122', // 6+8+8F
+                '120', // 6+8+14A
                 '124', // 6+8+14F
                 '149', // 6+8B+4x250 kg
             ],
@@ -2493,9 +2513,12 @@ const M2000C_OCA_1 = {
                 '0.90 - FL400', // 6F
                 '0.90 - FL360', // 6B
                 '0.83 - FL300', // 6K
+                '0.90 - FL400', // 6+8A
                 '0.90 - FL400', // 6+8F
                 '0.90 - FL360', // 6+8B
                 '0.81 - FL300', // 6+8K
+                '0.88 - FL400', // 6+8+8F
+                '0.89 - FL400', // 6+8+14A
                 '0.84 - FL360', // 6+8+14F
                 '0.81 - FL300', // 6+8B+4x250 kg
             ],
@@ -2524,9 +2547,12 @@ const M2000C_OCA_1 = {
                 '153', // 6F
                 '165', // 6B
                 '170', // 6K
+                '153', // 6+8A
                 '153', // 6+8F
                 '167', // 6+8B
                 '172', // 6+8K
+                '154', // 6+8+8F
+                '153', // 6+8+14A
                 '155', // 6+8+14F
                 '173', // 6+8B+4x250 kg
             ],
@@ -2545,9 +2571,12 @@ const M2000C_OCA_1 = {
                 '375', // 6F
                 '385', // 6B
                 '385', // 6K
+                '370', // 6+8A
                 '370', // 6+8F
                 '385', // 6+8B
                 '380', // 6+8K
+                '380', // 6+8+8F
+                '380', // 6+8+14A
                 '365', // 6+8+14F
                 '380', // 6+8B+4x250 kg
             ],
@@ -2566,9 +2595,12 @@ const M2000C_OCA_1 = {
                 '2400 kg', // 6F
                 '2000 kg', // 6B
                 '1800 kg', // 6K
+                '2400 kg', // 6+8A
                 '2300 kg', // 6+8F
                 '1900 kg', // 6+8B
                 '1700 kg', // 6+8K
+                '2100 kg', // 6+8+8F
+                '2300 kg', // 6+8+14A
                 '2100 kg', // 6+8+14F
                 '1700 kg', // 6+8B+4x250 kg
             ],
@@ -3838,7 +3870,9 @@ const M2000C_OCA_2 = {
                         // Row 3
                         {
                             id: 'pilot-1-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 1 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [2, 3, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3847,7 +3881,9 @@ const M2000C_OCA_2 = {
                         // Row 4
                         {
                             id: 'pilot-2-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 2 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [3, 4, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3855,7 +3891,9 @@ const M2000C_OCA_2 = {
                         // Row 5
                         {
                             id: 'pilot-3-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 3 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [4, 5, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3864,7 +3902,9 @@ const M2000C_OCA_2 = {
                         // Row 6
                         {
                             id: 'pilot-4-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 4 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [5, 6, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3872,7 +3912,9 @@ const M2000C_OCA_2 = {
                         // Row 7
                         {
                             id: 'pilot-5-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 5 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [6, 7, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3881,7 +3923,9 @@ const M2000C_OCA_2 = {
                         // Row 8
                         {
                             id: 'pilot-6-targeting',
+                            type: 'input-select',
                             _description: 'Pilot 6 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [7, 8, 1, 3],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -3919,8 +3963,9 @@ const M2000C_OCA_2 = {
                         // Row 3-4
                         {
                             id: 'pilot-1-2-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-2 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [2, 4, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3929,8 +3974,9 @@ const M2000C_OCA_2 = {
                         // Row 5-6
                         {
                             id: 'pilot-3-4-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 3-4 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [4, 6, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3939,8 +3985,9 @@ const M2000C_OCA_2 = {
                         // Row 7-8
                         {
                             id: 'pilot-5-6-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 5-6 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [6, 8, 1, 3],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -3979,8 +4026,9 @@ const M2000C_OCA_2 = {
                         // Row 3-6
                         {
                             id: 'pilot-1-4-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-4 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [2, 6, 1, 3],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -3989,8 +4037,9 @@ const M2000C_OCA_2 = {
                         // Row 7-8
                         {
                             id: 'pilot-5-6-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 5-6 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [6, 8, 1, 3],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -4029,8 +4078,9 @@ const M2000C_OCA_2 = {
                         // Row 3-8
                         {
                             id: 'pilot-1-6-targeting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-6 targeting text field',
+                            options: M2000C_OCA_targetingOptions,
                             position: [2, 8, 1, 3],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -4054,7 +4104,9 @@ const M2000C_OCA_2 = {
                         // Row 3
                         {
                             id: 'pilot-1-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 1 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [2, 3, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4063,7 +4115,9 @@ const M2000C_OCA_2 = {
                         // Row 4
                         {
                             id: 'pilot-2-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 2 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [3, 4, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4071,7 +4125,9 @@ const M2000C_OCA_2 = {
                         // Row 5
                         {
                             id: 'pilot-3-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 3 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [4, 5, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4080,7 +4136,9 @@ const M2000C_OCA_2 = {
                         // Row 6
                         {
                             id: 'pilot-4-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 4 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [5, 6, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4088,7 +4146,9 @@ const M2000C_OCA_2 = {
                         // Row 7
                         {
                             id: 'pilot-5-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 5 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [6, 7, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4097,7 +4157,9 @@ const M2000C_OCA_2 = {
                         // Row 8
                         {
                             id: 'pilot-6-sorting',
+                            type: 'input-select',
                             _description: 'Pilot 6 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [7, 8, 3, 5],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -4135,8 +4197,9 @@ const M2000C_OCA_2 = {
                         // Row 3-4
                         {
                             id: 'pilot-1-2-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-2 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [2, 4, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4145,8 +4208,9 @@ const M2000C_OCA_2 = {
                         // Row 5-6
                         {
                             id: 'pilot-3-4-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 3-4 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [4, 6, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4155,8 +4219,9 @@ const M2000C_OCA_2 = {
                         // Row 7-8
                         {
                             id: 'pilot-5-6-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 5-6 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [6, 8, 3, 5],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -4195,8 +4260,9 @@ const M2000C_OCA_2 = {
                         // Row 3-6
                         {
                             id: 'pilot-1-4-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-4 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [2, 6, 3, 5],
                             borderWidths: [1, 1, 1, 1],
                             textAlign: 'center',
@@ -4205,8 +4271,9 @@ const M2000C_OCA_2 = {
                         // Row 7-8
                         {
                             id: 'pilot-5-6-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 5-6 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [6, 8, 3, 5],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -4245,8 +4312,9 @@ const M2000C_OCA_2 = {
                         // Row 3-8
                         {
                             id: 'pilot-1-6-sorting',
-                            type: 'textarea',
+                            type: 'input-select',
                             _description: 'Pilot 1-6 sorting text field',
+                            options: M2000C_OCA_sortingOptions,
                             position: [2, 8, 3, 5],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
