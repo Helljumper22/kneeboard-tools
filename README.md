@@ -17,7 +17,7 @@ All elements are placed based on their azimuth and distance relative to the bull
 #### Examples
 <p align="center">
   <img width="300" src="https://github.com/user-attachments/assets/7d3d37c6-5de4-4d04-84b6-6308da52e800">
-  <img width="30" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
+  <img width="30">
   <img width="300" src="https://github.com/user-attachments/assets/4ed0ecbd-b77c-42d0-8319-b904e0906ab1">
 </p>
 <p align="center">
@@ -31,7 +31,7 @@ The kneeboard pages are based on a template file that support shapes, drop-down 
 #### Examples
 <p align="center">
   <img width="300" src="https://github.com/user-attachments/assets/47684afb-e9f9-4491-b5f9-182383141801">
-  <img width="30" height="1" alt="" src="https://via.placeholder.com/40x1/FFFFFF/FFFFFF?text=+">
+  <img width="30" >
   <img width="300" src="https://github.com/user-attachments/assets/9c50d35b-a89e-4715-b927-5eca3c5416c2">
 </p>
 
