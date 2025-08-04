@@ -5520,7 +5520,7 @@ const M2000C_OCA_2 = {
             _description: 'Shotgun state text field',
             position: [40, 41, 5, 9],
             borderWidths: [1, 2, 2, 2],
-            default: '0 2 2+',
+            default: '0 0 2+',
             textAlign: 'center',
         },
         // Row 42
