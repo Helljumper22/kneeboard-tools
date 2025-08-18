@@ -6,8 +6,8 @@ class KneeboardM2000C_OCA extends Kneeboard {
     this.kneeboardId = this.kneeboardTemplate.id;
   }
 
-  init() {
-    super.init();
+  displayKneeboard() {
+    super.displayKneeboard();
 
     this.runContrails();
   }
@@ -16,7 +16,7 @@ class KneeboardM2000C_OCA extends Kneeboard {
     const slTempField = $('.kneeboard-fields-container').find('#sl-temp');
     const contrailsField = $('.kneeboard-fields-container').find('#contrails-alt');
 
-    $(slTempField).on('change', (event) => {
+    $(slTempField).off('change').on('change', (event) => {
       const slTempVal = $(event.target).val();
 
       const match = slTempVal.match(/(-?\d+)\s?(°?[CF])?/i);
