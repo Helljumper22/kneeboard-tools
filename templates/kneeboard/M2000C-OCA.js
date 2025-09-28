@@ -882,7 +882,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-1-number',
+            type: 'linked-text',
             _description: 'Pilot 1 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-1-radar-channel'],
+            ],
             position: [2, 3, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
@@ -962,7 +966,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-2-number',
+            type: 'linked-text',
             _description: 'Pilot 2 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-2-radar-channel'],
+            ],
             position: [3, 4, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
@@ -1036,7 +1044,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-3-number',
+            type: 'linked-text',
             _description: 'Pilot 3 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-3-radar-channel'],
+            ],
             position: [4, 5, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
@@ -1116,7 +1128,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-4-number',
+            type: 'linked-text',
             _description: 'Pilot 4 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-4-radar-channel'],
+            ],
             position: [5, 6, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center'
@@ -1190,7 +1206,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-5-number',
+            type: 'linked-text',
             _description: 'Pilot 5 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-5-radar-channel'],
+            ],
             position: [6, 7, 7, 8],
             borderWidths: [1, 1, 1, 1],
             textAlign: 'center',
@@ -1270,7 +1290,11 @@ const M2000C_OCA_1 = {
         },
         {
             id: 'pilot-6-number',
+            type: 'linked-text',
             _description: 'Pilot 6 number field',
+            linkedFields: [
+                ['M2000C-OCA-page-1', 'pilot-6-radar-channel'],
+            ],
             position: [7, 8, 7, 8],
             borderWidths: [1, 1, 2, 1],
             textAlign: 'center'

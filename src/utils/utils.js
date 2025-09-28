@@ -235,7 +235,18 @@ class Utils {
 
         switch (node.type) {
             case 'StringLiteral':
-                return node.value !== null ? node.value : JSON.parse(node.raw); // Fix for null value
+                // node.value should already contain the clean string
+                if (node.value !== null) return node.value;
+
+                // fallback: strip quotes and unescape manually
+                if (typeof node.raw === 'string') {
+                    return node.raw
+                        .replace(/^"(.*)"$/, '$1')   // remove outer quotes
+                        .replace(/\\n/g, '\n')       // unescape newlines
+                        .replace(/\\"/g, '"')        // unescape quotes
+                        .replace(/\\\\/g, '\\');     // unescape backslashes
+                }
+                return null;
             case 'NumericLiteral':
                 return node.value;
             case 'BooleanLiteral':
