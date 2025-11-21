@@ -1,147 +1,1351 @@
-defaultBullseyeRingsRange = 20;
-defaultBullseyeLinesAngle = 30;
-
-bullseyeDataKey = 'bullseye-data';
-mobsDataKey = 'mobs-data';
-baseLinesDataKey = 'base-lines-data';
-coastlinesDataKey = 'coastlines-data';
-bordersDataKey = 'borders-data';
-ringsDataKey = 'rings-data';
-areaPointsDataKey = 'area-points-data';
-faorPointsDataKey = 'faor-points-data';
-gatesDataKey = 'gates-data';
-arrowsDataKey = 'arrows-data';
-aircraftDataKey = 'aircraft-data';
-navPointsDataKey = 'nav-points-data';
-capPointsDataKey = 'cap-points-data';
-pointsDataKey = 'points-data';
-
-fieldsetsDataKey = 'fieldsets-data';
-
 class BullseyeMap {
+  mapComponentList = [
+    {
+      id: 'bullseye',
+      label: 'Bullseye options',
+      description: '',
+      fields: [
+        {
+          id: 'display',
+          label: 'Display',
+          type: 'checkbox',
+          default: 'checked',
+        },
+        {
+          id: 'limit-to-area',
+          label: 'Limit to area',
+          type: 'checkbox',
+          default: 'checked',
+        },
+        {
+          id: 'name',
+          label: 'Bullseye name',
+          type: 'text',
+        },
+        {
+          id: 'name-position',
+          label: 'Name position',
+          type: 'range',
+          options: {
+            min: 0,
+            max: 360
+          },
+          default: 180,
+        },
+        {
+          id: 'map-orientation',
+          label: 'Map orientation (°)',
+          type: 'number',
+          default: 0,
+        },
+        {
+          id: 'line-angles',
+          label: 'Line angles (°)',
+          type: 'number',
+          default: 30,
+        },
+        {
+          id: 'half-lines',
+          label: 'Half lines',
+          type: 'checkbox',
+          default: 'checked',
+        },
+        {
+          id: 'ring-ranges',
+          label: 'Ring ranges (nm)',
+          type: 'number',
+          default: 20,
+        },
+        {
+          id: 'ring-range-positions',
+          label: 'Ring range positions',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'ring-range-position',
+              label: 'Ring range position',
+              type: 'range',
+              options: {
+                min: 0,
+                max: 360
+              },
+              default: 180,
+            }
+          ]
+        },
+      ],
+      drawFunction: this.drawBullseye.bind(this)
+    },
+    {
+      id: 'base-lines',
+      label: 'Base Lines',
+      fields: [
+        {
+          id: 'display',
+          label: 'Display',
+          type: 'checkbox',
+        },
+        {
+          id: 'location',
+          label: 'Location',
+          type: 'select',
+          options: {
+            'top-left': 'Top left',
+            'top-right': 'Top right',
+            'bottom-right': 'Bottom right',
+            'bottom-left': 'Bottom left',
+          },
+          default: 'top-left',
+        },
+        {
+          id: 'magnetic-declination',
+          label: 'Magnetic declination',
+          type: 'number',
+          default: 0,
+        },
+      ],
+      drawFunction: this.drawBaseLines.bind(this)
+    },
+    {
+      id: 'map-area-points',
+      label: 'Map Area Points',
+      fields: [
+        {
+          id: 'points',
+          label: 'Points',
+          type: 'multiple',
+          options: {
+            repeatable: true,
+            sortable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (°)',
+              type: 'number',
+              default: '',
+            },
+          ]
+        },
+      ],
+      drawFunction: this.drawMapArea.bind(this)
+    },
+    {
+      id: 'lines',
+      label: 'Lines',
+      fields: [
+        {
+          id: 'lines',
+          label: 'Lines',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'simple': 'Simple',
+                'double': 'Double',
+                'dashed': 'Dashed',
+                'border': 'Border',
+                'coastline': 'Coastline',
+              },
+              default: 'simple',
+            },
+            {
+              id: 'color',
+              label: 'Color',
+              type: 'color',
+              default: '#000000',
+            },
+            /*{
+              id: 'name-position',
+              label: 'Name position',
+              type: 'range',
+              options: {
+                min: 0,
+                max: 360
+              },
+              default: 180,
+            },*/
+            {
+              id: 'points',
+              label: 'Points',
+              type: 'multiple',
+              options: {
+                repeatable: true,
+                sortable: true
+              },
+              fields: [
+                {
+                  id: 'azimuth',
+                  label: 'Azimuth (°)',
+                  type: 'number',
+                  default: '',
+                },
+                {
+                  id: 'distance',
+                  label: 'Distance (°)',
+                  type: 'number',
+                  default: '',
+                },
+              ]
+            }
+          ]
+        },
+      ],
+      drawFunction: this.drawLines.bind(this)
+    },
+    {
+      id: 'areas',
+      label: 'Areas',
+      fields: [
+        {
+          id: 'areas',
+          label: 'Areas',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'simple': 'Simple',
+                'double': 'Double',
+                'dashed': 'Dashed',
+                'border': 'Border',
+                'coastline': 'Coastline',
+                'no-border': 'No border',
+              },
+              default: 'simple',
+            },
+            {
+              id: 'color',
+              label: 'Color',
+              type: 'color',
+              default: '#000000',
+            },
+            {
+              id: 'fill',
+              label: 'Fill',
+              type: 'color',
+              default: '#00000000',
+              options: {
+                transparency: true,
+              }
+            },
+            /*{
+              id: 'name-position',
+              label: 'Name position',
+              type: 'range',
+              options: {
+                min: 0,
+                max: 360
+              },
+              default: 180,
+            },*/
+            {
+              id: 'points',
+              label: 'Points',
+              type: 'multiple',
+              options: {
+                repeatable: true,
+                sortable: true
+              },
+              fields: [
+                {
+                  id: 'name',
+                  label: 'Name',
+                  type: 'text',
+                  default: '',
+                },
+                {
+                  id: 'azimuth',
+                  label: 'Azimuth (°)',
+                  type: 'number',
+                  default: '',
+                },
+                {
+                  id: 'distance',
+                  label: 'Distance (°)',
+                  type: 'number',
+                  default: '',
+                },
+              ]
+            }
+          ]
+        },
+      ],
+      drawFunction: this.drawAreas.bind(this)
+    },
+    {
+      id: 'rings',
+      label: 'Rings',
+      fields: [
+        {
+          id: 'rings',
+          label: 'Rings',
+          type: 'multiple',
+          options: {
+            repeatable: true,
+            sortable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'area': 'Area',
+                'threat': 'Threat',
+              },
+              default: 'area',
+            },
+            /*{
+              id: 'name-position',
+              label: 'Name position',
+              type: 'range',
+              options: {
+                min: 0,
+                max: 360
+              },
+              default: 180,
+            },*/
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'radius',
+              label: 'Radius (nm)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'color',
+              label: 'Color',
+              type: 'color',
+              default: '#000000',
+            },
+            {
+              id: 'fill',
+              label: 'Fill',
+              type: 'color',
+              default: '#00000000',
+              options: {
+                transparency: true,
+              }
+            },
+          ]
+        },
+      ],
+      drawFunction: this.drawRings.bind(this)
+    },
+    {
+      id: 'racetracks',
+      label: 'Racetracks',
+      fields: [
+        {
+          id: 'racetracks',
+          label: 'Racetracks',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'point-name',
+              label: 'Point name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'racetrack-name',
+              label: 'Racetrack name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'length',
+              label: 'Length (nm)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'width',
+              label: 'Width (nm)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'orientation',
+              label: 'Orientation (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'side',
+              label: 'Side',
+              type: 'select',
+              options: {
+                'left': 'Left',
+                'right': 'Right',
+              },
+              default: 'left',
+            },
+            {
+              id: 'color',
+              label: 'Color',
+              type: 'color',
+              default: '#000000',
+            },
+          ]
+        }
+      ],
+      drawFunction: this.drawRacetracks.bind(this)
+    },
+    {
+      id: 'objects',
+      label: 'Objects',
+      fields: [
+        {
+          id: 'objects',
+          label: 'Objects',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'name-position',
+              label: 'Name position',
+              type: 'range',
+              options: {
+                min: 0,
+                max: 360
+              },
+              default: 180,
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'airfield': 'Airfield',
+                'gate': 'Gate',
+                'arrow': 'Arrow',
+                '1-aircraft': '1 Aircraft',
+                '2-aircraft': '2 Aircraft',
+                '3-aircraft': '3 Aircraft',
+                '4-aircraft': '4 Aircraft',
+              },
+              default: 'airfield',
+            },
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'orientation',
+              label: 'Orientation (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'color',
+              label: 'Color',
+              type: 'color',
+              default: '#000000',
+            },
+          ]
+        }
+      ],
+      drawFunction: this.drawObjects.bind(this)
+    },
+    {
+      id: 'points',
+      label: 'Points',
+      fields: [
+        {
+          id: 'points',
+          label: 'Points',
+          type: 'multiple',
+          options: {
+            repeatable: true
+          },
+          fields: [
+            {
+              id: 'name',
+              label: 'Name',
+              type: 'text',
+              default: '',
+            },
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'square': 'Square',
+                'triangle': 'Triangle',
+                'no-border': 'No border',
+                'clear': 'Clear',
+              },
+              default: 'square',
+            },
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'fill',
+              label: 'Fill',
+              type: 'color',
+              default: '#FFFFFF',
+            },
+          ]
+        }
+      ],
+      drawFunction: this.drawPoints.bind(this)
+    },
+  ]
+
   constructor() {
     this.utils = new Utils();
-    this.mapDrawUtils = new MapDrawUtils();
-
-    this.bullseye = {};
-    this.baseLines = {};
-    this.coastlines = [];
-    this.mobs = [];
-    this.borders = [];
-    this.rings = [];
-    this.areaPoints = [];
-    this.faorPoints = [];
-    this.gates = [];
-    this.arrows = [];
-    this.aircraft = [];
-    this.navPoints = [];
-    this.capPoints = [];
-    this.points = [];
+    this.mapDrawUtils = new MapDrawUtils('.map-canvas');
+    this.mapFieldsUtils = new MapFieldsUtils(this, $('.tab[attr-tab="bullseye-map-tab"]'));
 
     this.furthestPoint = 0;
-    this.furthestPointMargin = 1.2;
+    this.furthestPointMargin = 1.25;
     this.defaultScale = 100;
 
-    // Initialize color pickers
-    $('.color-picker').each((index, element) => {
-      this.initColorPicker(element);
-    });
+    this.boundingBoxPoints = [];
+    this.pointNamesData = [];
 
-    // Get saved data from local storage.
-    this.getData();
+    this.mapFieldsUtils.displayComponentListButtons();
 
-    // Import data from JSON file
-    $('.import-map-button').off('click').on('click', async () => {
-      const mapData = await this.utils.importData('.json');
-
-      if (mapData) {
-        this.resetFields();
-
-        localStorage.setItem(bullseyeDataKey, JSON.stringify(mapData.bullseye));
-        localStorage.setItem(baseLinesDataKey, JSON.stringify(mapData.baseLines));
-        localStorage.setItem(coastlinesDataKey, JSON.stringify(mapData.coastlines));
-        localStorage.setItem(mobsDataKey, JSON.stringify(mapData.mobs));
-        localStorage.setItem(bordersDataKey, JSON.stringify(mapData.borders));
-        localStorage.setItem(ringsDataKey, JSON.stringify(mapData.rings));
-        localStorage.setItem(areaPointsDataKey, JSON.stringify(mapData.areaPoints));
-        localStorage.setItem(faorPointsDataKey, JSON.stringify(mapData.faorPoints));
-        localStorage.setItem(gatesDataKey, JSON.stringify(mapData.gates));
-        localStorage.setItem(arrowsDataKey, JSON.stringify(mapData.arrows));
-        localStorage.setItem(aircraftDataKey, JSON.stringify(mapData.aircraft));
-        localStorage.setItem(navPointsDataKey, JSON.stringify(mapData.navPoints));
-        localStorage.setItem(capPointsDataKey, JSON.stringify(mapData.capPoints));
-        localStorage.setItem(pointsDataKey, JSON.stringify(mapData.points));
-
-        this.getData();
-
-        this.updateMap();
-      }
-    });
-
-    // Export data to JSON file.
-    $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
-
-    // Export map as png.
-    $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
-
-    // Reset all fields.
-    $('.reset-map-fields-button').off('click').on('click', () => {
-      if (window.confirm('Are you sure ? All data will be lost.')) {
-        this.resetFields();
-
-        this.updateMap();
-      }
-    });
-
-    // Initialize the area point sorting.
-    $('.sortable-container').sortable({
-      cursor: 'grabbing',
-      axis: 'y',
-      classes: { 'ui-sortable-helper': 'dragged' },
-      scrollSpeed: 5,
-      stop: (event, ui) => {
-        // Reset inline styles to prevent misalignment
-        $(ui.item).css({
-          left: '',
-          top: '',
-          position: ''
-        });
-
-        this.updateMap()
-      }
-    });
-
-    // Add element to list.
-    $('.add-button').off('click').on('click', (event) => this.addElement(event));
-
-    // Delete element from list.
-    $('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-
-    // Update map when a field is changed.
-    $('.update-field').off('input').on('input', () => this.updateMap());
-
-    // Get the current state of the fieldsets.
-    this.fieldsetsData = [];
-    $('fieldset').each((index, element) => {
-      this.fieldsetsData.push({
-        id: $(element).attr('id'),
-        collapsed: $(element).hasClass('collapsed')
-      })
-    });
-
-    // Display or hide the fieldsets.
-    $('.toggle-fieldset').off('click').on('click', (event) => {
-      const fieldset = $(event.target).closest('fieldset');
-      fieldset.toggleClass('collapsed');
-
-      const fieldsetData = this.fieldsetsData.find((fieldsetData) => fieldsetData.id == $(fieldset).attr('id'))
-      fieldsetData.collapsed = $(fieldset).hasClass('collapsed');
-
-      localStorage.setItem(fieldsetsDataKey, JSON.stringify(this.fieldsetsData));
-    });
-
-    // First drawing of the map.
     this.updateMap();
+
+
+    $('.import-map-button').off('click').on('click', async () => this.importData());
+    $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
+    $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
+    $('.reset-map-map-button').off('click').on('click', () => this.resetMap());
+  }
+
+  updateMap() {
+    this.furthestPoint = 0;
+
+    this.mapDrawUtils.clearCanvas();
+    this.mapDrawUtils.setToForeground();
+
+    // Recalculate scale and redraw map
+    this.runScale();
+
+    const bullseyeData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'bullseye'));
+    const limitToArea = bullseyeData['limit-to-area'] ?? true;
+    const mapOrientation = bullseyeData['map-orientation'] ?? 0;
+
+    const mapAreaPointsData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'map-area-points'));
+    const areaPoints = [];
+    if (Array.isArray(mapAreaPointsData.points) && mapAreaPointsData.points.length > 0) {
+      mapAreaPointsData.points.forEach(areaPoint => {
+        if (this.utils.isNumber(areaPoint['azimuth']) && this.utils.isNumber(areaPoint['distance'])) {
+          const angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const x = areaPoint['distance'] * Math.cos(angleRad);
+          const y = areaPoint['distance'] * Math.sin(angleRad);
+
+          areaPoints.push({ x, y })
+        }
+      });
+    }
+
+    this.pointNamesData = [];
+    this.mapComponentList.forEach(mapComponent => {
+      mapComponent.drawFunction(mapComponent, limitToArea, mapOrientation, areaPoints);
+    });
+
+    this.drawPointNames(areaPoints);
+  }
+
+  runScale() {
+    // Determine the furthest graphic distance
+    this.furthestPoint = 0;
+
+    // Initialize bounding box variables
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+
+    // Rebuild boundingBoxPoints from stored component data (azimuth/distance => x,y)
+    this.boundingBoxPoints = [];
+
+    // Iterate components and scan stored data iteratively (no nested functions)
+    this.mapComponentList.forEach(component => {
+      const stored = this.getComponentData(component);
+      if (!stored) return;
+
+      // Use a stack to traverse objects/arrays without recursion
+      const stack = [];
+      if (Array.isArray(stored)) {
+        for (let i = 0; i < stored.length; i++) stack.push(stored[i]);
+      } else if (stored && typeof stored === 'object') {
+        stack.push(stored);
+      }
+
+      while (stack.length) {
+        const obj = stack.pop();
+        if (!obj || typeof obj !== 'object') continue;
+
+        // If this object looks like a polar point, parse and push
+        if (Object.prototype.hasOwnProperty.call(obj, 'azimuth') && Object.prototype.hasOwnProperty.call(obj, 'distance')) {
+          const az = obj['azimuth'];
+          const dist = obj['distance'];
+
+          if (az !== '' && az != null && dist !== '' && dist != null) {
+            const a = parseFloat(az);
+            const d = parseFloat(dist);
+            if (this.utils.isNumber(a) && this.utils.isNumber(d)) {
+              // Convert azimuth (degrees) to radians. Assume azimuth 0 = north, clockwise positive.
+              const rad = a * Math.PI / 180;
+
+              // x = -d * sin(rad), y = -d * cos(rad)
+              const x = d * Math.sin(rad);
+              const y = -d * Math.cos(rad);
+
+              this.boundingBoxPoints.push({ x, y });
+            }
+          }
+        }
+
+        // Push child objects/arrays onto the stack for further processing
+        Object.values(obj).forEach(val => {
+          if (Array.isArray(val)) {
+            for (let i = 0; i < val.length; i++) stack.push(val[i]);
+          } else if (val && typeof val === 'object') {
+            stack.push(val);
+          }
+        });
+      }
+    });
+
+    // Use collected bounding points to compute box; if none, fall back to defaults below
+    if (this.boundingBoxPoints.length > 0) {
+      for (let i = 0; i < this.boundingBoxPoints.length; i++) {
+        const boundingBoxPoint = this.boundingBoxPoints[i];
+        minX = Math.min(minX, boundingBoxPoint.x);
+        maxX = Math.max(maxX, boundingBoxPoint.x);
+        minY = Math.min(minY, boundingBoxPoint.y);
+        maxY = Math.max(maxY, boundingBoxPoint.y);
+      }
+    }
+
+    // Calculate the center of the bounding box
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    const maxDistance = Math.max(maxX - centerX, maxY - centerY, minX - centerX, minY - centerY);
+
+    this.furthestPoint = maxDistance * this.furthestPointMargin;
+
+    if (this.furthestPoint == 0) this.furthestPoint = this.defaultScale;
+
+    // Update the scale in DrawUtils
+    this.mapDrawUtils.setScale(this.furthestPoint);
+
+    // Update DrawUtils center
+    this.mapDrawUtils.setCenter(centerX, centerY);
+  }
+
+  drawBullseye(component, limitToArea, mapOrientation, areaPoints) {
+    const bullseyeData = this.getComponentData(component);
+
+    bullseyeData['display'] = bullseyeData['display'] ?? component.fields.find(field => field.id == 'display').default == 'checked';
+    bullseyeData['limit-to-area'] = bullseyeData['limit-to-area'] ?? component.fields.find(field => field.id == 'limit-to-area').default == 'checked';
+    bullseyeData['name'] = bullseyeData['name'] ?? component.fields.find(field => field.id == 'name').default;
+    bullseyeData['name-position'] = bullseyeData['name-position'] ?? component.fields.find(field => field.id == 'name-position').default;
+    bullseyeData['map-orientation'] = bullseyeData['map-orientation'] ?? component.fields.find(field => field.id == 'map-orientation').default;
+    bullseyeData['line-angles'] = bullseyeData['line-angles'] ?? component.fields.find(field => field.id == 'line-angles').default;
+    bullseyeData['half-lines'] = bullseyeData['half-lines'] ?? component.fields.find(field => field.id == 'half-lines').default == 'checked';
+    bullseyeData['ring-ranges'] = bullseyeData['ring-ranges'] ?? component.fields.find(field => field.id == 'ring-ranges').default;
+    bullseyeData['ring-range-positions'] = bullseyeData['ring-range-positions'] ?? [{ 'ring-range-position': component.fields.find(field => field.id == 'ring-range-positions').fields.find(field => field.id == 'ring-range-position').default }];
+
+    if (bullseyeData['display']) {
+      const bullseyeInArea = (bullseyeData['limit-to-area']) && this.utils.isPointWithinArea({ x: 0, y: 0 }, areaPoints);
+
+      if (limitToArea && areaPoints.length > 2 && bullseyeInArea) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      // Draw cardinal lines
+      const linesAngle = bullseyeData['half-lines'] ? this.utils.getClosestDivisorTo90(bullseyeData['line-angles']) / 2 : this.utils.getClosestDivisorTo90(bullseyeData['line-angles']);
+
+      let dashed = false;
+      const displayedAngles = [];
+      let displayText = true;
+
+      for (let angle = 0; angle < 360; angle += linesAngle) {
+        if (angle < 180) {
+          const angleRad = (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+          this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
+        }
+
+        if (displayText) {
+          const intersections = [];
+          if (bullseyeInArea) {
+            // Display the bullseye angle text at the intersection between the angle lines and the area borders.
+            // Calculate intersection points with area point lines
+            areaPoints.forEach((point, index) => {
+              const nextPoint = areaPoints[(index + 1) % areaPoints.length];
+
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180) }, { start: point, end: nextPoint });
+              if (intersection) {
+                intersections.push(intersection);
+              }
+            });
+          } else {
+            // Display the bullseye angle text at the border of the canvas 
+            const corners = this.mapDrawUtils.getCanvasCorners(20);
+            corners.forEach((corner, index) => {
+              const nextCorner = corners[(index + 1) % corners.length];
+
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180) }, { start: corner, end: nextCorner });
+              if (intersection) {
+                intersections.push(intersection);
+              }
+            });
+          }
+
+          if (intersections.length > 0) {
+            const farthestIntersection = intersections.reduce((a, b) => a['distance'] > b['distance'] ? a : b);
+
+            const textAngle = (angle + 90) % 360;
+            if (!displayedAngles.includes(textAngle)) {
+              this.pointNamesData.push({
+                limitToArea: false,
+                x: farthestIntersection.x,
+                y: farthestIntersection.y,
+                text: `${textAngle}°`,
+                type: 'clear',
+                fontSize: 14,
+                offsetDistance: bullseyeInArea ? 15 : 0,
+                offsetAngle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180),
+                textAngle: 0,
+                padding: 0
+              });
+
+              displayedAngles.push(textAngle);
+            }
+          }
+        }
+
+        if (bullseyeData['half-lines']) {
+          dashed = !dashed;
+          displayText = !displayText;
+        }
+      }
+
+      // Draw rings
+      if (bullseyeData['ring-ranges'] > 0) {
+        const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
+        const ringCount = Math.ceil(maxRadius / bullseyeData['ring-ranges']); // Calculate how many rings to draw
+        for (let i = 1; i <= ringCount + 1; i++) {
+          const radius = i * bullseyeData['ring-ranges'];
+
+          this.mapDrawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
+
+          // Add rings range to drawPoints array
+          if (bullseyeData['ring-range-positions']?.length > 0) {
+            bullseyeData['ring-range-positions'].forEach((rangePosition) => {
+              const ringsRangeAngle = Math.round(rangePosition['ring-range-position'] / linesAngle) * linesAngle;
+              const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+              const ringTextX = radius * Math.cos(angleRad);
+              const ringTextY = radius * Math.sin(angleRad);
+
+              if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, areaPoints)) {
+                this.pointNamesData.push({
+                  limitToArea: false,
+                  x: ringTextX,
+                  y: ringTextY,
+                  text: radius,
+                  type: 'clear',
+                  fontSize: 14,
+                  offsetDistance: 8,
+                  offsetAngle: angleRad,
+                  textAngle: 0,
+                  padding: 0
+                });
+              }
+            });
+          }
+        }
+      }
+
+      // Draw bullseye dot
+      this.mapDrawUtils.drawBullseye(0, 0, 'black');
+
+      if (bullseyeData['name'] != '' && bullseyeData['name'] != undefined && bullseyeData['display']) {
+        const angleRad = ((bullseyeData['name-position'] - 90) * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+        this.pointNamesData.push({
+          limitToArea: bullseyeInArea,
+          x: 0,
+          y: 0,
+          text: bullseyeData['name'],
+          type: 'clear',
+          fontSize: 16,
+          offsetDistance: 25,
+          offsetAngle: angleRad,
+          textAngle: 0,
+          padding: 0
+        });
+      }
+
+      this.mapDrawUtils.unclipCanvas();
+    }
+  }
+
+  drawBaseLines(component, limitToArea, mapOrientation) {
+    const baselineData = this.getComponentData(component);
+
+    if (baselineData && baselineData.display) {
+      this.mapDrawUtils.drawBaseLines(baselineData['location'] ?? 'top-left', this.utils.isNumber(baselineData['magnetic-declination']) ? baselineData['magnetic-declination'] : 0, mapOrientation);
+    }
+  }
+
+  drawMapArea(component, limitToArea, mapOrientation) {
+    const mapAreaData = this.getComponentData(component);
+
+    if (mapAreaData && mapAreaData.points?.length > 0) {
+      for (let i = 0; i < mapAreaData.points.length; i++) {
+        const nextAreaPointIndex = (i + 1) % mapAreaData.points.length;
+
+        if (this.utils.isNumber(mapAreaData.points[i]['azimuth']) && this.utils.isNumber(mapAreaData.points[i]['distance'])) {
+          const startAngleRad = ((mapAreaData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const startX = mapAreaData.points[i]['distance'] * Math.cos(startAngleRad);
+          const startY = mapAreaData.points[i]['distance'] * Math.sin(startAngleRad);
+
+          if (mapAreaData.points[i]['name'] != '' && mapAreaData.points[i]['name'] != undefined) {
+            this.pointNamesData.push({
+              limitToArea: false,
+              x: startX,
+              y: startY,
+              text: mapAreaData.points[i]['name'],
+              type: 'square',
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
+
+          if (this.utils.isNumber(mapAreaData.points[nextAreaPointIndex]['azimuth']) && this.utils.isNumber(mapAreaData.points[nextAreaPointIndex]['distance'])) {
+            const endAngleRad = ((mapAreaData.points[nextAreaPointIndex]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            const endX = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.cos(endAngleRad);
+            const endY = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.sin(endAngleRad);
+
+            this.mapDrawUtils.drawLine(startX, startY, endX, endY, 'black', 3, 'simple');
+          }
+        }
+      };
+    }
+  }
+
+  drawLines(component, limitToArea, mapOrientation, areaPoints) {
+    const linesData = this.getComponentData(component);
+
+    if (linesData && linesData.lines?.length > 0) {
+      if (limitToArea && areaPoints.length > 2) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      linesData.lines.forEach(lineData => {
+        for (let i = 1; i < lineData.points.length; i++) {
+          if (this.utils.isNumber(lineData.points[i - 1]['azimuth']) && this.utils.isNumber(lineData.points[i - 1]['distance'])
+            && this.utils.isNumber(lineData.points[i]['azimuth']) && this.utils.isNumber(lineData.points[i]['distance'])) {
+            const startAngleRad = ((lineData.points[i - 1]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            const startX = lineData.points[i - 1]['distance'] * Math.cos(startAngleRad);
+            const startY = lineData.points[i - 1]['distance'] * Math.sin(startAngleRad);
+
+            const endAngleRad = ((lineData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            const endX = lineData.points[i]['distance'] * Math.cos(endAngleRad);
+            const endY = lineData.points[i]['distance'] * Math.sin(endAngleRad);
+
+            const color = lineData['color'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'color').default;
+            const type = lineData['type'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'type').default;
+
+            this.mapDrawUtils.drawLine(startX, startY, endX, endY, color, 3, type);
+          }
+        };
+      });
+    }
+  }
+
+  drawRings(component, limitToArea, mapOrientation, areaPoints) {
+    const ringsData = this.getComponentData(component);
+
+    if (ringsData && ringsData.rings?.length > 0) {
+      if (limitToArea && areaPoints.length > 2) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      ringsData.rings.forEach((ring) => {
+        const angleRad = ((ring['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+        const x = ring['distance'] * Math.cos(angleRad);
+        const y = ring['distance'] * Math.sin(angleRad);
+
+        const color = ring['color'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'color').default;
+        const fill = ring['fill'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'fill').default;
+
+        this.mapDrawUtils.drawRing(x, y, ring.radius, color, 2, fill);
+
+        if (ring['name'] != '' && ring['name'] != undefined) {
+          let type = '';
+          switch (ring['type']) {
+            case 'area':
+              type = 'clear';
+              break;
+            case 'threat':
+              type = "plus-bottom";
+              break;
+          }
+
+          this.pointNamesData.push({
+            limitToArea: false,
+            x,
+            y,
+            text: ring['name'],
+            type,
+            fontSize: 16,
+            offsetDistance: 0,
+            offsetAngle: 0,
+            textAngle: 0,
+            padding: 2
+          });
+        }
+      });
+
+      this.mapDrawUtils.unclipCanvas();
+    }
+  }
+
+  drawAreas(component, limitToArea, mapOrientation, areaPoints) {
+    const areasData = this.getComponentData(component);
+
+    if (areasData.areas && areasData.areas?.length > 0) {
+      if (limitToArea && areaPoints.length > 2) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      areasData.areas.forEach(area => {
+        if (area && area.points?.length > 0) {
+          const corners = [];
+
+          const color = area['color'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'color').default;
+          const type = area['type'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'type').default;
+          const fill = area['fill'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'fill').default;
+
+          area.points.forEach(areaPoint => {
+            const angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            const x = areaPoint['distance'] * Math.cos(angleRad);
+            const y = areaPoint['distance'] * Math.sin(angleRad);
+
+            corners.push({ x, y });
+          });
+
+          this.mapDrawUtils.drawPolygon(corners, color, 3, type, fill);
+
+          if (area['name'] != '' && area['name'] != undefined) {
+            const { x: areaNameX, y: areaNameY } = this.utils.getCenter(corners);
+
+            this.pointNamesData.push({
+              limitToArea: false,
+              x: areaNameX,
+              y: areaNameY,
+              text: area['name'],
+              type: 'clear',
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
+        }
+      });
+    }
+  }
+
+  drawRacetracks(component, limitToArea, mapOrientation, areaPoints) {
+    const racetracksData = this.getComponentData(component);
+
+    if (racetracksData && racetracksData.racetracks?.length > 0) {
+      if (limitToArea && areaPoints.length > 2) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      racetracksData.racetracks.forEach(racetrack => {
+        racetrack['orientation'] = this.utils.isNumber(racetrack['orientation']) ? racetrack['orientation'] : 0
+        if (
+          this.utils.isNumber(racetrack['azimuth'])
+          && this.utils.isNumber(racetrack['distance'])
+          && this.utils.isNumber(racetrack['length']) && racetrack['length'] >= 0
+          && this.utils.isNumber(racetrack['width']) && racetrack['width'] >= 0
+        ) {
+          const angleRad = ((racetrack['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const x = racetrack['distance'] * Math.cos(angleRad);
+          const y = racetrack['distance'] * Math.sin(angleRad);
+
+          const side = area['side'] ? area['side'] == 'left' : component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'type').default == 'left';
+          const color = racetrack['color'] ?? component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'color').default;
+
+          this.mapDrawUtils.drawRacetrack(x, y, racetrack['length'], racetrack['width'], (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), side, color);
+
+          if (racetrack['point-name'] != '' && racetrack['point-name'] != undefined) {
+            this.pointNamesData.push({
+              limitToArea: false,
+              x,
+              y,
+              text: racetrack['point-name'],
+              type: 'square',
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
+
+          if (racetrack['racetrack-name'] != '' && racetrack['racetrack-name'] != undefined) {
+            const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side == 'left', mapOrientation);
+
+            const { x: racetrackNamex, y: racetrackNameY } = this.utils.getCenter(corners);
+
+            let racetrackNameAngle = (((racetrack['orientation'] + 90) * (Math.PI / 180)) % 360) + (mapOrientation * Math.PI / 180);
+            if (racetrackNameAngle <= Math.PI * 1.5 && racetrackNameAngle >= Math.PI / 2) {
+              racetrackNameAngle -= Math.PI;
+            }
+
+            this.pointNamesData.push({
+              limitToArea: false,
+              x: racetrackNamex,
+              y: racetrackNameY,
+              text: racetrack['racetrack-name'],
+              type: 'clear',
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: racetrackNameAngle,
+              padding: 0
+            });
+          }
+        }
+      });
+    }
+  }
+
+  drawObjects(component, limitToArea, mapOrientation, areaPoints) {
+    const objectsData = this.getComponentData(component);
+
+    if (objectsData && objectsData.objects?.length > 0) {
+      objectsData.objects.forEach((object) => {
+        if (this.utils.isNumber(object['azimuth']) && this.utils.isNumber(object['distance'])) {
+          const angleRad = ((object['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const x = object['distance'] * Math.cos(angleRad);
+          const y = object['distance'] * Math.sin(angleRad);
+
+          const color = object['color'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'color').default;
+
+          switch (object.type) {
+            case 'airfield':
+              this.mapDrawUtils.drawAirbase(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), color);
+              break;
+            case 'gate':
+              this.mapDrawUtils.drawGate(x, y, 15, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), color)
+              break;
+            case 'arrow':
+              this.mapDrawUtils.drawArrow(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 10, 5, color);
+              break;
+            case '1-aircraft':
+              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 1, color);
+              break;
+            case '2-aircraft':
+              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 2, color);
+              break;
+            case '3-aircraft':
+              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 3, color);
+              break;
+            case '4-aircraft':
+              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 4, color);
+              break;
+          }
+          if (object['name'] != '' && object['name'] != undefined) {
+            const nameAngleRad = ((object['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            this.pointNamesData.push({
+              limitToArea: false,
+              x,
+              y,
+              text: object['name'],
+              type: 'clear',
+              fontSize: 14,
+              offsetDistance: 20,
+              offsetAngle: nameAngleRad,
+              textAngle: 0,
+              padding: 0
+            });
+          }
+        }
+      });
+    }
+  }
+
+  drawPoints(component, limitToArea, mapOrientation, areaPoints) {
+    const pointsData = this.getComponentData(component);
+
+    if (pointsData && pointsData.points?.length > 0) {
+      pointsData.points.forEach((point) => {
+        if (this.utils.isNumber(point['azimuth']) && this.utils.isNumber(point['distance'])) {
+          const angleRad = ((point['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const x = point['distance'] * Math.cos(angleRad);
+          const y = point['distance'] * Math.sin(angleRad);
+
+          const type = point['type'] ?? component.fields.find(field => field.id == 'points').fields.find(field => field.id == 'type').default;
+          const fill = point['fill'] ?? component.fields.find(field => field.id == 'points').fields.find(field => field.id == 'fill').default;
+
+          if (point['name'] != '' && point['name'] != undefined) {
+            this.pointNamesData.push({
+              limitToArea: false,
+              x,
+              y,
+              text: point['name'],
+              type,
+              fill,
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
+        }
+      });
+    }
+  }
+
+  drawPointNames(areaPoints) {
+    this.pointNamesData.forEach(pointNameData => {
+      if (pointNameData.limitToArea) {
+        this.mapDrawUtils.clipCanvas(areaPoints);
+      }
+
+      this.mapDrawUtils.drawText(pointNameData.x, pointNameData.y, pointNameData.text, pointNameData.type, pointNameData.fontSize, pointNameData.offsetDistance, pointNameData.offsetAngle, pointNameData.textAngle, pointNameData.padding, pointNameData.fill);
+
+      this.mapDrawUtils.unclipCanvas();
+    });
+
+    /*
+    // Draw border names
+    this.borders.forEach((border) => {
+      if (border.name != '') this.mapDrawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
+    });
+   
+    // Draw ring names
+    this.rings.forEach((ring) => {
+      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name, 'plus-bottom');
+    });
+   
+    // Draw area points name
+    this.areaPoints.forEach((areaPoint) => {
+      if (areaPoint.name != '') this.mapDrawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
+    });
+   
+    // Draw FAOR points name
+    this.faorPoints.forEach((faorPoint) => {
+      if (faorPoint.name != '') this.mapDrawUtils.drawText(faorPoint.x, faorPoint.y, faorPoint.name);
+    });
+   
+    // Draw gate names
+    this.gates.forEach((gate) => {
+      if (gate.name != '') {
+        const angleRad = ((gate.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+        this.mapDrawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
+      }
+    });
+   
+    // Draw aircraft names
+    this.aircraft.forEach((aircraft) => {
+      const angleRad = ((aircraft.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
+      if (aircraft.name != '') this.mapDrawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
+    });
+   
+    // Draw nav points name
+    this.navPoints.forEach((navPoint) => {
+      if (navPoint.name != '') this.mapDrawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
+    });
+   
+    // Draw CAP names and CAP points name.
+    this.capPoints.forEach((capPoint) => {
+      if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
+        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
+          if (capPoint.name != '') {
+            const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
+   
+            let capNameAngle = (((capPoint.orientation + 90) * (Math.PI / 180)) % 360) + (this.bullseye.mapOrientation * Math.PI / 180);
+            if (capNameAngle <= Math.PI * 1.5 && capNameAngle >= Math.PI / 2) {
+              capNameAngle -= Math.PI;
+            }
+   
+            this.mapDrawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
+          }
+        }
+   
+        if (capPoint.pointName != '') {
+          this.mapDrawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
+        }
+      }
+    });
+   
+    // Draw point names
+    this.points.forEach((point) => {
+      let type = 'no-border', padding = 0;
+      switch (point.type) {
+        case 'nav-point':
+          type = 'square';
+          padding = 2;
+          break;
+        case 'target-point':
+          type = 'triangle';
+          padding = 7;
+          break;
+      }
+   
+      this.mapDrawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
+    });*/
+  }
+
+  getComponentData(mapComponent) {
+    let store = null;
+    try {
+      store = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+    } catch (e) {
+      store = {};
+    }
+
+    if (typeof mapComponent === 'object') {
+      const data = store[mapComponent.id];
+      if (data === undefined || data === null) {
+        return mapComponent['type'] == 'multiple' ? [] : {};
+      }
+      return data;
+    } else if (typeof mapComponent === 'string') {
+      return store[mapComponent];
+    }
+
+    return null;
+  }
+
+  saveComponentData(mapComponent, componentData) {
+    // Persist into a single object under 'bullseye-map-data'
+    let store = {};
+    try {
+      store = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+    } catch (e) {
+      store = {};
+    }
+
+    const key = typeof mapComponent === 'object' ? mapComponent.id : mapComponent;
+    if (!key) return;
+
+    store[key] = componentData;
+    localStorage.setItem('bullseye-map-data', JSON.stringify(store));
+  }
+
+  async importData() {
+    const mapData = await this.utils.importData('.json');
+
+    if (mapData) {
+      localStorage.setItem('bullseye-map-data', JSON.stringify(mapData));
+
+      this.updateMap();
+    }
   }
 
   showExportModal() {
@@ -157,25 +1361,10 @@ class BullseyeMap {
     });
 
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
-      const mapData = {
-        'bullseye': this.bullseye,
-        'baseLines': this.baseLines,
-        'coastlines': this.coastlines,
-        'mobs': this.mobs,
-        'borders': this.borders,
-        'rings': this.rings,
-        'areaPoints': this.areaPoints,
-        'faorPoints': this.faorPoints,
-        'gates': this.gates,
-        'arrows': this.arrows,
-        'aircraft': this.aircraft,
-        'navPoints': this.navPoints,
-        'capPoints': this.capPoints,
-        'points': this.points,
-      };
+      const mapData = localStorage.getItem('bullseye-map-data');
 
       const fileName = $(exportModal).find('.file-name').val();
-      this.utils.exportMap(mapData, fileName != '' ? fileName : 'bullseye_map');
+      this.utils.exportData(mapData, fileName != '' ? fileName : 'bullseye_map');
 
       $(exportModal).removeClass('show');
     });
@@ -219,1476 +1408,13 @@ class BullseyeMap {
     });
   }
 
-  initColorPicker(element) {
-    new JSColor(element, {
-      value: '#000000',
-      backgroundColor: '#1e1e1e',
-      borderColor: '#444',
-      borderRadius: 4,
-      onInput: () => this.updateMap(),
-      palette: [
-        '#0044ff',
-        '#00a7ff',
-        '#d10000',
-        '#ff4444',
-        '#0c6f00',
-        '#119f00',
-        '#ae6500',
-        '#ab9b00',
-        '#931568',
-        '#ff5cbd',
-        '#5d0281',
-        '#8c0ac2',
-        '#532c00',
-        '#8a4900',
-        '#545454',
-        '#000000'
-      ],
-      paletteCols: 8,
-    });
-  }
+  resetMap() {
+    if (window.confirm('Are you sure ? All data will be lost.')) {
+      this.mapFieldsUtils.displayComponentListButtons();
 
-  resetFields() {
-    $('input[type=text].update-field').val('');
-    $('input[type=number].update-field').val('');
+      localStorage.removeItem('bullseye-map-data');
 
-    $('.display-bullseye').prop('checked', true);
-    $('.limit-bullseye-to-area').prop('checked', true);
-    $('.half-angle-lines').prop('checked', true);
-
-    $('.bullseye-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-    $('.map-orientation').val('0');
-    $('.rings-range').val(defaultBullseyeRingsRange);
-    /*$('.ring-range-angle').val($('.ring-range-angle').prop('max') / 2);
-    $('.lines-angle').val(defaultBullseyeLinesAngle);*/
-    $('.mob-name-angle').val($('.bullseye-name-angle').prop('max') / 2);
-    $('.gate-name-angle').val($('.gate-name-angle').prop('max') / 2);
-
-    $('.display-base-lines').prop('checked', false);
-    $('.base-lines-location').val('top-left');
-    $('.base-lines-magnetic-declination').val(0);
-
-    $('.cap-side').val(1);
-
-    $('.ring-range-indicator:not(:first)').remove();
-    $('.coastline:not(:first)').remove();
-    $('.mob:not(:first)').remove();
-    $('.border:not(:first)').remove();
-    $('.ring:not(:first)').remove();
-    $('.area-point:not(:first)').remove();
-    $('.faor-point:not(:first)').remove();
-    $('.gate:not(:first)').remove();
-    $('.arrow:not(:first)').remove();
-    $('.aircraft:not(:first)').remove();
-    $('.nav-point:not(:first)').remove();
-    $('.cap-point:not(:first)').remove();
-    $('.point:not(:first)').remove();
-  }
-
-  addElement(event) {
-    const elementContainer = $(event.target).siblings('.element-container').first();
-
-    if ($(elementContainer).hasClass('ring-range-indicator-container') && $(elementContainer).find('.ring-range-indicator').length >= 4) {
-      return;
+      this.updateMap();
     }
-
-    const newPoint = $(elementContainer).find('.element').first().clone();
-    newPoint.find('input').val('');
-    $(elementContainer).append(newPoint);
-
-    newPoint.find('.update-field').off('input').on('input', () => this.updateMap());
-    newPoint.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-
-    const colorPicker = newPoint.find('.color-picker');
-    if (colorPicker.length > 0) {
-      this.initColorPicker(colorPicker[0]);
-    }
-
-    // Pre-fill the start azimuth, start distance and color fields based on the previous field.
-    if (newPoint.is('.border, .coastline')) {
-      const secondToLastElement = $(elementContainer).find('.element:nth-last-child(2)');
-
-      $(newPoint).find('[class*="start-azimuth"]').val($(secondToLastElement).find('[class*="end-azimuth"]').val());
-      $(newPoint).find('[class*="start-distance"]').val($(secondToLastElement).find('[class*="end-distance"]').val());
-
-      const colorPicker = newPoint.find('.color-picker');
-      if (colorPicker.length > 0) {
-        $(newPoint).find('[class*="color"]')[0].jscolor.fromString($(secondToLastElement).find('[class*="color"]').attr('data-current-color'));
-      }
-    }
-
-    this.updateMap();
-  }
-
-  deleteElement(event) {
-    const element = $(event.target).closest('.element');
-    if ($(event.target).closest('.element-container').find('.element').length > 1) {
-      $(element).remove();
-    } else {
-      $(element).find('.update-field').val('');
-
-      const capSide = $(element).find('.cap-side');
-      if (capSide.length > 0) {
-        $(capSide).val(1);
-      }
-
-      const colorPicker = $(element).find('.color-picker');
-      if (colorPicker.length > 0) {
-        $(colorPicker)[0].jscolor.fromString('#000000');
-      }
-    }
-
-    this.updateMap();
-  }
-
-  updateMap() {
-    this.furthestPoint = 0;
-
-    this.getInputParameters();
-
-    this.mapDrawUtils.clearCanvas();
-    this.mapDrawUtils.setToForeground();
-
-    // Recalculate scale and redraw map
-    this.runScale();
-
-    // Draw bullseye
-    if (this.bullseye.display) this.runBullseye();
-
-    // Draw base lines
-    this.runBaseLines();
-
-    // Draw coastlines
-    this.runCoastlines();
-
-    // Draw mobs
-    this.runMobs();
-
-    // Draw borders
-    this.runBorders();
-
-    // Draw rings
-    this.runRings();
-
-    // Draw area points
-    this.runAreaPoints();
-
-    // Draw area points
-    this.runFaorPoints();
-
-    // Draw gates
-    this.runGates();
-
-    // Draw aircraft
-    this.runAircraft();
-
-    // Draw arrows
-    this.runArrows();
-
-    // Draw nav points
-    this.runNavPoints();
-
-    // Draw CAP points
-    this.runCapPoints();
-
-    // Draw all points names
-    this.runPointNames();
-
-    this.saveData();
-  }
-
-  getInputParameters() {
-    // Bullseye
-    this.bullseye.display = $('.display-bullseye').is(':checked');
-    this.bullseye.limitToArea = $('.limit-bullseye-to-area').is(':checked');
-    this.bullseye.name = $('.bullseye-name').val();
-    this.bullseye.nameAngle = parseInt($('.bullseye-name-angle').val());
-    this.bullseye.mapOrientation = $('.map-orientation').val() != '' ? parseFloat($('.map-orientation').val()) : 0;
-    this.bullseye.linesAngle = $('.lines-angle').val() != '' ? parseInt($('.lines-angle').val()) : defaultBullseyeLinesAngle;
-    this.bullseye.halfAnglesLines = $('.half-angle-lines').is(':checked');
-    this.bullseye.ringsRange = $('.rings-range').val() != '' ? parseFloat($('.rings-range').val()) : defaultBullseyeRingsRange;
-
-    this.bullseye.ringsRangeAngle = [];
-    $('.ring-range-angle').each((index, element) => {
-      this.bullseye.ringsRangeAngle.push($(element).val());
-    })
-
-    // Coastlines
-    this.baseLines.display = $('.display-base-lines').is(':checked');
-    this.baseLines.location = $('.base-lines-location').val();
-    this.baseLines.magneticDeclination = $('.base-lines-magnetic-declination').val();
-
-    // Coastlines
-    this.coastlines = [];
-    $('.coastline').each((index, element) => {
-      const startAzimuth = parseFloat($(element).find('.coastline-start-azimuth').val());
-      const startDistance = parseFloat($(element).find('.coastline-start-distance').val());
-      const endAzimuth = parseFloat($(element).find('.coastline-end-azimuth').val());
-      const endDistance = parseFloat($(element).find('.coastline-end-distance').val());
-
-      if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
-        const startAngleRad = ((startAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const startX = startDistance * Math.cos(startAngleRad);
-        const startY = startDistance * Math.sin(startAngleRad);
-
-        const endAngleRad = ((endAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const endX = endDistance * Math.cos(endAngleRad);
-        const endY = endDistance * Math.sin(endAngleRad);
-
-        this.coastlines.push({ startAzimuth, startDistance, endAzimuth, endDistance, startX, startY, endX, endY });
-      }
-    });
-
-    // MOBs
-    this.mobs = [];
-    $('.mob').each((index, element) => {
-      const name = $(element).find('.mob-name').val();
-      const nameAngle = parseInt($(element).find('.mob-name-angle').val());
-      const azimuth = parseFloat($(element).find('.mob-azimuth').val());
-      const distance = parseFloat($(element).find('.mob-distance').val());
-      const orientation = parseFloat($(element).find('.mob-orientation').val() != '' ? $(element).find('.mob-orientation').val() : 0);
-      const color = $(element).find('.mob-color').attr('data-current-color');
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.mobs.push({ name, nameAngle, azimuth, distance, orientation, color, x, y });
-      }
-    });
-
-    // Borders
-    this.borders = [];
-    $('.border').each((index, element) => {
-      const name = $(element).find('.border-name').val();
-      const startAzimuth = parseFloat($(element).find('.border-start-azimuth').val());
-      const startDistance = parseFloat($(element).find('.border-start-distance').val());
-      const endAzimuth = parseFloat($(element).find('.border-end-azimuth').val());
-      const endDistance = parseFloat($(element).find('.border-end-distance').val());
-      const color = $(element).find('.border-color').attr('data-current-color');
-
-      if (!isNaN(startAzimuth) && !isNaN(startDistance) && !isNaN(endAzimuth) && !isNaN(endDistance)) {
-        const startAngleRad = ((startAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const startX = startDistance * Math.cos(startAngleRad);
-        const startY = startDistance * Math.sin(startAngleRad);
-
-        const endAngleRad = ((endAzimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const endX = endDistance * Math.cos(endAngleRad);
-        const endY = endDistance * Math.sin(endAngleRad);
-
-        const nameX = (startX + endX) / 2;
-        const nameY = (startY + endY) / 2;
-        const nameAngle = Math.atan2(endY - startY, endX - startX);
-
-        this.borders.push({ name, startAzimuth, startDistance, endAzimuth, endDistance, color, startX, startY, endX, endY, nameX, nameY, nameAngle });
-      }
-    });
-
-    // Rings
-    this.rings = [];
-    $('.ring').each((index, element) => {
-      const name = $(element).find('.ring-name').val();
-      const azimuth = parseFloat($(element).find('.ring-azimuth').val());
-      const distance = parseFloat($(element).find('.ring-distance').val());
-      const radius = parseFloat($(element).find('.ring-radius').val());
-      const color = $(element).find('.ring-color').attr('data-current-color');
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.rings.push({ name, azimuth, distance, radius, color, x, y });
-      }
-    });
-
-    // Area points
-    this.areaPoints = [];
-    $('.area-point').each((index, element) => {
-      const name = $(element).find('.area-point-name').val();
-      const azimuth = parseFloat($(element).find('.area-point-azimuth').val());
-      const distance = parseFloat($(element).find('.area-point-distance').val());
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.areaPoints.push({ name, azimuth, distance, x, y });
-      }
-    });
-
-    // FAOR points
-    this.faorPoints = [];
-    $('.faor-point').each((index, element) => {
-      const name = $(element).find('.faor-point-name').val();
-      const azimuth = parseFloat($(element).find('.faor-point-azimuth').val());
-      const distance = parseFloat($(element).find('.faor-point-distance').val());
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.faorPoints.push({ name, azimuth, distance, x, y });
-      }
-    });
-
-    // Gates
-    this.gates = [];
-    $('.gate').each((index, element) => {
-      const name = $(element).find('.gate-name').val();
-      const nameAngle = parseInt($(element).find('.gate-name-angle').val());
-      const azimuth = parseFloat($(element).find('.gate-azimuth').val());
-      const distance = parseFloat($(element).find('.gate-distance').val());
-      const orientation = parseFloat($(element).find('.gate-orientation').val());
-      const color = $(element).find('.gate-color').attr('data-current-color');
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.gates.push({ name, nameAngle, azimuth, distance, orientation, color, x, y });
-      }
-    });
-
-    // Aircraft
-    this.arrows = [];
-    $('.arrow').each((index, element) => {
-      const azimuth = parseFloat($(element).find('.arrow-azimuth').val());
-      const distance = parseFloat($(element).find('.arrow-distance').val());
-      const orientation = parseFloat($(element).find('.arrow-orientation').val() != '' ? $(element).find('.arrow-orientation').val() : 0);
-      const length = parseFloat($(element).find('.arrow-length').val());
-      const width = parseFloat($(element).find('.arrow-width').val());
-      const color = $(element).find('.arrow-color').attr('data-current-color');
-
-      if (!isNaN(azimuth) && !isNaN(distance) && !isNaN(length) && !isNaN(width)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.arrows.push({ azimuth, distance, orientation, length, width, color, x, y });
-      }
-    });
-
-    // Aircraft
-    this.aircraft = [];
-    $('.aircraft').each((index, element) => {
-      const name = $(element).find('.aircraft-name').val();
-      const nameAngle = parseInt($(element).find('.aircraft-name-angle').val());
-      const azimuth = parseFloat($(element).find('.aircraft-azimuth').val());
-      const distance = parseFloat($(element).find('.aircraft-distance').val());
-      const orientation = parseFloat($(element).find('.aircraft-orientation').val() != '' ? $(element).find('.aircraft-orientation').val() : 0);
-      const quantity = parseInt($(element).find('.aircraft-quantity').val());
-      const color = $(element).find('.aircraft-color').attr('data-current-color');
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.aircraft.push({ name, nameAngle, azimuth, distance, orientation, quantity, color, x, y });
-      }
-    });
-
-    // Nav points
-    this.navPoints = [];
-    $('.nav-point').each((index, element) => {
-      const pointName = $(element).find('.nav-point-name').val();
-      const name = $(element).find('.nav-point-name').val();
-      const azimuth = parseFloat($(element).find('.nav-point-azimuth').val());
-      const distance = parseFloat($(element).find('.nav-point-distance').val());
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.navPoints.push({ pointName, name, azimuth, distance, x, y });
-      }
-    });
-
-    // CAP points
-    this.capPoints = [];
-    $('.cap-point').each((index, element) => {
-      const pointName = $(element).find('.cap-point-name').val();
-      const name = $(element).find('.cap-name').val();
-      const azimuth = parseFloat($(element).find('.cap-point-azimuth').val());
-      const distance = parseFloat($(element).find('.cap-point-distance').val());
-      let length = parseFloat($(element).find('.cap-length').val());
-      let width = parseFloat($(element).find('.cap-width').val());
-      const orientation = parseFloat($(element).find('.cap-orientation').val());
-      const leftSide = $(element).find('.cap-side').val() == 1;
-      const color = $(element).find('.cap-color').attr('data-current-color');
-
-      if (length < width) {
-        const temp = width;
-        width = length;
-        length = temp;
-      };
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        const corners = [];
-        if (!isNaN(length) && length >= 0 && !isNaN(width) && width >= 0 && !isNaN(orientation)) {
-          const orienationRad = (orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180)
-
-          corners.push({
-            x: x + ((width / 2) * Math.cos(orienationRad - Math.PI / 2)),
-            y: y - ((width / 2) * Math.cos(orienationRad))
-          });
-
-          corners.push({
-            x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)),
-            y: corners[0].y + (length * Math.cos(orienationRad))
-          });
-
-          if (leftSide) {
-            corners.push({
-              x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) - (width * Math.cos(orienationRad)),
-              y: corners[0].y + (length * Math.cos(orienationRad)) - (width * Math.cos(orienationRad - Math.PI / 2))
-            });
-
-            corners.push({
-              x: corners[0].x - (width * Math.cos(orienationRad)),
-              y: corners[0].y - (width * Math.cos(orienationRad - Math.PI / 2))
-            });
-          } else {
-            corners.push({
-              x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) + (width * Math.cos(orienationRad)),
-              y: corners[0].y + (length * Math.cos(orienationRad)) + (width * Math.cos(orienationRad - Math.PI / 2))
-            });
-
-            corners.push({
-              x: corners[0].x + (width * Math.cos(orienationRad)),
-              y: corners[0].y + (width * Math.cos(orienationRad - Math.PI / 2))
-            });
-          }
-        }
-
-        this.capPoints.push({ pointName, name, azimuth, distance, length, width, orientation, leftSide, color, x, y, corners });
-      }
-    });
-
-    // Points
-    this.points = [];
-    $('.point').each((index, element) => {
-      const name = $(element).find('.point-name').val();
-      const azimuth = parseFloat($(element).find('.point-azimuth').val());
-      const distance = parseFloat($(element).find('.point-distance').val());
-      const type = $(element).find('.point-type').val();
-
-      if (!isNaN(azimuth) && !isNaN(distance)) {
-        const angleRad = ((azimuth - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        const x = distance * Math.cos(angleRad);
-        const y = distance * Math.sin(angleRad);
-
-        this.points.push({ name, azimuth, distance, type, x, y });
-      }
-    });
-  }
-
-  runScale() {
-    // Determine the furthest graphic distance
-    this.furthestPoint = 0;
-
-    // Initialize bounding box variables
-    let minX = 0, maxX = 0, minY = 0, maxY = 0;
-
-    // Include coastlines in bounding box
-    this.coastlines.forEach((coastline) => {
-      minX = Math.min(minX, coastline.startX, coastline.endX);
-      maxX = Math.max(maxX, coastline.startX, coastline.endX);
-      minY = Math.min(minY, coastline.startY, coastline.endY);
-      maxY = Math.max(maxY, coastline.startY, coastline.endY);
-    });
-
-    // Include MOBs in bounding box
-    this.mobs.forEach((mob) => {
-      minX = Math.min(minX, mob.x);
-      maxX = Math.max(maxX, mob.x);
-      minY = Math.min(minY, mob.y);
-      maxY = Math.max(maxY, mob.y);
-    });
-
-    // Include borders in bounding box
-    this.borders.forEach((border) => {
-      minX = Math.min(minX, border.startX, border.endX);
-      maxX = Math.max(maxX, border.startX, border.endX);
-      minY = Math.min(minY, border.startY, border.endY);
-      maxY = Math.max(maxY, border.startY, border.endY);
-    });
-
-    // Include rings in bounding box
-    this.rings.forEach((ring) => {
-      minX = Math.min(minX, ring.x);
-      maxX = Math.max(maxX, ring.x);
-      minY = Math.min(minY, ring.y);
-      maxY = Math.max(maxY, ring.y);
-    });
-
-    // Include area points in bounding box
-    this.areaPoints.forEach((areaPoint) => {
-      minX = Math.min(minX, areaPoint.x);
-      maxX = Math.max(maxX, areaPoint.x);
-      minY = Math.min(minY, areaPoint.y);
-      maxY = Math.max(maxY, areaPoint.y);
-    });
-
-    // Include area points in bounding box
-    this.faorPoints.forEach((faorPoint) => {
-      minX = Math.min(minX, faorPoint.x);
-      maxX = Math.max(maxX, faorPoint.x);
-      minY = Math.min(minY, faorPoint.y);
-      maxY = Math.max(maxY, faorPoint.y);
-    });
-
-    // Include gates in bounding box
-    this.gates.forEach((gate) => {
-      minX = Math.min(minX, gate.x);
-      maxX = Math.max(maxX, gate.x);
-      minY = Math.min(minY, gate.y);
-      maxY = Math.max(maxY, gate.y);
-    });
-
-    // Include arrows in bounding box
-    this.arrows.forEach((arrow) => {
-      minX = Math.min(minX, arrow.x);
-      maxX = Math.max(maxX, arrow.x);
-      minY = Math.min(minY, arrow.y);
-      maxY = Math.max(maxY, arrow.y);
-    });
-
-    // Include aircraft in bounding box
-    this.aircraft.forEach((aircraft) => {
-      minX = Math.min(minX, aircraft.x);
-      maxX = Math.max(maxX, aircraft.x);
-      minY = Math.min(minY, aircraft.y);
-      maxY = Math.max(maxY, aircraft.y);
-    });
-
-    // Include nav points in bounding box
-    this.navPoints.forEach((navPoint) => {
-      minX = Math.min(minX, navPoint.x);
-      maxX = Math.max(maxX, navPoint.x);
-      minY = Math.min(minY, navPoint.y);
-      maxY = Math.max(maxY, navPoint.y);
-    });
-
-    // Include CAP points and racetracks in bounding box
-    this.capPoints.forEach((capPoint) => {
-      if (capPoint.azimuth !== null && capPoint.distance !== null) {
-        minX = Math.min(minX, capPoint.x);
-        maxX = Math.max(maxX, capPoint.x);
-        minY = Math.min(minY, capPoint.y);
-        maxY = Math.max(maxY, capPoint.y);
-
-        if (capPoint.length !== null && capPoint.width !== null && capPoint.orientation !== null) {
-          capPoint.corners.forEach((corner) => {
-            minX = Math.min(minX, corner.x);
-            maxX = Math.max(maxX, corner.x);
-            minY = Math.min(minY, corner.y);
-            maxY = Math.max(maxY, corner.y);
-          });
-        }
-      }
-    });
-
-    // Include points in bounding box
-    this.points.forEach((point) => {
-      minX = Math.min(minX, point.x);
-      maxX = Math.max(maxX, point.x);
-      minY = Math.min(minY, point.y);
-      maxY = Math.max(maxY, point.y);
-    });
-
-    // Calculate the center of the bounding box
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
-
-    const maxDistance = Math.max(maxX - centerX, maxY - centerY, minX - centerX, minY - centerY);
-
-    this.furthestPoint = maxDistance * this.furthestPointMargin;
-
-    if (this.furthestPoint == 0) this.furthestPoint = this.defaultScale;
-
-    // Update the scale in DrawUtils
-    this.mapDrawUtils.setScale(this.furthestPoint);
-
-    // Update DrawUtils center
-    this.mapDrawUtils.setCenter(centerX, centerY);
-  }
-
-  runBullseye() {
-    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
-
-    // Draw cardinal lines
-    const linesAngle = this.bullseye.halfAnglesLines ? this.utils.getClosestDivisorTo90(this.bullseye.linesAngle) / 2 : this.utils.getClosestDivisorTo90(this.bullseye.linesAngle);
-    let dashed = false;
-    for (let angle = 0; angle < 180; angle += linesAngle) {
-      const angleRad = (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
-
-      if (this.bullseye.halfAnglesLines) {
-        dashed = !dashed;
-      }
-    }
-
-    // Draw rings
-    const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
-    const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
-    for (let i = 1; i <= ringCount + 1; i++) {
-      const radius = i * this.bullseye.ringsRange;
-
-      this.mapDrawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
-    }
-
-    // Draw bullseye dot
-    this.mapDrawUtils.drawBullseye(0, 0, 'black');
-
-    this.mapDrawUtils.unclipCanvas();
-  }
-
-  runBaseLines() {
-    if (this.baseLines.display) {
-      this.mapDrawUtils.drawBaseLines(this.baseLines.location, this.baseLines.magneticDeclination, this.bullseye.mapOrientation);
-    }
-  }
-
-  runCoastlines() {
-    this.coastlines.forEach((coastline) => {
-      this.mapDrawUtils.drawCoastline(coastline.startX, coastline.startY, coastline.endX, coastline.endY, 'black', 2);
-    });
-  }
-
-  runMobs() {
-    this.mobs.forEach((mob) => {
-      this.mapDrawUtils.drawAirbase(mob.x, mob.y, (mob.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), mob.color);
-    });
-  }
-
-  runBorders() {
-    this.borders.forEach((border) => {
-      this.mapDrawUtils.drawBorder(border.startX, border.startY, border.endX, border.endY, border.color, 3);
-    });
-  }
-
-  runRings() {
-    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
-
-    this.rings.forEach((ring) => {
-      this.mapDrawUtils.drawRing(ring.x, ring.y, ring.radius, ring.color, 2);
-    });
-
-    this.mapDrawUtils.unclipCanvas();
-  }
-
-  runAreaPoints() {
-    if (this.areaPoints.length > 1) {
-      // Draw lines between points to form a polygon
-      for (let i = 0; i < this.areaPoints.length; i++) {
-        const startPoint = this.areaPoints[i];
-        const endPoint = this.areaPoints[(i + 1) % this.areaPoints.length]; // Wrap around to the first point
-
-        this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3);
-      }
-    }
-  }
-
-  runFaorPoints() {
-    if (this.faorPoints.length > 1) {
-      // Draw dashed lines between points to form a polygon
-      for (let i = 0; i < this.faorPoints.length; i++) {
-        if (i == 0 || this.faorPoints.length > 2) {
-          const startPoint = this.faorPoints[i];
-          const endPoint = this.faorPoints[(i + 1) % this.faorPoints.length]; // Wrap around to the first point
-
-          this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 2, 'dashed');
-        }
-      }
-    }
-  }
-
-  runGates() {
-    this.gates.forEach((gate) => {
-      this.mapDrawUtils.drawGate(gate.x, gate.y, 15, (gate.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), gate.color)
-    });
-  }
-
-  runArrows() {
-    this.arrows.forEach((arrow) => {
-      this.mapDrawUtils.drawArrow(arrow.x, arrow.y, (arrow.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), arrow.length, arrow.width, arrow.color);
-    });
-  }
-
-  runAircraft() {
-    this.aircraft.forEach((aircraft) => {
-      this.mapDrawUtils.drawAircraft(aircraft.x, aircraft.y, (aircraft.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), aircraft.quantity, aircraft.color);
-    });
-  }
-
-  runNavPoints() {
-    if (this.navPoints.length > 1) {
-      // Draw lines between points to form a line
-      for (let i = 0; i < this.navPoints.length - 1; i++) {
-        const startPoint = this.navPoints[i];
-        const endPoint = this.navPoints[(i + 1)];
-
-        this.mapDrawUtils.drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y, 'black', 3, 'double');
-      }
-    }
-  }
-
-  runCapPoints() {
-    this.capPoints.forEach((capPoint) => {
-      if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
-        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
-          // Draw CAP racetrack.
-          this.mapDrawUtils.drawRacetrack(capPoint.x, capPoint.y, capPoint.length, capPoint.width, (capPoint.orientation * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), capPoint.leftSide, capPoint.color);
-        }
-      }
-    });
-  }
-
-  runPointNames() {
-    const bullseyeInArea = this.bullseye.limitToArea && this.utils.isPointWithinArea({ x: 0, y: 0 }, this.areaPoints);
-    const linesAngle = this.bullseye.halfAnglesLines ? this.utils.getClosestDivisorTo90(this.bullseye.linesAngle) / 2 : this.utils.getClosestDivisorTo90(this.bullseye.linesAngle);
-
-    // Draw bullseye rings range
-    if (this.bullseye.display) {
-      this.bullseye.ringsRangeAngle.forEach((rangeAngle) => {
-        const maxRadius = this.furthestPoint * this.furthestPointMargin; // Furthest point determines the maximum radius
-        const ringCount = Math.ceil(maxRadius / this.bullseye.ringsRange); // Calculate how many rings to draw
-        for (let i = 1; i <= ringCount + 1; i++) {
-          const radius = i * this.bullseye.ringsRange;
-
-          const ringsRangeAngle = Math.round(rangeAngle / linesAngle) * linesAngle;
-
-          const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-          const ringTextX = radius * Math.cos(angleRad);
-          const ringTextY = radius * Math.sin(angleRad);
-
-          if (!bullseyeInArea || this.utils.isPointWithinArea({ x: ringTextX, y: ringTextY }, this.areaPoints)) {
-            this.mapDrawUtils.drawText(ringTextX, ringTextY, radius, 'no-border', 14, 8, angleRad, 0, 0);
-          }
-        }
-      });
-    }
-
-    // Draw bullseye angles
-    if (this.bullseye.display) {
-      const displayedAngles = [];
-      let displayText = true;
-      for (let angle = 0; angle < 360; angle += linesAngle) {
-        if (displayText) {
-          const intersections = [];
-          if (bullseyeInArea) {
-            // Display the bullseye angle text at the intersection between the angle lines and the area borders.
-            // Calculate intersection points with area point lines
-            this.areaPoints.forEach((point, index) => {
-              const nextPoint = this.areaPoints[(index + 1) % this.areaPoints.length];
-
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180) }, { start: point, end: nextPoint });
-
-              if (intersection) {
-                intersections.push(intersection);
-              }
-            });
-
-          } else {
-            // Display the bullseye angle text at the border of the canvas 
-            const corners = this.mapDrawUtils.getCanvasCorners(20);
-            corners.forEach((corner, index) => {
-              const nextCorner = corners[(index + 1) % corners.length];
-
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180) }, { start: corner, end: nextCorner });
-
-              if (intersection) {
-                intersections.push(intersection);
-              }
-            });
-          }
-
-          if (intersections.length > 0) {
-            const farthestIntersection = intersections.reduce((a, b) => a.distance > b.distance ? a : b);
-
-            const textAngle = (angle + 90) % 360;
-            if (!displayedAngles.includes(textAngle)) {
-              this.mapDrawUtils.drawText(farthestIntersection.x, farthestIntersection.y, `${textAngle}°`, 'no-border', 14, bullseyeInArea ? 15 : 0, (angle * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180), 0, 0);
-
-              displayedAngles.push(textAngle);
-            }
-          }
-        }
-
-        if (this.bullseye.halfAnglesLines) {
-          displayText = !displayText;
-        }
-      }
-    }
-
-    if (this.bullseye.limitToArea) this.mapDrawUtils.clipCanvas(this.areaPoints.map((areaPoint) => ({ x: areaPoint.x, y: areaPoint.y })));
-
-    // Draw bullseye name
-    if (this.bullseye.name != '' && this.bullseye.display) {
-      const angleRad = ((this.bullseye.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      this.mapDrawUtils.drawText(0, 0, this.bullseye.name, 'no-border', 16, 25, angleRad, 0, 0);
-    }
-
-    this.mapDrawUtils.unclipCanvas();
-
-    // Draw MOB names
-    this.mobs.forEach((mob) => {
-      const angleRad = ((mob.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      if (mob.name != '') this.mapDrawUtils.drawText(mob.x, mob.y, mob.name, 'no-border', 14, 20, angleRad, 0, 0);
-    });
-
-    // Draw border names
-    this.borders.forEach((border) => {
-      if (border.name != '') this.mapDrawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
-    });
-
-    // Draw ring names
-    this.rings.forEach((ring) => {
-      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name, 'plus-bottom');
-    });
-
-    // Draw area points name
-    this.areaPoints.forEach((areaPoint) => {
-      if (areaPoint.name != '') this.mapDrawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
-    });
-
-    // Draw FAOR points name
-    this.faorPoints.forEach((faorPoint) => {
-      if (faorPoint.name != '') this.mapDrawUtils.drawText(faorPoint.x, faorPoint.y, faorPoint.name);
-    });
-
-    // Draw gate names
-    this.gates.forEach((gate) => {
-      if (gate.name != '') {
-        const angleRad = ((gate.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        this.mapDrawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
-      }
-    });
-
-    // Draw aircraft names
-    this.aircraft.forEach((aircraft) => {
-      const angleRad = ((aircraft.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      if (aircraft.name != '') this.mapDrawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
-    });
-
-    // Draw nav points name
-    this.navPoints.forEach((navPoint) => {
-      if (navPoint.name != '') this.mapDrawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
-    });
-
-    // Draw CAP names and CAP points name.
-    this.capPoints.forEach((capPoint) => {
-      if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
-        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
-          if (capPoint.name != '') {
-            const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
-
-            let capNameAngle = (((capPoint.orientation + 90) * (Math.PI / 180)) % 360) + (this.bullseye.mapOrientation * Math.PI / 180);
-            if (capNameAngle <= Math.PI * 1.5 && capNameAngle >= Math.PI / 2) {
-              capNameAngle -= Math.PI;
-            }
-
-            this.mapDrawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
-          }
-        }
-
-        if (capPoint.pointName != '') {
-          this.mapDrawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
-        }
-      }
-    });
-
-    // Draw point names
-    this.points.forEach((point) => {
-      let type = 'no-border', padding = 0;
-      switch (point.type) {
-        case 'nav-point':
-          type = 'square';
-          padding = 2;
-          break;
-        case 'target-point':
-          type = 'triangle';
-          padding = 7;
-          break;
-      }
-
-      this.mapDrawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
-    });
-  }
-
-  getData() {
-    // Bullseye
-    try {
-      const bullseyeData = JSON.parse(localStorage.getItem(bullseyeDataKey));
-      if (bullseyeData) {
-        $('.display-bullseye').prop('checked', bullseyeData.display);
-        $('.limit-bullseye-to-area').prop('checked', bullseyeData.limitToArea);
-        $('.bullseye-name').val(bullseyeData.name);
-        $('.bullseye-name-angle').val(bullseyeData.nameAngle);
-        $('.map-orientation').val(bullseyeData.mapOrientation);
-        $('.lines-angle').val(bullseyeData.linesAngle);
-        $('.half-angle-lines').prop('checked', bullseyeData.halfAnglesLines);
-        $('.rings-range').val(bullseyeData.ringsRange);
-
-        bullseyeData.ringsRangeAngle.forEach((coastlineData, index) => {
-          let ringsRangeAngleElement;
-          if (index == 0) {
-            ringsRangeAngleElement = $('.ring-range-indicator').first();
-          } else {
-            ringsRangeAngleElement = $('.ring-range-indicator').first().clone();
-            $('.ring-range-indicator-container').append(ringsRangeAngleElement);
-
-            ringsRangeAngleElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            ringsRangeAngleElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(ringsRangeAngleElement).find('.ring-range-angle').val(coastlineData);
-        });
-      }
-    } catch (error) {
-      $('.display-bullseye').prop('checked', true);
-      $('.limit-bullseye-to-area').prop('checked', true);
-      $('.bullseye-name').val('');
-      $('.bullseye-name-angle').val(180);
-      $('.rings-range').val(20);
-      $('.ring-range-angle').val(180)
-      $('.lines-angle').val(30);
-      $('.half-angle-lines').prop('checked', true);
-      $('.map-orientation').val(0)
-    }
-
-    // Base lines
-    try {
-      const baseLinesData = JSON.parse(localStorage.getItem(baseLinesDataKey));
-      if (baseLinesData) {
-        $('.display-base-lines').prop('checked', baseLinesData.display);
-        $('.base-lines-location').val(baseLinesData.location);
-        $('.base-lines-magnetic-declination').val(baseLinesData.magneticDeclination);
-      }
-    } catch (error) {
-      $('.display-base-lines').prop('checked', false);
-      $('.base-lines-location').val('top-left');
-      $('.base-lines-magnetic-declination').val('0');
-    }
-
-    // Coastlines
-    try {
-      const coastlinesData = JSON.parse(localStorage.getItem(coastlinesDataKey));
-      if (coastlinesData) {
-        coastlinesData.forEach((coastlineData, index) => {
-          let coastlineElement;
-          if (index == 0) {
-            coastlineElement = $('.coastline').first();
-          } else {
-            coastlineElement = $('.coastline').first().clone();
-            $('.coastlines-container').append(coastlineElement);
-
-            coastlineElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            coastlineElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(coastlineElement).find('.coastline-start-azimuth').val(coastlineData.startAzimuth);
-          $(coastlineElement).find('.coastline-start-distance').val(coastlineData.startDistance);
-          $(coastlineElement).find('.coastline-end-azimuth').val(coastlineData.endAzimuth);
-          $(coastlineElement).find('.coastline-end-distance').val(coastlineData.endDistance);
-        });
-      }
-    } catch (error) {
-      const coastlines = $('.coastline:not(:first)');
-      const firstCoastline = $('.coastline').first();
-
-      $(firstCoastline).find('.coastline-start-azimuth').val('');
-      $(firstCoastline).find('.coastline-start-distance').val('');
-      $(firstCoastline).find('.coastline-end-azimuth').val('');
-      $(firstCoastline).find('.coastline-end-distance').val('');
-
-      coastlines.remove();
-    }
-
-    // MOBs
-    try {
-      const mobsData = JSON.parse(localStorage.getItem(mobsDataKey));
-      if (mobsData) {
-        mobsData.forEach((mobData, index) => {
-          let mobElement;
-          if (index == 0) {
-            mobElement = $('.mob').first();
-          } else {
-            mobElement = $('.mob').first().clone();
-            $('.mobs-container').append(mobElement);
-
-            mobElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            mobElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = mobElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(mobElement).find('.mob-name').val(mobData.name);
-          $(mobElement).find('.mob-name-angle').val(mobData.nameAngle);
-          $(mobElement).find('.mob-azimuth').val(mobData.azimuth);
-          $(mobElement).find('.mob-distance').val(mobData.distance);
-          $(mobElement).find('.mob-orientation').val(mobData.orientation);
-          $(mobElement).find('.mob-color')[0].jscolor.fromString(mobData.color);
-        });
-      }
-    } catch (error) {
-      const mobs = $('.mob:not(:first)');
-      const firstMob = $('.mob').first();
-
-      $(firstMob).find('.mob-name').val('');
-      $(firstMob).find('.mob-name-angle').val(180);
-      $(firstMob).find('.mob-azimuth').val('');
-      $(firstMob).find('.mob-distance').val('');
-      $(firstMob).find('.mob-orientation').val('');
-      $(firstMob).find('.mob-color')[0].jscolor.fromString('#000000');
-
-      mobs.remove();
-    }
-
-    // Borders
-    try {
-      const bordersData = JSON.parse(localStorage.getItem(bordersDataKey));
-      if (bordersData) {
-        bordersData.forEach((borderData, index) => {
-          let borderElement;
-          if (index == 0) {
-            borderElement = $('.border').first();
-          } else {
-            borderElement = $('.border').first().clone();
-            $('.borders-container').append(borderElement);
-
-            borderElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            borderElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = borderElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(borderElement).find('.border-name').val(borderData.name);
-          $(borderElement).find('.border-start-azimuth').val(borderData.startAzimuth);
-          $(borderElement).find('.border-start-distance').val(borderData.startDistance);
-          $(borderElement).find('.border-end-azimuth').val(borderData.endAzimuth);
-          $(borderElement).find('.border-end-distance').val(borderData.endDistance);
-          $(borderElement).find('.border-color')[0].jscolor.fromString(borderData.color);
-        });
-      }
-    } catch (error) {
-      const borders = $('.border:not(:first)');
-      const firstBorder = $('.border').first();
-
-      $(firstBorder).find('.border-name').val('');
-      $(firstBorder).find('.border-start-azimuth').val('');
-      $(firstBorder).find('.border-start-distance').val('');
-      $(firstBorder).find('.border-end-azimuth').val('');
-      $(firstBorder).find('.border-end-distance').val('');
-      $(firstBorder).find('.border-color')[0].jscolor.fromString('#000000');
-
-      borders.remove();
-    }
-
-    // Rings
-    try {
-      const ringsData = JSON.parse(localStorage.getItem(ringsDataKey));
-      if (ringsData) {
-        ringsData.forEach((ringData, index) => {
-          let ringElement;
-          if (index == 0) {
-            ringElement = $('.ring').first();
-          } else {
-            ringElement = $('.ring').first().clone();
-            $('.rings-container').append(ringElement);
-
-            ringElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            ringElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = ringElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(ringElement).find('.ring-name').val(ringData.name);
-          $(ringElement).find('.ring-azimuth').val(ringData.azimuth);
-          $(ringElement).find('.ring-distance').val(ringData.distance);
-          $(ringElement).find('.ring-radius').val(ringData.radius);
-          $(ringElement).find('.ring-color')[0].jscolor.fromString(ringData.color);
-        });
-      }
-    } catch (error) {
-      const rings = $('.ring:not(:first)');
-      const firstRing = $('.ring').first();
-
-      $(firstRing).find('.ring-name').val('');
-      $(firstRing).find('.ring-azimuth').val('');
-      $(firstRing).find('.ring-distance').val('');
-      $(firstRing).find('.ring-radius').val('');
-      $(firstRing).find('.ring-color')[0].jscolor.fromString('#000000');
-
-      rings.remove();
-    }
-
-    // Area points
-    try {
-      const areaPointsData = JSON.parse(localStorage.getItem(areaPointsDataKey));
-      if (areaPointsData) {
-        areaPointsData.forEach((areaPointData, index) => {
-          let areaPointElement;
-          if (index == 0) {
-            areaPointElement = $('.area-point').first();
-          } else {
-            areaPointElement = $('.area-point').first().clone();
-            $('.area-points-container').append(areaPointElement);
-
-            areaPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            areaPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(areaPointElement).find('.area-point-name').val(areaPointData.name);
-          $(areaPointElement).find('.area-point-azimuth').val(areaPointData.azimuth);
-          $(areaPointElement).find('.area-point-distance').val(areaPointData.distance);
-        });
-      }
-    } catch (error) {
-      const areaPoints = $('.area-point:not(:first)');
-      const firstAreaPoint = $('.area-point').first();
-
-      $(firstAreaPoint).find('.area-point-name').val('');
-      $(firstAreaPoint).find('.area-point-azimuth').val('');
-      $(firstAreaPoint).find('.area-point-distance').val('');
-
-      areaPoints.remove();
-    }
-
-    // FAOR points
-    try {
-      const faorPointsData = JSON.parse(localStorage.getItem(faorPointsDataKey));
-      if (faorPointsData) {
-        faorPointsData.forEach((faorPointsData, index) => {
-          let faorPointElement;
-          if (index == 0) {
-            faorPointElement = $('.faor-point').first();
-          } else {
-            faorPointElement = $('.faor-point').first().clone();
-            $('.faor-points-container').append(faorPointElement);
-
-            faorPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            faorPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(faorPointElement).find('.faor-point-name').val(faorPointsData.name);
-          $(faorPointElement).find('.faor-point-azimuth').val(faorPointsData.azimuth);
-          $(faorPointElement).find('.faor-point-distance').val(faorPointsData.distance);
-        });
-      }
-    } catch (error) {
-      const faorPoints = $('.faor-point:not(:first)');
-      const firstFaorPoint = $('.faor-point').first();
-
-      $(firstFaorPoint).find('.faor-point-name').val('');
-      $(firstFaorPoint).find('.faor-point-azimuth').val('');
-      $(firstFaorPoint).find('.faor-point-distance').val('');
-
-      faorPoints.remove();
-    }
-
-    // Gates
-    try {
-      const gatesData = JSON.parse(localStorage.getItem(gatesDataKey));
-      if (gatesData) {
-        gatesData.forEach((gateData, index) => {
-          let gateElement;
-          if (index == 0) {
-            gateElement = $('.gate').first();
-          } else {
-            gateElement = $('.gate').first().clone();
-            $('.gates-container').append(gateElement);
-
-            gateElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            gateElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = gateElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(gateElement).find('.gate-name').val(gateData.name);
-          $(gateElement).find('.gate-name-angle').val(gateData.nameAngle);
-          $(gateElement).find('.gate-azimuth').val(gateData.azimuth);
-          $(gateElement).find('.gate-distance').val(gateData.distance);
-          $(gateElement).find('.gate-orientation').val(gateData.orientation);
-          $(gateElement).find('.gate-color')[0].jscolor.fromString(gateData.color);
-        });
-      }
-    } catch (error) {
-      const gates = $('.gate:not(:first)');
-      const firstGate = $('.gate').first();
-
-      $(firstGate).find('.gate-name').val('');
-      $(firstGate).find('.gate-name-angle').val(180);
-      $(firstGate).find('.gate-azimuth').val('');
-      $(firstGate).find('.gate-distance').val('');
-      $(firstGate).find('.gate-orientation').val('');
-      $(firstGate).find('.gate-color')[0].jscolor.fromString('#000000');
-
-      gates.remove();
-    }
-
-    // Arrows
-    try {
-      const arrowsData = JSON.parse(localStorage.getItem(arrowsDataKey));
-      if (arrowsData) {
-        arrowsData.forEach((arrowData, index) => {
-          let arrowElement;
-          if (index == 0) {
-            arrowElement = $('.arrow').first();
-          } else {
-            arrowElement = $('.arrow').first().clone();
-            $('.arrow-container').append(arrowElement);
-
-            arrowElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            arrowElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = arrowElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(arrowElement).find('.arrow-azimuth').val(arrowData.azimuth);
-          $(arrowElement).find('.arrow-distance').val(arrowData.distance);
-          $(arrowElement).find('.arrow-orientation').val(arrowData.orientation);
-          $(arrowElement).find('.arrow-length').val(arrowData.length);
-          $(arrowElement).find('.arrow-width').val(arrowData.width);
-          $(arrowElement).find('.arrow-color')[0].jscolor.fromString(arrowData.color);
-        });
-      }
-    } catch (error) {
-      const arrow = $('.arrow:not(:first)');
-      const firstArrow = $('.arrow').first();
-
-      $(firstArrow).find('.arrow-azimuth').val('');
-      $(firstArrow).find('.arrow-distance').val('');
-      $(firstArrow).find('.arrow-orientation').val('');
-      $(firstArrow).find('.arrow-length').val('');
-      $(firstArrow).find('.arrow-width').val('');
-      $(firstArrow).find('.arrow-color')[0].jscolor.fromString('#000000');
-
-      arrow.remove();
-    }
-
-    // Aircraft
-    try {
-      const aircraftData = JSON.parse(localStorage.getItem(aircraftDataKey));
-      if (aircraftData) {
-        aircraftData.forEach((oneAircraftData, index) => {
-          let aircraftElement;
-          if (index == 0) {
-            aircraftElement = $('.aircraft').first();
-          } else {
-            aircraftElement = $('.aircraft').first().clone();
-            $('.aircraft-container').append(aircraftElement);
-
-            aircraftElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            aircraftElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = aircraftElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(aircraftElement).find('.aircraft-name').val(oneAircraftData.name);
-          $(aircraftElement).find('.aircraft-name-angle').val(oneAircraftData.nameAngle);
-          $(aircraftElement).find('.aircraft-azimuth').val(oneAircraftData.azimuth);
-          $(aircraftElement).find('.aircraft-distance').val(oneAircraftData.distance);
-          $(aircraftElement).find('.aircraft-orientation').val(oneAircraftData.orientation);
-          $(aircraftElement).find('.aircraft-quantity').val(oneAircraftData.quantity);
-          $(aircraftElement).find('.aircraft-color')[0].jscolor.fromString(oneAircraftData.color);
-        });
-      }
-    } catch (error) {
-      const aircraft = $('.aircraft:not(:first)');
-      const firstAircraft = $('.aircraft').first();
-
-      $(firstAircraft).find('.aircraft-name').val('');
-      $(firstAircraft).find('.aircraft-name-angle').val(180);
-      $(firstAircraft).find('.aircraft-azimuth').val('');
-      $(firstAircraft).find('.aircraft-distance').val('');
-      $(firstAircraft).find('.aircraft-orientation').val('');
-      $(firstAircraft).find('.aircraft-quantity').val(1);
-      $(firstAircraft).find('.aircraft-color')[0].jscolor.fromString('#000000');
-
-      aircraft.remove();
-    }
-
-    // Nav points
-    try {
-      const navPointsData = JSON.parse(localStorage.getItem(navPointsDataKey));
-      if (navPointsData) {
-        navPointsData.forEach((navPointData, index) => {
-          let navPointElement;
-          if (index == 0) {
-            navPointElement = $('.nav-point').first();
-          } else {
-            navPointElement = $('.nav-point').first().clone();
-            $('.nav-points-container').append(navPointElement);
-
-            navPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            navPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(navPointElement).find('.nav-point-name').val(navPointData.name);
-          $(navPointElement).find('.nav-point-azimuth').val(navPointData.azimuth);
-          $(navPointElement).find('.nav-point-distance').val(navPointData.distance);
-        });
-      }
-    } catch (error) {
-      const navPoints = $('.nav-point:not(:first)');
-      const firstNavPoint = $('.nav-point').first();
-
-      $(firstNavPoint).find('.nav-point-name').val('');
-      $(firstNavPoint).find('.nav-point-azimuth').val('');
-      $(firstNavPoint).find('.nav-point-distance').val('');
-
-      navPoints.remove();
-    }
-
-    // Cap point
-    try {
-      const capPointsData = JSON.parse(localStorage.getItem(capPointsDataKey));
-      if (capPointsData) {
-        capPointsData.forEach((capPointData, index) => {
-          let capPointElement;
-          if (index == 0) {
-            capPointElement = $('.cap-point').first();
-          } else {
-            capPointElement = $('.cap-point').first().clone();
-            $('.cap-points-container').append(capPointElement);
-
-            capPointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            capPointElement.find('.update-field').off('input').on('input', () => this.updateMap());
-
-            const colorPicker = capPointElement.find('.color-picker');
-            if (colorPicker) {
-              this.initColorPicker(colorPicker[0]);
-            }
-          }
-
-          $(capPointElement).find('.cap-point-name').val(capPointData.pointName);
-          $(capPointElement).find('.cap-name').val(capPointData.name);
-          $(capPointElement).find('.cap-point-azimuth').val(capPointData.azimuth);
-          $(capPointElement).find('.cap-point-distance').val(capPointData.distance);
-          $(capPointElement).find('.cap-length').val(capPointData.length);
-          $(capPointElement).find('.cap-width').val(capPointData.width);
-          $(capPointElement).find('.cap-orientation').val(capPointData.orientation);
-          $(capPointElement).find('.cap-side').val(capPointData.leftSide ? 1 : 0).change();
-          $(capPointElement).find('.cap-color')[0].jscolor.fromString(capPointData.color);
-        });
-      }
-    } catch (error) {
-      const capPoints = $('.cap-point:not(:first)');
-      const firstCapPoint = $('.cap-point').first();
-
-      $(firstCapPoint).find('.cap-point-name').val('');
-      $(firstCapPoint).find('.cap-name').val('');
-      $(firstCapPoint).find('.cap-point-azimuth').val('');
-      $(firstCapPoint).find('.cap-point-distance').val('');
-      $(firstCapPoint).find('.cap-length').val('');
-      $(firstCapPoint).find('.cap-width').val('');
-      $(firstCapPoint).find('.cap-orientation').val('');
-      $(firstCapPoint).find('.cap-side').val(1).change();
-      $(firstCapPoint).find('.cap-color')[0].jscolor.fromString('#000000');
-
-      capPoints.remove();
-    }
-
-    // Points
-    try {
-      const pointsData = JSON.parse(localStorage.getItem(pointsDataKey));
-      if (pointsData) {
-        pointsData.forEach((pointData, index) => {
-          let pointElement;
-          if (index == 0) {
-            pointElement = $('.point').first();
-          } else {
-            pointElement = $('.point').first().clone();
-            $('.points-container').append(pointElement);
-
-            pointElement.find('.delete-button').off('click').on('click', (event) => this.deleteElement(event));
-            pointElement.find('.update-field').off('input').on('input', () => this.updateMap());
-          }
-
-          $(pointElement).find('.point-name').val(pointData.name);
-          $(pointElement).find('.point-azimuth').val(pointData.azimuth);
-          $(pointElement).find('.point-distance').val(pointData.distance);
-          $(pointElement).find('.point-type').val(pointData.type);
-        });
-      }
-    } catch (error) {
-      const points = $('.point:not(:first)');
-      const firstPoint = $('.point').first();
-
-      $(firstPoint).find('.point-name').val('');
-      $(firstPoint).find('.point-azimuth').val('');
-      $(firstPoint).find('.point-distance').val('');
-      $(firstPoint).find('.nav-point').val('nav-point');
-
-      points.remove();
-    }
-
-    // Collapse fieldsets
-    try {
-      const fieldsetsData = JSON.parse(localStorage.getItem(fieldsetsDataKey));
-
-      if (fieldsetsData) {
-        fieldsetsData.forEach((fieldsetData) => {
-          const fieldset = $(`fieldset#${fieldsetData.id}`);
-          const subcontainer = $(fieldset).find('.fieldset-subcontainer');
-
-          $(fieldset).css('transition', 'none')
-          $(subcontainer).css('transition', 'none');
-
-          $(fieldset).toggleClass('collapsed', fieldsetData.collapsed);
-
-          $(fieldset)[0].offsetHeight;
-          $(fieldset).css('transition', '');
-          $(subcontainer).css('transition', '');
-        });
-      }
-    } catch (error) { }
-  }
-
-  saveData() {
-    localStorage.setItem(bullseyeDataKey, JSON.stringify(this.bullseye));
-    localStorage.setItem(baseLinesDataKey, JSON.stringify(this.baseLines));
-    localStorage.setItem(coastlinesDataKey, JSON.stringify(this.coastlines));
-    localStorage.setItem(mobsDataKey, JSON.stringify(this.mobs));
-    localStorage.setItem(bordersDataKey, JSON.stringify(this.borders));
-    localStorage.setItem(ringsDataKey, JSON.stringify(this.rings));
-    localStorage.setItem(areaPointsDataKey, JSON.stringify(this.areaPoints));
-    localStorage.setItem(faorPointsDataKey, JSON.stringify(this.faorPoints));
-    localStorage.setItem(gatesDataKey, JSON.stringify(this.gates));
-    localStorage.setItem(arrowsDataKey, JSON.stringify(this.arrows));
-    localStorage.setItem(aircraftDataKey, JSON.stringify(this.aircraft));
-    localStorage.setItem(navPointsDataKey, JSON.stringify(this.navPoints));
-    localStorage.setItem(capPointsDataKey, JSON.stringify(this.capPoints));
-    localStorage.setItem(pointsDataKey, JSON.stringify(this.points));
   }
 }

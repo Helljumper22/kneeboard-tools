@@ -1,290 +1,451 @@
-body .container .tabs-container .tabs .tab[attr-tab="bullseye-map-tab"] {
-  .tab-content {
-    height: 100%;
+body .container .tabs-container .tabs {
 
-    .sidebar {
+  .tab[attr-tab="bullseye-map-tab"],
+  .tab[attr-tab="bullseye-map-v2-tab"] {
+    .tab-content {
       height: 100%;
 
-      .input-fields-container {
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-        padding: 20px;
-        text-align: left;
+      .sidebar {
+        height: 100%;
 
-        fieldset {
-          display: flex;
-          flex-direction: column;
-          position: relative;
-          width: 100%;
-          border: 1px solid #444;
-          padding: 10px;
-          box-sizing: border-box;
-          transition: max-height 0.3s ease, opacity 0.3s ease;
+        .bullseye-map-component-list-container,
+        .bullseye-map-component-container {
+          background: #2b2b2b;
+          padding: 10px 20px;
+          height: 100%;
+        }
 
-          .fieldset-header {
+        .bullseye-map-component-list-container {
+          &.hide {
+            display: none;
+          }
+
+          .component-list-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+          }
+        }
+
+        .bullseye-map-component-container {
+          &.hide {
+            display: none;
+          }
+
+          .bullseye-map-component-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            transform: translateY(-50%);
-            padding: 0 10px;
-            box-sizing: border-box;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 40px;
+            padding-bottom: 10px;
 
-            .fieldset-title {
-              background-color: #2B2B2B;
-              padding: 5px;
-              font-size: 16px;
+            .bullseye-map-component-back-button {
+              position: absolute;
+              left: 0;
+            }
+
+            .bullseye-map-component-name {
+              width: 100%;
+              text-align: center;
+              white-space: normal;
               font-weight: bold;
-              color: #ccc;
-            }
-
-            .toggle-fieldset {
-              width: 30px;
-              background-color: #2B2B2B;
-              border: none;
-              padding: 5px;
-              color: white;
-              font-size: 16px;
-              cursor: pointer;
-              transform: rotate(0deg) translateY(-10%);
             }
           }
 
-          &.collapsed {
-            .fieldset-subcontainer {
-              max-height: 0;
-              opacity: 0;
-            }
-
-            .toggle-fieldset {
-              transform: rotate(180deg) translateY(20%);
-            }
+          .bullseye-map-component-description:not(:empty) {
+            padding-bottom: 10px;
           }
 
-          .fieldset-subcontainer {
+          .bullseye-map-component-fields-container {
             display: flex;
             flex-direction: column;
-            margin-top: 20px;
-            overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.3s ease;
-            max-height: 1000px;
-            opacity: 1;
+            justify-content: center;
 
-            .element-container {
-              max-height: 400px;
-              overflow-y: auto;
-              border: 1px solid #444;
-              padding: 10px;
-              background: #1e1e1e;
-              transition: opacity 0.3s ease;
 
-              .element {
-                display: flex;
-                flex-direction: column;
+            .multiple-field-wrapper {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              position: relative;
+              margin: 10px 20px 10px 20px;
+              width: calc(100% - 40px);
+              border: 1px solid #2b2b2b;
+              border-radius: 10px;
+              overflow: hidden;
+
+              &.multiple-field-wrapper:not(.multiple-field-item .multiple-field-wrapper) {
+                border-radius: 0;
+                margin: 10px 0 10px 0;
+                width: 100%
+              }
+
+              .multiple-field-item {
                 position: relative;
                 padding: 10px 20px;
-                background-color: #1e1e1e;
+                /*border: 1px solid white;*/
+                background: #1e1e1e;
+                display: flex;
+                flex-direction: column;
+                border-radius: 10px;
 
                 .drag-handle {
                   position: absolute;
+                  left: 0;
+                  top: 0;
+                  bottom: 0;
+                  width: 20px;
+                  background: #000000;
+                  cursor: move;
                   display: flex;
-                  justify-content: center;
                   align-items: center;
-                  text-align: center;
-                  top: 5px;
-                  height: 111px;
-                  margin: 0;
-                  left: 5px;
-                  width: 25px;
-                  cursor: grab;
-                  font-size: 16px;
-                  color: #ccc;
-                  user-select: none;
-                  background-color: #2b2b2b;
-                  border-radius: 4px;
+                  justify-content: center;
+                  /*border-right: 1px solid white;*/
                 }
 
                 .delete-button {
                   position: absolute;
-                  padding: 4px 10px;
-                  margin: 0;
-                  top: 5px;
-                  right: 5px;
-                  width: auto;
-                }
+                  padding: 0;
+                  right: 0;
+                  top: 0;
+                  bottom: 0;
+                  width: 20px;
+                  background: #000000;
+                  /*border-left: 1px solid white;*/
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 16px;
+                  line-height: 16px;
+                  cursor: pointer;
+                  border-radius: 0;
 
-                .delete-ring-range-indicator-button {
-                  height: 30px;
-                }
-
-                .delete-coastline-button {
-                  height: 151px;
-                }
-
-                .delete-mob-button {
-                  height: 231px;
-                }
-
-                .delete-border-button {
-                  height: 231px;
-                }
-
-                .delete-ring-button {
-                  height: 191px;
-                }
-
-                .delete-area-point-button,
-                .delete-faor-point-button {
-                  height: 111px;
-                }
-
-                .delete-gate-button {
-                  height: 231px;
-                }
-
-                .delete-arrow-button {
-                  height: 231px;
-                }
-
-                .delete-aircraft-button {
-                  height: 271px;
-                }
-
-                .delete-nav-point-button {
-                  height: 111px;
-                }
-
-                .delete-cap-point-button {
-                  height: 351px;
-                }
-
-                .delete-point-button {
-                  height: 151px;
-                }
-
-                &:first-child {
-                  padding-top: 0;
-                }
-
-                &:last-child {
-                  padding-bottom: 0;
-                }
-
-                &:not(:first-child) {
-                  border-top: 1px solid white;
-
-                  .delete-button,
-                  .drag-handle {
-                    margin-top: 10px;
+                  &:hover {
+                    background: #3b3b3b;
                   }
-
                 }
 
-                &:not(:last-child) {
-                  border-bottom: 1px solid white;
+                .field {
+                  margin: 0 10px 0 10px;
                 }
+              }
 
-                &.dragged {
-                  border: 0px;
+              .add-button {
+                width: 100%;
+                padding: 0;
+                height: 20px;
+                background: #000000;
+                /*border: 1px solid white;*/
+                color: white;
+                cursor: pointer;
+                font-size: 16px;
+                line-height: 16px;
+                border-radius: 0;
+
+                &:hover {
+                  background: #3b3b3b;
                 }
+              }
+
+              .multiple-field-item.dragging {
+                opacity: 0.5;
+                border: 1px dashed white;
+              }
+
+              .ui-sortable-placeholder {
+                visibility: visible !important;
+                height: 40px;
+                background: #3b3b3b;
+                border: 1px dashed white;
+                margin: 5px 0;
               }
             }
           }
+        }
 
-          .asterisk-text {
+        /*.input-fields-container {
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+          padding: 20px;
+          text-align: left;
+
+          fieldset {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 100%;
+            border: 1px solid #444;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+
+            .fieldset-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              transform: translateY(-50%);
+              padding: 0 10px;
+              box-sizing: border-box;
+
+              .fieldset-title {
+                background-color: #2B2B2B;
+                padding: 5px;
+                font-size: 16px;
+                font-weight: bold;
+                color: #ccc;
+              }
+
+              .toggle-fieldset {
+                width: 30px;
+                background-color: #2B2B2B;
+                border: none;
+                padding: 5px;
+                color: white;
+                font-size: 16px;
+                cursor: pointer;
+                transform: rotate(0deg) translateY(-10%);
+              }
+            }
+
+            &.collapsed {
+              .fieldset-subcontainer {
+                max-height: 0;
+                opacity: 0;
+              }
+
+              .toggle-fieldset {
+                transform: rotate(180deg) translateY(20%);
+              }
+            }
+
+            .fieldset-subcontainer {
+              display: flex;
+              flex-direction: column;
+              margin-top: 20px;
+              overflow: hidden;
+              transition: max-height 0.3s ease, opacity 0.3s ease;
+              max-height: 1000px;
+              opacity: 1;
+
+              .element-container {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid #444;
+                padding: 10px;
+                background: #1e1e1e;
+                transition: opacity 0.3s ease;
+
+                .element {
+                  display: flex;
+                  flex-direction: column;
+                  position: relative;
+                  padding: 10px 20px;
+                  background-color: #1e1e1e;
+
+                  .drag-handle {
+                    position: absolute;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    top: 5px;
+                    height: 111px;
+                    margin: 0;
+                    left: 5px;
+                    width: 25px;
+                    cursor: grab;
+                    font-size: 16px;
+                    color: #ccc;
+                    user-select: none;
+                    background-color: #2b2b2b;
+                    border-radius: 4px;
+                  }
+
+                  .delete-button {
+                    position: absolute;
+                    padding: 4px 10px;
+                    margin: 0;
+                    top: 5px;
+                    right: 5px;
+                    width: auto;
+                  }
+
+                  .delete-ring-range-indicator-button {
+                    height: 30px;
+                  }
+
+                  .delete-coastline-button {
+                    height: 151px;
+                  }
+
+                  .delete-mob-button {
+                    height: 231px;
+                  }
+
+                  .delete-border-button {
+                    height: 231px;
+                  }
+
+                  .delete-ring-button {
+                    height: 191px;
+                  }
+
+                  .delete-area-point-button,
+                  .delete-faor-point-button {
+                    height: 111px;
+                  }
+
+                  .delete-gate-button {
+                    height: 231px;
+                  }
+
+                  .delete-arrow-button {
+                    height: 231px;
+                  }
+
+                  .delete-aircraft-button {
+                    height: 271px;
+                  }
+
+                  .delete-nav-point-button {
+                    height: 111px;
+                  }
+
+                  .delete-cap-point-button {
+                    height: 351px;
+                  }
+
+                  .delete-point-button {
+                    height: 151px;
+                  }
+
+                  &:first-child {
+                    padding-top: 0;
+                  }
+
+                  &:last-child {
+                    padding-bottom: 0;
+                  }
+
+                  &:not(:first-child) {
+                    border-top: 1px solid white;
+
+                    .delete-button,
+                    .drag-handle {
+                      margin-top: 10px;
+                    }
+
+                  }
+
+                  &:not(:last-child) {
+                    border-bottom: 1px solid white;
+                  }
+
+                  &.dragged {
+                    border: 0px;
+                  }
+                }
+              }
+            }
+
+            .asterisk-text {
+              margin-top: 10px;
+              font-size: small;
+            }
+
+            .add-button {
+              width: 150px;
+            }
+          }
+
+          button {
             margin-top: 10px;
-            font-size: small;
           }
-
-          .add-button {
-            width: 150px;
-          }
-        }
-
-        button {
-          margin-top: 10px;
-        }
-      }
-    }
-
-    .map-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #1e1e1e;
-      width: 100%;
-
-      .map-canvas {
-        background: white;
-        border: 1px solid black;
-      }
-    }
-
-    .field {
-      display: flex;
-      height: 40px;
-      align-items: center;
-      justify-content: center;
-
-      label {
-        display: inline-block;
-        width: 150px;
-        font-size: 14px;
+        }*/
       }
 
-      input,
-      select {
-        width: 140px;
-        padding: 5px;
-        font-size: 14px;
-        margin: 5px 0;
+      .map-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #1e1e1e;
+        width: 100%;
 
-        &[type=checkbox] {
-          width: 155px;
-        }
-
-        &[type="range"] {
-          cursor: pointer;
-          height: 16px;
-          padding: 0 5px;
-          border-radius: 1px;
-          border: 1px solid rgb(118, 118, 118);
+        .map-canvas,
+        .map-canvas-v2 {
           background: white;
-          outline: none;
-          appearance: none;
-
-          &::-webkit-slider-thumb {
-            cursor: pointer;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #005CC8;
-          }
-
-          &::-moz-range-thumb {
-            cursor: pointer;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #005CC8;
-          }
+          border: 1px solid black;
         }
       }
 
-      select {
-        width: 154px;
-      }
+      .field {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
 
-      .color-picker {
-        width: 155px;
-        height: 30px;
-        margin: 5px 0;
-        border-radius: 1px;
+        label {
+          display: inline-block;
+          width: 150px;
+          font-size: 14px;
+        }
+
+        input,
+        select {
+          width: 140px;
+          padding: 5px;
+          font-size: 14px;
+          margin: 5px 0;
+
+          &[type=checkbox] {
+            width: 155px;
+          }
+
+          &[type="range"] {
+            cursor: pointer;
+            height: 16px;
+            padding: 0 5px;
+            border-radius: 1px;
+            border: 1px solid rgb(118, 118, 118);
+            background: white;
+            outline: none;
+            appearance: none;
+
+            &::-webkit-slider-thumb {
+              cursor: pointer;
+              appearance: none;
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: #005CC8;
+            }
+
+            &::-moz-range-thumb {
+              cursor: pointer;
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: #005CC8;
+            }
+          }
+        }
+
+        select {
+          width: 154px;
+        }
+
+        .color-picker {
+          width: 155px;
+          height: 30px;
+          margin: 5px 0;
+          border-radius: 1px;
+        }
       }
     }
   }

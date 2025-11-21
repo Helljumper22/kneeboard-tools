@@ -50,9 +50,8 @@ class Utils {
         });
     }
 
-    exportMap(mapData, fileName) {
-        const mapDataJSON = JSON.stringify(mapData, null, 2);
-        const blob = new Blob([mapDataJSON], { type: 'application/json' });
+    exportData(data, fileName) {
+        const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement('a');
@@ -187,6 +186,48 @@ class Utils {
         return isInside;
     }
 
+    getRacetrackCorners(x, y, length, width, orientation, leftSide, mapOrientation) {
+        console.log(x, y, length, width, orientation, leftSide, mapOrientation);
+        const corners = [];
+        if (this.isNumber(length) && length >= 0 && this.isNumber(width) && width >= 0 && this.isNumber(orientation)) {
+            const orienationRad = (orientation * Math.PI / 180) + (mapOrientation * Math.PI / 180)
+
+            corners.push({
+                x: x + ((width / 2) * Math.cos(orienationRad - Math.PI / 2)),
+                y: y - ((width / 2) * Math.cos(orienationRad))
+            });
+
+            corners.push({
+                x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)),
+                y: corners[0].y + (length * Math.cos(orienationRad))
+            });
+
+            if (leftSide) {
+                corners.push({
+                    x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) - (width * Math.cos(orienationRad)),
+                    y: corners[0].y + (length * Math.cos(orienationRad)) - (width * Math.cos(orienationRad - Math.PI / 2))
+                });
+
+                corners.push({
+                    x: corners[0].x - (width * Math.cos(orienationRad)),
+                    y: corners[0].y - (width * Math.cos(orienationRad - Math.PI / 2))
+                });
+            } else {
+                corners.push({
+                    x: corners[0].x - (length * Math.cos(orienationRad - Math.PI / 2)) + (width * Math.cos(orienationRad)),
+                    y: corners[0].y + (length * Math.cos(orienationRad)) + (width * Math.cos(orienationRad - Math.PI / 2))
+                });
+
+                corners.push({
+                    x: corners[0].x + (width * Math.cos(orienationRad)),
+                    y: corners[0].y + (width * Math.cos(orienationRad - Math.PI / 2))
+                });
+            }
+        }
+
+        return corners;
+    }
+
     parseLuaMiz(lua) {
         const astData = luaparse.parse(lua, {
             comments: false,
@@ -292,6 +333,10 @@ class Utils {
 
     fahrenheitToCelsius(f) {
         return (f - 32) * 5 / 9;
+    }
+
+    isNumber(value) {
+        return typeof value === 'number' && !isNaN(value);
     }
 
     getContrailsRange(slTemp) {

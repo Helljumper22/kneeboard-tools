@@ -281,7 +281,7 @@ class Kneeboard {
 
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
       const fileName = $(exportModal).find('.file-name').val();
-      this.utils.exportMap(this.kneeboardData, fileName != '' ? fileName : 'kneeboard');
+      this.utils.exportData(JSON.stringify(this.kneeboardData, null, 2), fileName != '' ? fileName : 'kneeboard');
 
       $(exportModal).removeClass('show');
     });

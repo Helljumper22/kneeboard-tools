@@ -194,16 +194,16 @@ body {
                   }
                 }
 
+                .header-text {
+                  margin-top: 15px;
+                  font-size: 0.8em;
+                }
+
                 .header-buttons {
                   margin-top: 20px;
                   display: grid;
                   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
                   gap: 10px;
-                }
-
-                .header-text {
-                  margin-top: 15px;
-                  font-size: 0.8em;
                 }
               }
             }
