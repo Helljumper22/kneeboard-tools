@@ -1,6 +1,6 @@
 class MapDrawUtils {
-  constructor() {
-    this.canvas = $('.map-canvas')[0];
+  constructor(canvas) {
+    this.canvas = $(canvas)[0];
     this.ctx = this.canvas.getContext('2d');
 
     this.height = 700;
@@ -233,6 +233,42 @@ class MapDrawUtils {
     this.ctx.fillRect(xPx, yPx, length, length);
   }
 
+  drawPolygon(corners, color, strokeWidth = 1, type = 'simple', fillColor = false) {
+    this.ctx.fillStyle = fillColor;
+
+    this.ctx.beginPath();
+
+    const lines = [];
+    for (let i = 0; i < corners.length; i++) {
+      const nextCornerIndex = (i + 1) % corners.length;
+
+      const cornerX = (corners[i].x * this.nmToPixels) + this.centerX;
+      const cornerY = (corners[i].y * this.nmToPixels) + this.centerY;
+
+      lines.push({
+        startX: corners[i].x,
+        startY: corners[i].y,
+        endX: corners[nextCornerIndex].x,
+        endY: corners[nextCornerIndex].y,
+      })
+
+      if (i == 0) {
+        this.ctx.moveTo(cornerX, cornerY)
+      } else {
+        this.ctx.lineTo(cornerX, cornerY)
+      }
+    }
+
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    if (type != 'no-border') {
+      lines.forEach(line => {
+        this.drawLine(line.startX, line.startY, line.endX, line.endY, color, strokeWidth, type);
+      });
+    }
+  }
+
   drawLine(startX, startY, endX, endY, color, strokeWidth = 1, type = 'simple') {
     const startXPx = (startX * this.nmToPixels) + this.centerX;
     const startYPx = (startY * this.nmToPixels) + this.centerY;
@@ -242,23 +278,9 @@ class MapDrawUtils {
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = strokeWidth;
 
+    let angle, lineLength, middleX, middleY;
+
     switch (type) {
-      case 'dashed':
-        const length = Math.hypot(endXPx - startXPx, endYPx - startYPx); // Get the Euclidean distance
-
-        const desiredDashLength = 5;
-        const dashCount = Math.floor(length / (desiredDashLength * 2)) || 1;
-        const dashLength = Math.round(length / (dashCount * 2));
-
-        this.ctx.setLineDash([dashLength, dashLength]);
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(startXPx, startYPx);
-        this.ctx.lineTo(endXPx, endYPx);
-        this.ctx.stroke();
-
-        this.ctx.setLineDash([]);
-        break;
       case 'simple':
         this.ctx.beginPath();
         this.ctx.moveTo(startXPx, startYPx);
@@ -268,7 +290,7 @@ class MapDrawUtils {
       case 'double':
         const lineSpacing = 3;
         // Calculate the angle of the line
-        const angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+        angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
 
         // Calculate the offset for the parallel lines
         const offsetX = lineSpacing * Math.sin(angle);
@@ -296,7 +318,106 @@ class MapDrawUtils {
         this.ctx.moveTo(startXPx + offsetX, startYPx - offsetY);
         this.ctx.lineTo(endXPx + offsetX, endYPx - offsetY);
         this.ctx.stroke();
+        break;
+      case 'dashed':
+        const length = Math.hypot(endXPx - startXPx, endYPx - startYPx); // Get the Euclidean distance
 
+        const desiredDashLength = 5;
+        const dashCount = Math.floor(length / (desiredDashLength * 2)) || 1;
+        const dashLength = Math.round(length / (dashCount * 2));
+
+        this.ctx.setLineDash([dashLength, dashLength]);
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+
+        this.ctx.setLineDash([]);
+        break;
+      case 'border':
+        const crossSpacing = 40;
+        const crossSize = 15;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+
+        // Calculate the angle of the line
+        angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+
+        // Calculate the length of the line
+        lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
+
+        // If the line is shorter than half the crossSpacing, don't draw any crosses
+        if (lineLength < crossSpacing / 2) return;
+
+        // Calculate the starting point for crosses (middle of the line)
+        middleX = startXPx + (endXPx - startXPx) / 2;
+        middleY = startYPx + (endYPx - startYPx) / 2;
+
+        // Draw crosses along the line
+        for (let i = -Math.floor(lineLength / (2 * crossSpacing)) * crossSpacing; i <= Math.floor(lineLength / (2 * crossSpacing)) * crossSpacing; i += crossSpacing) {
+          const crossX = middleX + i * Math.cos(angle);
+          const crossY = middleY + i * Math.sin(angle);
+
+          this.ctx.save();
+          this.ctx.translate(crossX, crossY);
+          this.ctx.rotate(angle + Math.PI / 4);
+
+          // Draw the cross
+          this.ctx.strokeStyle = color;
+          this.ctx.lineWidth = strokeWidth;
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(-crossSize / 2, 0);
+          this.ctx.lineTo(crossSize / 2, 0);
+          this.ctx.moveTo(0, -crossSize / 2);
+          this.ctx.lineTo(0, crossSize / 2);
+          this.ctx.stroke();
+
+          this.ctx.restore();
+        }
+        break;
+      case 'coastline':
+        const tickSpacing = 10;
+        const tickLength = 10;
+        const tickDirection = 1;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startXPx, startYPx);
+        this.ctx.lineTo(endXPx, endYPx);
+        this.ctx.stroke();
+
+        // Calculate angle and line length
+        angle = Math.atan2(endYPx - startYPx, endXPx - startXPx);
+        const normalAngle = angle - (Math.PI / 4); // Perpendicular direction
+        lineLength = Math.sqrt((endXPx - startXPx) ** 2 + (endYPx - startYPx) ** 2);
+
+        if (lineLength < tickSpacing / 2) return;
+
+        // Draw ticks along the line, centered
+        middleX = startXPx + (endXPx - startXPx) / 2;
+        middleY = startYPx + (endYPx - startYPx) / 2;
+
+        for (let i = -Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+          i <= Math.floor(lineLength / (2 * tickSpacing)) * tickSpacing;
+          i += tickSpacing) {
+          const baseX = middleX + i * Math.cos(angle);
+          const baseY = middleY + i * Math.sin(angle);
+
+          // Tick start and end points, pointing to one side (e.g., water side)
+          const tickStartX = baseX;
+          const tickStartY = baseY;
+          const tickEndX = baseX + tickDirection * tickLength * Math.cos(normalAngle);
+          const tickEndY = baseY + tickDirection * tickLength * Math.sin(normalAngle);
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(tickStartX, tickStartY);
+          this.ctx.lineTo(tickEndX, tickEndY);
+          this.ctx.stroke();
+        }
         break;
     }
   }
@@ -398,7 +519,6 @@ class MapDrawUtils {
     }
   }
 
-
   drawInfiniteLine(x, y, angle, color, isDashed = false) {
     // Convert the starting point from nautical miles to pixels
     const startXPx = (x * this.nmToPixels) + this.centerX;
@@ -434,20 +554,24 @@ class MapDrawUtils {
     this.ctx.setLineDash([]);
   }
 
-  drawRing(x, y, radius, color, strokeWidth = 1) {
+  drawRing(x, y, radius, color, strokeWidth = 1, fillColor = false) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
-    const radiusPx = radius * this.nmToPixels
+    const radiusPx = Math.max(radius, 0) * this.nmToPixels
 
     this.ctx.strokeStyle = color;
     this.ctx.lineWidth = strokeWidth;
 
     this.ctx.beginPath();
     this.ctx.arc(xPx, yPx, radiusPx, 0, 2 * Math.PI);
+    if (fillColor) {
+      this.ctx.fillStyle = fillColor;
+      this.ctx.fill();
+    }
     this.ctx.stroke();
   }
 
-  drawText(x, y, text, type = 'square', fontsize = 16, offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2) {
+  drawText(x, y, text, type = 'square', fontsize = 16, offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2, fill = false) {
     let xPx = (x * this.nmToPixels) + this.centerX - padding;
     let yPx = (y * this.nmToPixels) + this.centerY - padding;
 
@@ -496,7 +620,7 @@ class MapDrawUtils {
           textY += textHeight + padding * 2;
         }
 
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - padding);
         break;
       case 'octogone':
@@ -528,14 +652,14 @@ class MapDrawUtils {
         }
         this.ctx.closePath();
 
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fill();
         this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
 
         if (text.length > 2) {
-          this.ctx.fillStyle = "white";
+          this.ctx.fillStyle = fill ? fill : "white";
           this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
         }
         break;
@@ -559,7 +683,7 @@ class MapDrawUtils {
         this.ctx.quadraticCurveTo(rs_x, rs_y, rs_x + rs_radius, rs_y);
         this.ctx.closePath();
 
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fill();
         this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
@@ -569,8 +693,8 @@ class MapDrawUtils {
         textY = padding;
         break;
       case 'square':
-        // Draw black square with white background
-        this.ctx.fillStyle = "white";
+        // Draw black square with colored background
+        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fillRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
         this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
@@ -580,8 +704,8 @@ class MapDrawUtils {
         textY = padding;
         break;
       case 'triangle':
-        // Draw black triangle with white background
-        this.ctx.fillStyle = "white";
+        // Draw black triangle with colored background
+        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.beginPath();
         this.ctx.moveTo(padding, (-boxHeight / 2) + (padding / 2));
         this.ctx.lineTo((boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
@@ -601,11 +725,19 @@ class MapDrawUtils {
         textY = padding * 1.3;
 
         if (text.length > 2) {
-          this.ctx.fillStyle = "white";
+          this.ctx.fillStyle = fill ? fill : "white";
           this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - (padding / 3));
         }
         break;
       case 'no-border':
+        // Draw colored background
+        this.ctx.fillStyle = fill ? fill : "white";
+        this.ctx.fillRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
+
+        textX = padding;
+        textY = padding;
+        break;
+      case 'clear':
         let heightFix = 0;
         if (padding == 0) {
           heightFix = 2
