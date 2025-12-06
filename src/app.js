@@ -7,10 +7,12 @@ class App {
 
     const kneeboardM2000C_OCA = new KneeboardM2000C_OCA();
     const kneeboardGCI = new KneeboardGCI();
+    const kneeboardMIR_F1_FRM = new KneeboardMIR_F1_FRM();
 
     this.kneeboardTemplates = {};
     this.kneeboardTemplates[kneeboardM2000C_OCA.kneeboardId] = kneeboardM2000C_OCA;
     this.kneeboardTemplates[kneeboardGCI.kneeboardId] = kneeboardGCI;
+    this.kneeboardTemplates[kneeboardMIR_F1_FRM.kneeboardId] = kneeboardMIR_F1_FRM;
 
     this.init()
   }

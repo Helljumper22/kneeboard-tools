@@ -938,25 +938,29 @@ class BullseyeMap {
       }
 
       linesData.lines.forEach(lineData => {
-        for (let i = 1; i < lineData.points.length; i++) {
-          if (this.utils.isNumber(lineData.points[i - 1]['azimuth']) && this.utils.isNumber(lineData.points[i - 1]['distance'])
-            && this.utils.isNumber(lineData.points[i]['azimuth']) && this.utils.isNumber(lineData.points[i]['distance'])) {
-            const startAngleRad = ((lineData.points[i - 1]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
-            const startX = lineData.points[i - 1]['distance'] * Math.cos(startAngleRad);
-            const startY = lineData.points[i - 1]['distance'] * Math.sin(startAngleRad);
+        if (lineData.points) {
+          for (let i = 1; i < lineData.points.length; i++) {
+            if (this.utils.isNumber(lineData.points[i - 1]['azimuth']) && this.utils.isNumber(lineData.points[i - 1]['distance'])
+              && this.utils.isNumber(lineData.points[i]['azimuth']) && this.utils.isNumber(lineData.points[i]['distance'])) {
+              const startAngleRad = ((lineData.points[i - 1]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              const startX = lineData.points[i - 1]['distance'] * Math.cos(startAngleRad);
+              const startY = lineData.points[i - 1]['distance'] * Math.sin(startAngleRad);
 
-            const endAngleRad = ((lineData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
-            const endX = lineData.points[i]['distance'] * Math.cos(endAngleRad);
-            const endY = lineData.points[i]['distance'] * Math.sin(endAngleRad);
+              const endAngleRad = ((lineData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              const endX = lineData.points[i]['distance'] * Math.cos(endAngleRad);
+              const endY = lineData.points[i]['distance'] * Math.sin(endAngleRad);
 
-            const color = lineData['color'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'color').default;
-            const type = lineData['type'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'type').default;
+              const color = lineData['color'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'color').default;
+              const type = lineData['type'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'type').default;
 
-            this.mapDrawUtils.drawLine(startX, startY, endX, endY, color, 3, type);
-          }
-        };
+              this.mapDrawUtils.drawLine(startX, startY, endX, endY, color, 3, type);
+            }
+          };
+        }
       });
     }
+
+    this.mapDrawUtils.unclipCanvas();
   }
 
   drawRings(component, limitToArea, mapOrientation, areaPoints) {
@@ -1052,6 +1056,8 @@ class BullseyeMap {
         }
       });
     }
+
+    this.mapDrawUtils.unclipCanvas();
   }
 
   drawRacetracks(component, limitToArea, mapOrientation, areaPoints) {
@@ -1074,25 +1080,10 @@ class BullseyeMap {
           const x = racetrack['distance'] * Math.cos(angleRad);
           const y = racetrack['distance'] * Math.sin(angleRad);
 
-          const side = area['side'] ? area['side'] == 'left' : component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'type').default == 'left';
+          const side = racetrack['side'] ? racetrack['side'] == 'left' : component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'side').default == 'left';
           const color = racetrack['color'] ?? component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'color').default;
 
           this.mapDrawUtils.drawRacetrack(x, y, racetrack['length'], racetrack['width'], (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), side, color);
-
-          if (racetrack['point-name'] != '' && racetrack['point-name'] != undefined) {
-            this.pointNamesData.push({
-              limitToArea: false,
-              x,
-              y,
-              text: racetrack['point-name'],
-              type: 'square',
-              fontSize: 16,
-              offsetDistance: 0,
-              offsetAngle: 0,
-              textAngle: 0,
-              padding: 2
-            });
-          }
 
           if (racetrack['racetrack-name'] != '' && racetrack['racetrack-name'] != undefined) {
             const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side == 'left', mapOrientation);
@@ -1117,9 +1108,26 @@ class BullseyeMap {
               padding: 0
             });
           }
+
+          if (racetrack['point-name'] != '' && racetrack['point-name'] != undefined) {
+            this.pointNamesData.push({
+              limitToArea: false,
+              x,
+              y,
+              text: racetrack['point-name'],
+              type: 'square',
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
         }
       });
     }
+
+    this.mapDrawUtils.unclipCanvas();
   }
 
   drawObjects(component, limitToArea, mapOrientation, areaPoints) {
@@ -1220,85 +1228,6 @@ class BullseyeMap {
 
       this.mapDrawUtils.unclipCanvas();
     });
-
-    /*
-    // Draw border names
-    this.borders.forEach((border) => {
-      if (border.name != '') this.mapDrawUtils.drawText(border.nameX, border.nameY, border.name, 'no-border', 16, 15, border.nameAngle - (Math.PI / 2), border.nameAngle, 0);
-    });
-   
-    // Draw ring names
-    this.rings.forEach((ring) => {
-      if (ring.name != '') this.mapDrawUtils.drawText(ring.x, ring.y, ring.name, 'plus-bottom');
-    });
-   
-    // Draw area points name
-    this.areaPoints.forEach((areaPoint) => {
-      if (areaPoint.name != '') this.mapDrawUtils.drawText(areaPoint.x, areaPoint.y, areaPoint.name);
-    });
-   
-    // Draw FAOR points name
-    this.faorPoints.forEach((faorPoint) => {
-      if (faorPoint.name != '') this.mapDrawUtils.drawText(faorPoint.x, faorPoint.y, faorPoint.name);
-    });
-   
-    // Draw gate names
-    this.gates.forEach((gate) => {
-      if (gate.name != '') {
-        const angleRad = ((gate.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-        this.mapDrawUtils.drawText(gate.x, gate.y, gate.name, 'no-border', 16, 25, angleRad, 0, 0);
-      }
-    });
-   
-    // Draw aircraft names
-    this.aircraft.forEach((aircraft) => {
-      const angleRad = ((aircraft.nameAngle - 90) * Math.PI / 180) + (this.bullseye.mapOrientation * Math.PI / 180);
-      if (aircraft.name != '') this.mapDrawUtils.drawText(aircraft.x, aircraft.y, aircraft.name, 'no-border', 14, 20, angleRad, 0, 0);
-    });
-   
-    // Draw nav points name
-    this.navPoints.forEach((navPoint) => {
-      if (navPoint.name != '') this.mapDrawUtils.drawText(navPoint.x, navPoint.y, navPoint.name);
-    });
-   
-    // Draw CAP names and CAP points name.
-    this.capPoints.forEach((capPoint) => {
-      if (!isNaN(capPoint.x) && !isNaN(capPoint.y)) {
-        if (!isNaN(capPoint.length) && capPoint.length >= 0 && !isNaN(capPoint.width) && capPoint.width >= 0 && !isNaN(capPoint.orientation)) {
-          if (capPoint.name != '') {
-            const { x: capNameX, y: capNameY } = this.utils.getCenter(capPoint.corners);
-   
-            let capNameAngle = (((capPoint.orientation + 90) * (Math.PI / 180)) % 360) + (this.bullseye.mapOrientation * Math.PI / 180);
-            if (capNameAngle <= Math.PI * 1.5 && capNameAngle >= Math.PI / 2) {
-              capNameAngle -= Math.PI;
-            }
-   
-            this.mapDrawUtils.drawText(capNameX, capNameY, capPoint.name, 'no-border', 16, 0, 0, capNameAngle, 0);
-          }
-        }
-   
-        if (capPoint.pointName != '') {
-          this.mapDrawUtils.drawText(capPoint.x, capPoint.y, capPoint.pointName);
-        }
-      }
-    });
-   
-    // Draw point names
-    this.points.forEach((point) => {
-      let type = 'no-border', padding = 0;
-      switch (point.type) {
-        case 'nav-point':
-          type = 'square';
-          padding = 2;
-          break;
-        case 'target-point':
-          type = 'triangle';
-          padding = 7;
-          break;
-      }
-   
-      this.mapDrawUtils.drawText(point.x, point.y, point.name, type, 16, 0, 0, 0, padding);
-    });*/
   }
 
   getComponentData(mapComponent) {

@@ -187,7 +187,6 @@ class Utils {
     }
 
     getRacetrackCorners(x, y, length, width, orientation, leftSide, mapOrientation) {
-        console.log(x, y, length, width, orientation, leftSide, mapOrientation);
         const corners = [];
         if (this.isNumber(length) && length >= 0 && this.isNumber(width) && width >= 0 && this.isNumber(orientation)) {
             const orienationRad = (orientation * Math.PI / 180) + (mapOrientation * Math.PI / 180)
