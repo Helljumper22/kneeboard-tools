@@ -76,6 +76,32 @@ class BullseyeMap {
             }
           ]
         },
+        {
+          id: 'shift-bullseye',
+          label: 'Shift Bullseye',
+          description: 'Shifts the location of the bullseye on the map and adjusts all elements accordingly',
+          type: 'sub-component',
+          fields: [
+            {
+              id: 'azimuth',
+              label: 'Azimuth (°)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'distance',
+              label: 'Distance (nm)',
+              type: 'number',
+              default: '',
+            },
+            {
+              id: 'button',
+              label: 'Shift Bullseye',
+              type: 'button',
+              clickFunction: this.shiftBullseye.bind(this)
+            }
+          ]
+        },
       ],
       drawFunction: this.drawBullseye.bind(this)
     },
@@ -606,7 +632,6 @@ class BullseyeMap {
 
     this.updateMap();
 
-
     $('.import-map-button').off('click').on('click', async () => this.importData());
     $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
     $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
@@ -733,6 +758,96 @@ class BullseyeMap {
 
     // Update DrawUtils center
     this.mapDrawUtils.setCenter(centerX, centerY);
+  }
+
+  shiftBullseye(field, data, parentComponent, parentFieldId) {
+    const componentId = parentFieldId.substring(0, parentFieldId.lastIndexOf('.'));
+
+    let shiftAzimuth = 0;
+    let shiftDistance = 0;
+    parentComponent.fields.forEach(field => {
+      const fieldId = `${componentId}.${field.id}`
+      const escapedFieldId = fieldId.replace(/\./g, '\\.');
+
+      if (field.id == 'azimuth') {
+        shiftAzimuth = parseFloat($(`#${escapedFieldId}`).val()) || 0;
+      } else if (field.id == 'distance') {
+        shiftDistance = parseFloat($(`#${escapedFieldId}`).val()) || 0;
+      }
+    })
+
+    console.log(shiftAzimuth, shiftDistance);
+
+    if (shiftDistance && shiftDistance != 0) {
+      // Convert shift from polar to Cartesian
+      const shiftAngleRad = (shiftAzimuth + 90) * Math.PI / 180;
+      const shiftX = shiftDistance * Math.cos(shiftAngleRad);
+      const shiftY = shiftDistance * Math.sin(shiftAngleRad);
+
+      // Get all data
+      let allData = {};
+      try {
+        allData = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+      } catch (e) {
+        allData = {};
+      }
+
+      // Helper function to recursively transform coordinates
+      const transformCoordinates = (obj) => {
+        if (!obj || typeof obj !== 'object') return;
+
+        if (Array.isArray(obj)) {
+          obj.forEach(item => transformCoordinates(item));
+        } else {
+          // Check if this object has azimuth and distance
+          if (obj.hasOwnProperty('azimuth') && obj.hasOwnProperty('distance') &&
+            obj.azimuth !== '' && obj.distance !== '' &&
+            obj.azimuth != null && obj.distance != null) {
+
+            const az = parseFloat(obj.azimuth);
+            const dist = parseFloat(obj.distance);
+
+            if (this.utils.isNumber(az) && this.utils.isNumber(dist)) {
+              // Convert existing point from polar to Cartesian
+              const angleRad = (az - 90) * Math.PI / 180;
+              const x = dist * Math.cos(angleRad);
+              const y = dist * Math.sin(angleRad);
+
+              // Apply shift
+              const newX = x + shiftX;
+              const newY = y + shiftY;
+
+              // Convert back to polar
+              const newDist = Math.sqrt(newX * newX + newY * newY);
+              const newAngle = Math.atan2(newY, newX) * 180 / Math.PI + 90;
+
+              obj.azimuth = newAngle < 0 ? newAngle + 360 : newAngle;
+              obj.distance = newDist;
+            }
+          }
+
+          // Recursively transform all nested objects
+          Object.values(obj).forEach(val => {
+            if (val && typeof val === 'object') {
+              transformCoordinates(val);
+            }
+          });
+        }
+      };
+
+      // Transform all data
+      Object.values(allData).forEach(componentData => {
+        transformCoordinates(componentData);
+      });
+
+      // Save updated data
+      localStorage.setItem('bullseye-map-data', JSON.stringify(allData));
+
+      // Update map
+      this.updateMap();
+    }
+
+    this.mapFieldsUtils.displayComponentListButtons();
   }
 
   drawBullseye(component, limitToArea, mapOrientation, areaPoints) {

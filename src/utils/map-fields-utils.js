@@ -23,6 +23,8 @@ class MapFieldsUtils {
     }
 
     displayComponent(mapComponent) {
+        const componentData = this.bullseyeMap.getComponentData(mapComponent);
+
         // Toggle visibility
         $(this.menuContainer).addClass('hide');
         $(this.componentContainer).removeClass('hide');
@@ -35,8 +37,7 @@ class MapFieldsUtils {
         $(this.componentDescription).text(mapComponent.description ?? '');
 
         // Clear previous content
-        $(this.componentContainer).find('.bullseye-map-component-fields-container, .bullseye-map-subcomponents-container').remove();
-
+        $(this.componentContainer).find('.bullseye-map-component-fields-container, .bullseye-map-sub-components-container').remove();
 
         // Create and append form container
         const formContainer = $('<form class="bullseye-map-component-fields-container"></form>')
@@ -48,18 +49,58 @@ class MapFieldsUtils {
         $(this.componentContainer).append(formContainer);
 
         // Render fields with stored data
-        const componentData = this.bullseyeMap.getComponentData(mapComponent);
-        this.renderFields(formContainer, mapComponent.fields, componentData, mapComponent.id);
+        this.renderFields(formContainer, mapComponent, componentData, mapComponent.id);
     }
 
-    renderFields(container, fields, data, parentId) {
-        fields.forEach(field => {
-            const fieldId = `${parentId}.${field.id}`;
+    displaySubComponent(subComponent, data, parentComponent, fieldId) {
+        // Toggle visibility
+        $(this.menuContainer).addClass('hide');
+        $(this.componentContainer).removeClass('hide');
 
-            if (field.type === 'multiple') {
-                this.renderMultipleField(container, field, data, fieldId);
-            } else {
-                this.renderSingleField(container, field, data, fieldId);
+        // Update header and setup back button
+        $(this.componentHeader).find('.bullseye-map-component-name').text(subComponent.label);
+        $(this.componentHeader).find('.bullseye-map-component-back-button')
+            .off('click')
+            .on('click', () => {
+                this.displayComponent(parentComponent)
+            });
+        $(this.componentDescription).text(subComponent.description ?? '');
+
+        // Clear previous content
+        $(this.componentContainer).find('.bullseye-map-component-fields-container, .bullseye-map-sub-components-container').remove();
+
+        /// TODO: Handle sub-component field change
+
+        // Create and append form container
+        const formContainer = $('<form class="bullseye-map-component-fields-container"></form>')
+            .on('input', 'input, select', (e) => this.handleFieldChange(e, subComponent))
+            .on('change', '.color-picker', (e) => this.handleFieldChange(e, subComponent))
+            .on('click', '.add-button', (e) => this.handleAddField(e, subComponent))
+            .on('click', '.delete-button', (e) => this.handleDeleteField(e, subComponent));
+
+        $(this.componentContainer).append(formContainer);
+
+        // Render fields with stored dataz
+        this.renderFields(formContainer, subComponent, data, fieldId);
+    }
+
+    renderFields(container, component, data, componentId) {
+        component.fields.forEach(field => {
+            const fieldId = `${componentId}.${field.id}`;
+
+            switch (field.type) {
+                case 'button':
+                    this.renderButton(container, field, data, component, fieldId);
+                    break;
+                case 'sub-component':
+                    this.renderSubComponentButton(container, field, data, component, fieldId);
+                    break;
+                case 'multiple':
+                    this.renderMultipleField(container, field, data, component, fieldId);
+                    break;
+                default:
+                    this.renderSingleField(container, field, data, fieldId);
+                    break;
             }
         });
     }
@@ -78,7 +119,27 @@ class MapFieldsUtils {
         $(container).append(fieldHtml);
     }
 
-    renderMultipleField(container, field, data, fieldId) {
+    renderButton(container, field, data, parentComponent, fieldId) {
+        const subComponentButton = $(`<button class="component-button" id="${fieldId}">${field.label}</button>`);
+        $(subComponentButton).off('click').on('click', (e) => {
+            e.preventDefault();
+            field.clickFunction(field, data, parentComponent, fieldId)
+        });
+
+        $(container).append(subComponentButton);
+    }
+
+    renderSubComponentButton(container, field, data, parentComponent, fieldId) {
+        const subComponentButton = $(`<button class="show-sub-component-button" id="${fieldId}">${field.label}</button>`);
+        $(subComponentButton).off('click').on('click', (e) => {
+            e.preventDefault();
+            this.displaySubComponent(field, data, parentComponent, fieldId);
+        });
+
+        $(container).append(subComponentButton);
+    }
+
+    renderMultipleField(container, field, data, component, fieldId) {
         const wrapper = $(`<div class="multiple-field-wrapper" data-field-id="${fieldId}"></div>`);
 
         // Handle different data structures based on field nesting
@@ -217,7 +278,7 @@ class MapFieldsUtils {
             itemContainer.append(dragHandle);
         }
 
-        this.renderFields(itemContainer, field.fields, data, fieldId);
+        this.renderFields(itemContainer, field, data, fieldId);
 
         if (field.options?.repeatable) {
             const deleteButton = $('<button class="delete-button">−</button>');

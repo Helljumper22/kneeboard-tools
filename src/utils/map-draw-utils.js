@@ -583,6 +583,7 @@ class MapDrawUtils {
     const textHeight = fontsize;
     const boxWidth = textWidth + padding * 2;
     const boxHeight = textHeight + padding * 2;
+    const triangleWidth = textHeight + padding * 6;
 
     if (offsetDistance > 0) {
       const offsetX = offsetDistance * Math.cos(offsetAngle);
@@ -707,17 +708,17 @@ class MapDrawUtils {
         // Draw black triangle with colored background
         this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.beginPath();
-        this.ctx.moveTo(padding, (-boxHeight / 2) + (padding / 2));
-        this.ctx.lineTo((boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
-        this.ctx.lineTo((-boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.moveTo(padding, (-triangleWidth / 2) - (padding * 2));
+        this.ctx.lineTo((triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
+        this.ctx.lineTo((-triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
         this.ctx.fill();
 
         this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
-        this.ctx.moveTo(padding, (-boxHeight / 2) + (padding / 2));
-        this.ctx.lineTo((boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
-        this.ctx.lineTo((-boxHeight / 2) + padding, (boxHeight / 2) + (padding / 2));
+        this.ctx.moveTo(padding, (-triangleWidth / 2) - (padding * 2));
+        this.ctx.lineTo((triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
+        this.ctx.lineTo((-triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
         this.ctx.closePath();
         this.ctx.stroke();
 

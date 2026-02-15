@@ -54,7 +54,7 @@ body .container .tabs-container .tabs {
           }
 
           .bullseye-map-component-description:not(:empty) {
-            padding-bottom: 10px;
+            padding: 0 5px 10px 5px;
           }
 
           .bullseye-map-component-fields-container {
@@ -159,6 +159,11 @@ body .container .tabs-container .tabs {
                 border: 1px dashed white;
                 margin: 5px 0;
               }
+            }
+
+            .component-button,
+            .show-sub-component-button {
+              margin: 10px 0 10px 0;
             }
           }
         }
