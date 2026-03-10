@@ -13,7 +13,7 @@ class BullseyeMap {
         },
         {
           id: 'limit-to-area',
-          label: 'Limit to area',
+          label: 'Limit to map area',
           type: 'checkbox',
           default: 'checked',
         },
@@ -104,7 +104,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawBullseye.bind(this)
-    },
+    }, // Bullseye
     {
       id: 'base-lines',
       label: 'Base Lines',
@@ -134,7 +134,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawBaseLines.bind(this)
-    },
+    }, // Base Lines
     {
       id: 'map-area-points',
       label: 'Map Area Points',
@@ -170,7 +170,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawMapArea.bind(this)
-    },
+    }, // Map Area Points
     {
       id: 'lines',
       label: 'Lines',
@@ -188,6 +188,12 @@ class BullseyeMap {
               label: 'Name',
               type: 'text',
               default: '',
+            },
+            {
+              id: 'limit-to-area',
+              label: 'Limit to map area',
+              type: 'checkbox',
+              default: 'checked',
             },
             {
               id: 'type',
@@ -245,7 +251,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawLines.bind(this)
-    },
+    }, // Lines
     {
       id: 'areas',
       label: 'Areas',
@@ -263,6 +269,12 @@ class BullseyeMap {
               label: 'Name',
               type: 'text',
               default: '',
+            },
+            {
+              id: 'limit-to-area',
+              label: 'Limit to map area',
+              type: 'checkbox',
+              default: 'checked',
             },
             {
               id: 'type',
@@ -336,7 +348,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawAreas.bind(this)
-    },
+    }, // Areas
     {
       id: 'rings',
       label: 'Rings',
@@ -355,6 +367,12 @@ class BullseyeMap {
               label: 'Name',
               type: 'text',
               default: '',
+            },
+            {
+              id: 'limit-to-area',
+              label: 'Limit to map area',
+              type: 'checkbox',
+              default: 'checked',
             },
             {
               id: 'type',
@@ -413,7 +431,7 @@ class BullseyeMap {
         },
       ],
       drawFunction: this.drawRings.bind(this)
-    },
+    }, // Rings
     {
       id: 'racetracks',
       label: 'Racetracks',
@@ -488,7 +506,7 @@ class BullseyeMap {
         }
       ],
       drawFunction: this.drawRacetracks.bind(this)
-    },
+    }, // Racetracks
     {
       id: 'objects',
       label: 'Objects',
@@ -560,7 +578,7 @@ class BullseyeMap {
         }
       ],
       drawFunction: this.drawObjects.bind(this)
-    },
+    }, // Objects
     {
       id: 'points',
       label: 'Points',
@@ -613,7 +631,7 @@ class BullseyeMap {
         }
       ],
       drawFunction: this.drawPoints.bind(this)
-    },
+    }, // Points
   ]
 
   constructor() {
@@ -674,16 +692,11 @@ class BullseyeMap {
   }
 
   runScale() {
-    // Determine the furthest graphic distance
-    this.furthestPoint = 0;
-
-    // Initialize bounding box variables
     let minX = 0, maxX = 0, minY = 0, maxY = 0;
-
-    // Rebuild boundingBoxPoints from stored component data (azimuth/distance => x,y)
+    this.furthestPoint = 0;
     this.boundingBoxPoints = [];
 
-    // Iterate components and scan stored data iteratively (no nested functions)
+    // Iterate components and scan stored data iteratively
     this.mapComponentList.forEach(component => {
       const stored = this.getComponentData(component);
       if (!stored) return;
@@ -716,7 +729,16 @@ class BullseyeMap {
               const x = d * Math.sin(rad);
               const y = -d * Math.cos(rad);
 
-              this.boundingBoxPoints.push({ x, y });
+              // For racetracks, take each corners
+              if (Object.prototype.hasOwnProperty.call(obj, 'racetrack-name')) {
+                const corners = this.utils.getRacetrackCorners(x, y, obj['length'], obj['width'], obj['orientation'], obj['side'] != 'right', 0);
+
+                corners.forEach(corner => {
+                  this.boundingBoxPoints.push({ x: corner.x, y: corner.y });
+                })
+              } else {
+                this.boundingBoxPoints.push({ x, y });
+              }
             }
           }
         }
@@ -775,8 +797,6 @@ class BullseyeMap {
         shiftDistance = parseFloat($(`#${escapedFieldId}`).val()) || 0;
       }
     })
-
-    console.log(shiftAzimuth, shiftDistance);
 
     if (shiftDistance && shiftDistance != 0) {
       // Convert shift from polar to Cartesian
@@ -1048,12 +1068,13 @@ class BullseyeMap {
     const linesData = this.getComponentData(component);
 
     if (linesData && linesData.lines?.length > 0) {
-      if (limitToArea && areaPoints.length > 2) {
-        this.mapDrawUtils.clipCanvas(areaPoints);
-      }
 
       linesData.lines.forEach(lineData => {
-        if (lineData.points) {
+        if (lineData.points && lineData.points.length > 1) {
+          if (lineData['limit-to-area']) {
+            this.mapDrawUtils.clipCanvas(areaPoints);
+          }
+
           for (let i = 1; i < lineData.points.length; i++) {
             if (this.utils.isNumber(lineData.points[i - 1]['azimuth']) && this.utils.isNumber(lineData.points[i - 1]['distance'])
               && this.utils.isNumber(lineData.points[i]['azimuth']) && this.utils.isNumber(lineData.points[i]['distance'])) {
@@ -1071,58 +1092,62 @@ class BullseyeMap {
               this.mapDrawUtils.drawLine(startX, startY, endX, endY, color, 3, type);
             }
           };
+
+          this.mapDrawUtils.unclipCanvas();
         }
       });
     }
-
-    this.mapDrawUtils.unclipCanvas();
   }
 
   drawRings(component, limitToArea, mapOrientation, areaPoints) {
     const ringsData = this.getComponentData(component);
 
     if (ringsData && ringsData.rings?.length > 0) {
-      if (limitToArea && areaPoints.length > 2) {
-        this.mapDrawUtils.clipCanvas(areaPoints);
-      }
 
       ringsData.rings.forEach((ring) => {
-        const angleRad = ((ring['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
-        const x = ring['distance'] * Math.cos(angleRad);
-        const y = ring['distance'] * Math.sin(angleRad);
-
-        const color = ring['color'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'color').default;
-        const fill = ring['fill'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'fill').default;
-
-        this.mapDrawUtils.drawRing(x, y, ring.radius, color, 2, fill);
-
-        if (ring['name'] != '' && ring['name'] != undefined) {
-          let type = '';
-          switch (ring['type']) {
-            case 'area':
-              type = 'clear';
-              break;
-            case 'threat':
-              type = "plus-bottom";
-              break;
+        if (this.utils.isNumber(ring.azimuth) && this.utils.isNumber(ring.distance)) {
+          if (ring['limit-to-area'] && areaPoints.length > 2) {
+            this.mapDrawUtils.clipCanvas(areaPoints);
           }
 
-          this.pointNamesData.push({
-            limitToArea: false,
-            x,
-            y,
-            text: ring['name'],
-            type,
-            fontSize: 16,
-            offsetDistance: 0,
-            offsetAngle: 0,
-            textAngle: 0,
-            padding: 2
-          });
+          const angleRad = ((ring['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          const x = ring['distance'] * Math.cos(angleRad);
+          const y = ring['distance'] * Math.sin(angleRad);
+
+          const color = ring['color'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'color').default;
+          const fill = ring['fill'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'fill').default;
+
+          this.mapDrawUtils.drawRing(x, y, ring.radius, color, 2, fill);
+
+          if (ring['name'] != '' && ring['name'] != undefined) {
+            let type = '';
+            switch (ring['type']) {
+              case 'area':
+                type = 'clear';
+                break;
+              case 'threat':
+                type = "plus-bottom";
+                break;
+            }
+
+            this.pointNamesData.push({
+              limitToArea: false,
+              x,
+              y,
+              text: ring['name'],
+              type,
+              fontSize: 16,
+              offsetDistance: 0,
+              offsetAngle: 0,
+              textAngle: 0,
+              padding: 2
+            });
+          }
+
+          this.mapDrawUtils.unclipCanvas();
         }
       });
 
-      this.mapDrawUtils.unclipCanvas();
     }
   }
 
@@ -1130,12 +1155,13 @@ class BullseyeMap {
     const areasData = this.getComponentData(component);
 
     if (areasData.areas && areasData.areas?.length > 0) {
-      if (limitToArea && areaPoints.length > 2) {
-        this.mapDrawUtils.clipCanvas(areaPoints);
-      }
 
       areasData.areas.forEach(area => {
         if (area && area.points?.length > 0) {
+          if (area['limit-to-area'] && areaPoints.length > 2) {
+            this.mapDrawUtils.clipCanvas(areaPoints);
+          }
+
           const corners = [];
 
           const color = area['color'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'color').default;
@@ -1168,21 +1194,18 @@ class BullseyeMap {
               padding: 2
             });
           }
+
+
+          this.mapDrawUtils.unclipCanvas();
         }
       });
     }
-
-    this.mapDrawUtils.unclipCanvas();
   }
 
   drawRacetracks(component, limitToArea, mapOrientation, areaPoints) {
     const racetracksData = this.getComponentData(component);
 
     if (racetracksData && racetracksData.racetracks?.length > 0) {
-      if (limitToArea && areaPoints.length > 2) {
-        this.mapDrawUtils.clipCanvas(areaPoints);
-      }
-
       racetracksData.racetracks.forEach(racetrack => {
         racetrack['orientation'] = this.utils.isNumber(racetrack['orientation']) ? racetrack['orientation'] : 0
         if (
@@ -1201,8 +1224,7 @@ class BullseyeMap {
           this.mapDrawUtils.drawRacetrack(x, y, racetrack['length'], racetrack['width'], (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), side, color);
 
           if (racetrack['racetrack-name'] != '' && racetrack['racetrack-name'] != undefined) {
-            const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side == 'left', mapOrientation);
-
+            const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side != 'right', mapOrientation);
             const { x: racetrackNamex, y: racetrackNameY } = this.utils.getCenter(corners);
 
             let racetrackNameAngle = (((racetrack['orientation'] + 90) * (Math.PI / 180)) % 360) + (mapOrientation * Math.PI / 180);

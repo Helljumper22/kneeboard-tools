@@ -64,13 +64,21 @@ class KneeboardMIR_F1_FRM extends Kneeboard {
       const theatreOrigin = mapsOrigin[theatre];
       const flights = [];
 
-      for (const keyCountry in missionData.coalition.blue.country) {
-        if (Object.hasOwn(missionData.coalition.blue.country, keyCountry)) {
-          const country = missionData.coalition.blue.country[keyCountry];
 
-          for (const keyGroup in country.plane.group) {
-            if (Object.hasOwn(country.plane.group, keyGroup)) {
-              flights.push(country.plane.group[keyGroup]);
+      for (const keyCoalition in missionData.coalition) {
+        if (Object.hasOwn(missionData.coalition, keyCoalition)) {
+          const coalition = missionData.coalition[keyCoalition];
+          console.log(coalition)
+
+          for (const keyCountry in coalition.country) {
+            if (Object.hasOwn(coalition.country, keyCountry)) {
+              const country = coalition.country[keyCountry];
+
+              for (const keyGroup in country?.plane?.group) {
+                if (Object.hasOwn(country.plane.group, keyGroup)) {
+                  flights.push({ ...country.plane.group[keyGroup], coalition: keyCoalition });
+                }
+              }
             }
           }
         }
@@ -81,13 +89,15 @@ class KneeboardMIR_F1_FRM extends Kneeboard {
 
       $(mizImportGroupModal).find('.selected-group option').remove();
 
+      console.log(flights);
+
       if (flights.length > 0) {
         for (const keyFlight in flights) {
           if (Object.hasOwn(flights, keyFlight)) {
             const flight = flights[keyFlight];
 
             $(mizImportGroupModal).find('.selected-group').append(
-              `<option value="${flight.groupId}">${flight.name}</option>`
+              `<option value="${flight.groupId}">${flight.name} (${flight.coalition})</option>`
             )
           }
         }
