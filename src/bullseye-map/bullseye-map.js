@@ -39,6 +39,22 @@ class BullseyeMap {
           default: 0,
         },
         {
+          id: 'magnetic-declination',
+          label: 'Magnetic declination (°)',
+          type: 'number',
+          default: 0,
+        },
+        {
+          id: 'north',
+          label: 'North',
+          type: 'select',
+          options: {
+            'true': 'True',
+            'magnetic': 'Magnetic',
+          },
+          default: 'true',
+        },
+        {
           id: 'line-angles',
           label: 'Line angles (°)',
           type: 'number',
@@ -125,12 +141,6 @@ class BullseyeMap {
             'bottom-left': 'Bottom left',
           },
           default: 'top-left',
-        },
-        {
-          id: 'magnetic-declination',
-          label: 'Magnetic declination',
-          type: 'number',
-          default: 0,
         },
       ],
       drawFunction: this.drawBaseLines.bind(this)
@@ -384,16 +394,6 @@ class BullseyeMap {
               },
               default: 'area',
             },
-            /*{
-              id: 'name-position',
-              label: 'Name position',
-              type: 'range',
-              options: {
-                min: 0,
-                max: 360
-              },
-              default: 180,
-            },*/
             {
               id: 'azimuth',
               label: 'Azimuth (°)',
@@ -668,13 +668,16 @@ class BullseyeMap {
     const bullseyeData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'bullseye'));
     const limitToArea = bullseyeData['limit-to-area'] ?? true;
     const mapOrientation = bullseyeData['map-orientation'] ?? 0;
+    const magneticDeclination = bullseyeData['magnetic-declination'] ?? 0;
+    const trueNorth = bullseyeData['north'] != 'magnetic';
 
     const mapAreaPointsData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'map-area-points'));
     const areaPoints = [];
     if (Array.isArray(mapAreaPointsData.points) && mapAreaPointsData.points.length > 0) {
       mapAreaPointsData.points.forEach(areaPoint => {
         if (this.utils.isNumber(areaPoint['azimuth']) && this.utils.isNumber(areaPoint['distance'])) {
-          const angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          let angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
           const x = areaPoint['distance'] * Math.cos(angleRad);
           const y = areaPoint['distance'] * Math.sin(angleRad);
 
@@ -685,7 +688,7 @@ class BullseyeMap {
 
     this.pointNamesData = [];
     this.mapComponentList.forEach(mapComponent => {
-      mapComponent.drawFunction(mapComponent, limitToArea, mapOrientation, areaPoints);
+      mapComponent.drawFunction(mapComponent, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth);
     });
 
     this.drawPointNames(areaPoints);
@@ -870,14 +873,13 @@ class BullseyeMap {
     this.mapFieldsUtils.displayComponentListButtons();
   }
 
-  drawBullseye(component, limitToArea, mapOrientation, areaPoints) {
+  drawBullseye(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const bullseyeData = this.getComponentData(component);
 
     bullseyeData['display'] = bullseyeData['display'] ?? component.fields.find(field => field.id == 'display').default == 'checked';
     bullseyeData['limit-to-area'] = bullseyeData['limit-to-area'] ?? component.fields.find(field => field.id == 'limit-to-area').default == 'checked';
     bullseyeData['name'] = bullseyeData['name'] ?? component.fields.find(field => field.id == 'name').default;
     bullseyeData['name-position'] = bullseyeData['name-position'] ?? component.fields.find(field => field.id == 'name-position').default;
-    bullseyeData['map-orientation'] = bullseyeData['map-orientation'] ?? component.fields.find(field => field.id == 'map-orientation').default;
     bullseyeData['line-angles'] = bullseyeData['line-angles'] ?? component.fields.find(field => field.id == 'line-angles').default;
     bullseyeData['half-lines'] = bullseyeData['half-lines'] ?? component.fields.find(field => field.id == 'half-lines').default == 'checked';
     bullseyeData['ring-ranges'] = bullseyeData['ring-ranges'] ?? component.fields.find(field => field.id == 'ring-ranges').default;
@@ -899,7 +901,7 @@ class BullseyeMap {
 
       for (let angle = 0; angle < 360; angle += linesAngle) {
         if (angle < 180) {
-          const angleRad = (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+          const angleRad = (angle * Math.PI / 180) + (mapOrientation * Math.PI / 180);
           this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
         }
 
@@ -911,7 +913,7 @@ class BullseyeMap {
             areaPoints.forEach((point, index) => {
               const nextPoint = areaPoints[(index + 1) % areaPoints.length];
 
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180) }, { start: point, end: nextPoint });
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (mapOrientation * Math.PI / 180) }, { start: point, end: nextPoint });
               if (intersection) {
                 intersections.push(intersection);
               }
@@ -922,7 +924,7 @@ class BullseyeMap {
             corners.forEach((corner, index) => {
               const nextCorner = corners[(index + 1) % corners.length];
 
-              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180) }, { start: corner, end: nextCorner });
+              const intersection = this.utils.getIntersectionWithLine({ x: 0, y: 0, angle: (angle * Math.PI / 180) + (mapOrientation * Math.PI / 180) }, { start: corner, end: nextCorner });
               if (intersection) {
                 intersections.push(intersection);
               }
@@ -942,7 +944,7 @@ class BullseyeMap {
                 type: 'clear',
                 fontSize: 14,
                 offsetDistance: bullseyeInArea ? 15 : 0,
-                offsetAngle: (angle * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180),
+                offsetAngle: (angle * Math.PI / 180) + (mapOrientation * Math.PI / 180),
                 textAngle: 0,
                 padding: 0
               });
@@ -970,8 +972,10 @@ class BullseyeMap {
           // Add rings range to drawPoints array
           if (bullseyeData['ring-range-positions']?.length > 0) {
             bullseyeData['ring-range-positions'].forEach((rangePosition) => {
-              const ringsRangeAngle = Math.round(rangePosition['ring-range-position'] / linesAngle) * linesAngle;
-              const angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+              let ringsRangeAngle = rangePosition['ring-range-position']
+              if (bullseyeData['north'] == 'magnetic') ringsRangeAngle -= bullseyeData['magnetic-declination'] * Math.PI / 180;
+              ringsRangeAngle = Math.round(ringsRangeAngle / linesAngle) * linesAngle;
+              let angleRad = ((ringsRangeAngle - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
               const ringTextX = radius * Math.cos(angleRad);
               const ringTextY = radius * Math.sin(angleRad);
 
@@ -998,7 +1002,7 @@ class BullseyeMap {
       this.mapDrawUtils.drawBullseye(0, 0, 'black');
 
       if (bullseyeData['name'] != '' && bullseyeData['name'] != undefined && bullseyeData['display']) {
-        const angleRad = ((bullseyeData['name-position'] - 90) * Math.PI / 180) + (bullseyeData['map-orientation'] * Math.PI / 180);
+        const angleRad = ((bullseyeData['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
         this.pointNamesData.push({
           limitToArea: bullseyeInArea,
           x: 0,
@@ -1017,15 +1021,15 @@ class BullseyeMap {
     }
   }
 
-  drawBaseLines(component, limitToArea, mapOrientation) {
+  drawBaseLines(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const baselineData = this.getComponentData(component);
 
     if (baselineData && baselineData.display) {
-      this.mapDrawUtils.drawBaseLines(baselineData['location'] ?? 'top-left', this.utils.isNumber(baselineData['magnetic-declination']) ? baselineData['magnetic-declination'] : 0, mapOrientation);
+      this.mapDrawUtils.drawBaseLines(baselineData['location'] ?? 'top-left', this.utils.isNumber(magneticDeclination) ? magneticDeclination : 0, !trueNorth ? mapOrientation - magneticDeclination : mapOrientation);
     }
   }
 
-  drawMapArea(component, limitToArea, mapOrientation) {
+  drawMapArea(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const mapAreaData = this.getComponentData(component);
 
     if (mapAreaData && mapAreaData.points?.length > 0) {
@@ -1033,7 +1037,8 @@ class BullseyeMap {
         const nextAreaPointIndex = (i + 1) % mapAreaData.points.length;
 
         if (this.utils.isNumber(mapAreaData.points[i]['azimuth']) && this.utils.isNumber(mapAreaData.points[i]['distance'])) {
-          const startAngleRad = ((mapAreaData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          let startAngleRad = ((mapAreaData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) startAngleRad -= magneticDeclination * Math.PI / 180;
           const startX = mapAreaData.points[i]['distance'] * Math.cos(startAngleRad);
           const startY = mapAreaData.points[i]['distance'] * Math.sin(startAngleRad);
 
@@ -1053,7 +1058,8 @@ class BullseyeMap {
           }
 
           if (this.utils.isNumber(mapAreaData.points[nextAreaPointIndex]['azimuth']) && this.utils.isNumber(mapAreaData.points[nextAreaPointIndex]['distance'])) {
-            const endAngleRad = ((mapAreaData.points[nextAreaPointIndex]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            let endAngleRad = ((mapAreaData.points[nextAreaPointIndex]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            if (!trueNorth) endAngleRad -= magneticDeclination * Math.PI / 180;
             const endX = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.cos(endAngleRad);
             const endY = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.sin(endAngleRad);
 
@@ -1064,7 +1070,7 @@ class BullseyeMap {
     }
   }
 
-  drawLines(component, limitToArea, mapOrientation, areaPoints) {
+  drawLines(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const linesData = this.getComponentData(component);
 
     if (linesData && linesData.lines?.length > 0) {
@@ -1078,11 +1084,13 @@ class BullseyeMap {
           for (let i = 1; i < lineData.points.length; i++) {
             if (this.utils.isNumber(lineData.points[i - 1]['azimuth']) && this.utils.isNumber(lineData.points[i - 1]['distance'])
               && this.utils.isNumber(lineData.points[i]['azimuth']) && this.utils.isNumber(lineData.points[i]['distance'])) {
-              const startAngleRad = ((lineData.points[i - 1]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              let startAngleRad = ((lineData.points[i - 1]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              if (!trueNorth) startAngleRad -= magneticDeclination * Math.PI / 180;
               const startX = lineData.points[i - 1]['distance'] * Math.cos(startAngleRad);
               const startY = lineData.points[i - 1]['distance'] * Math.sin(startAngleRad);
 
-              const endAngleRad = ((lineData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              let endAngleRad = ((lineData.points[i]['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+              if (!trueNorth) endAngleRad -= magneticDeclination * Math.PI / 180;
               const endX = lineData.points[i]['distance'] * Math.cos(endAngleRad);
               const endY = lineData.points[i]['distance'] * Math.sin(endAngleRad);
 
@@ -1099,7 +1107,7 @@ class BullseyeMap {
     }
   }
 
-  drawRings(component, limitToArea, mapOrientation, areaPoints) {
+  drawRings(component, limitToArea, mapOrientation, agneticDeclination, areaPoints, trueNorth) {
     const ringsData = this.getComponentData(component);
 
     if (ringsData && ringsData.rings?.length > 0) {
@@ -1110,7 +1118,8 @@ class BullseyeMap {
             this.mapDrawUtils.clipCanvas(areaPoints);
           }
 
-          const angleRad = ((ring['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          let angleRad = ((ring['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
           const x = ring['distance'] * Math.cos(angleRad);
           const y = ring['distance'] * Math.sin(angleRad);
 
@@ -1151,7 +1160,7 @@ class BullseyeMap {
     }
   }
 
-  drawAreas(component, limitToArea, mapOrientation, areaPoints) {
+  drawAreas(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const areasData = this.getComponentData(component);
 
     if (areasData.areas && areasData.areas?.length > 0) {
@@ -1169,7 +1178,8 @@ class BullseyeMap {
           const fill = area['fill'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'fill').default;
 
           area.points.forEach(areaPoint => {
-            const angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            let angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
             const x = areaPoint['distance'] * Math.cos(angleRad);
             const y = areaPoint['distance'] * Math.sin(angleRad);
 
@@ -1202,7 +1212,7 @@ class BullseyeMap {
     }
   }
 
-  drawRacetracks(component, limitToArea, mapOrientation, areaPoints) {
+  drawRacetracks(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const racetracksData = this.getComponentData(component);
 
     if (racetracksData && racetracksData.racetracks?.length > 0) {
@@ -1214,20 +1224,24 @@ class BullseyeMap {
           && this.utils.isNumber(racetrack['length']) && racetrack['length'] >= 0
           && this.utils.isNumber(racetrack['width']) && racetrack['width'] >= 0
         ) {
-          const angleRad = ((racetrack['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          let angleRad = ((racetrack['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
           const x = racetrack['distance'] * Math.cos(angleRad);
           const y = racetrack['distance'] * Math.sin(angleRad);
 
           const side = racetrack['side'] ? racetrack['side'] == 'left' : component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'side').default == 'left';
           const color = racetrack['color'] ?? component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'color').default;
+          let trackAngleRad = (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) trackAngleRad -= magneticDeclination * Math.PI / 180;
 
-          this.mapDrawUtils.drawRacetrack(x, y, racetrack['length'], racetrack['width'], (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), side, color);
+          this.mapDrawUtils.drawRacetrack(x, y, racetrack['length'], racetrack['width'], trackAngleRad, side, color);
 
           if (racetrack['racetrack-name'] != '' && racetrack['racetrack-name'] != undefined) {
-            const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side != 'right', mapOrientation);
+            const corners = this.utils.getRacetrackCorners(x, y, racetrack['length'], racetrack['width'], racetrack['orientation'], racetrack.side != 'right', !trueNorth ? mapOrientation - magneticDeclination : mapOrientation);
             const { x: racetrackNamex, y: racetrackNameY } = this.utils.getCenter(corners);
 
             let racetrackNameAngle = (((racetrack['orientation'] + 90) * (Math.PI / 180)) % 360) + (mapOrientation * Math.PI / 180);
+            if (!trueNorth) racetrackNameAngle -= magneticDeclination * Math.PI / 180;
             if (racetrackNameAngle <= Math.PI * 1.5 && racetrackNameAngle >= Math.PI / 2) {
               racetrackNameAngle -= Math.PI;
             }
@@ -1267,43 +1281,49 @@ class BullseyeMap {
     this.mapDrawUtils.unclipCanvas();
   }
 
-  drawObjects(component, limitToArea, mapOrientation, areaPoints) {
+  drawObjects(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const objectsData = this.getComponentData(component);
 
     if (objectsData && objectsData.objects?.length > 0) {
       objectsData.objects.forEach((object) => {
         if (this.utils.isNumber(object['azimuth']) && this.utils.isNumber(object['distance'])) {
           const angleRad = ((object['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
           const x = object['distance'] * Math.cos(angleRad);
           const y = object['distance'] * Math.sin(angleRad);
 
           const color = object['color'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'color').default;
 
+          let objectAngleRad = object['orientation'] * Math.PI / 180 + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) objectAngleRad -= magneticDeclination * Math.PI / 180;
+
           switch (object.type) {
             case 'airfield':
-              this.mapDrawUtils.drawAirbase(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), color);
+              this.mapDrawUtils.drawAirbase(x, y, objectAngleRad, color);
               break;
             case 'gate':
-              this.mapDrawUtils.drawGate(x, y, 15, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), color)
+              this.mapDrawUtils.drawGate(x, y, 15, objectAngleRad, color)
               break;
             case 'arrow':
-              this.mapDrawUtils.drawArrow(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 10, 5, color);
+              this.mapDrawUtils.drawArrow(x, y, objectAngleRad, 10, 5, color);
               break;
             case '1-aircraft':
-              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 1, color);
+              this.mapDrawUtils.drawAircraft(x, y, objectAngleRad, 1, color);
               break;
             case '2-aircraft':
-              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 2, color);
+              this.mapDrawUtils.drawAircraft(x, y, objectAngleRad, 2, color);
               break;
             case '3-aircraft':
-              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 3, color);
+              this.mapDrawUtils.drawAircraft(x, y, objectAngleRad, 3, color);
               break;
             case '4-aircraft':
-              this.mapDrawUtils.drawAircraft(x, y, (object['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180), 4, color);
+              this.mapDrawUtils.drawAircraft(x, y, objectAngleRad, 4, color);
               break;
           }
           if (object['name'] != '' && object['name'] != undefined) {
-            const nameAngleRad = ((object['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            let nameAngleRad = ((object['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            if (!trueNorth) nameAngleRad -= magneticDeclination * Math.PI / 180;
+
             this.pointNamesData.push({
               limitToArea: false,
               x,
@@ -1322,13 +1342,14 @@ class BullseyeMap {
     }
   }
 
-  drawPoints(component, limitToArea, mapOrientation, areaPoints) {
+  drawPoints(component, limitToArea, mapOrientation, magneticDeclination, areaPoints, trueNorth) {
     const pointsData = this.getComponentData(component);
 
     if (pointsData && pointsData.points?.length > 0) {
       pointsData.points.forEach((point) => {
         if (this.utils.isNumber(point['azimuth']) && this.utils.isNumber(point['distance'])) {
-          const angleRad = ((point['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          let angleRad = ((point['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+          if (!trueNorth) angleRad -= magneticDeclination * Math.PI / 180;
           const x = point['distance'] * Math.cos(angleRad);
           const y = point['distance'] * Math.sin(angleRad);
 
