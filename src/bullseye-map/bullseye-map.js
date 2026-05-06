@@ -281,6 +281,12 @@ class BullseyeMap {
               default: '',
             },
             {
+              id: 'display-name',
+              label: 'Display name',
+              type: 'checkbox',
+              default: 'checked',
+            },
+            {
               id: 'limit-to-area',
               label: 'Limit to map area',
               type: 'checkbox',
@@ -334,12 +340,6 @@ class BullseyeMap {
                 sortable: true
               },
               fields: [
-                {
-                  id: 'name',
-                  label: 'Name',
-                  type: 'text',
-                  default: '',
-                },
                 {
                   id: 'azimuth',
                   label: 'Azimuth (°)',
@@ -1188,7 +1188,7 @@ class BullseyeMap {
 
           this.mapDrawUtils.drawPolygon(corners, color, 3, type, fill);
 
-          if (area['name'] != '' && area['name'] != undefined) {
+          if (area.points.length > 2 && area['name'] != '' && area['name'] != undefined && area['display-name']) {
             const { x: areaNameX, y: areaNameY } = this.utils.getCenter(corners);
 
             this.pointNamesData.push({
@@ -1297,7 +1297,8 @@ class BullseyeMap {
           let objectAngleRad = object['orientation'] * Math.PI / 180 + (mapOrientation * Math.PI / 180);
           if (!trueNorth) objectAngleRad -= magneticDeclination * Math.PI / 180;
 
-          switch (object.type) {
+          const type = object['type'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'type').default;
+          switch (type) {
             case 'airfield':
               this.mapDrawUtils.drawAirbase(x, y, objectAngleRad, color);
               break;
@@ -1320,8 +1321,10 @@ class BullseyeMap {
               this.mapDrawUtils.drawAircraft(x, y, objectAngleRad, 4, color);
               break;
           }
+
           if (object['name'] != '' && object['name'] != undefined) {
-            let nameAngleRad = ((object['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
+            const namePosition = object['name-position'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'name-position').default;
+            let nameAngleRad = ((namePosition - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
             if (!trueNorth) nameAngleRad -= magneticDeclination * Math.PI / 180;
 
             this.pointNamesData.push({

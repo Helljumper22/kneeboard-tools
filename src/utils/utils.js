@@ -144,20 +144,42 @@ class Utils {
             return { x: 0, y: 0 };
         }
 
-        let sumX = 0;
-        let sumY = 0;
+        if (points.length === 1) {
+            return { x: points[0].x, y: points[0].y };
+        }
 
-        // Sum up all x and y coordinates
-        points.forEach((point) => {
-            sumX += point.x;
-            sumY += point.y;
-        });
+        // Shoelace formula to get signed area and centroid
+        let area = 0;
+        let cx = 0;
+        let cy = 0;
 
-        // Calculate the average of x and y coordinates
-        const centerX = sumX / points.length;
-        const centerY = sumY / points.length;
+        for (let i = 0; i < points.length; i++) {
+            const current = points[i];
+            const next = points[(i + 1) % points.length];
 
-        return { x: centerX, y: centerY };
+            const cross = (current.x * next.y) - (next.x * current.y);
+            area += cross;
+            cx += (current.x + next.x) * cross;
+            cy += (current.y + next.y) * cross;
+        }
+
+        area /= 2;
+
+        // Degenerate polygon (all points collinear), fall back to bounding box center
+        if (Math.abs(area) < 1e-10) {
+            let minX = points[0].x, maxX = points[0].x;
+            let minY = points[0].y, maxY = points[0].y;
+            points.forEach(p => {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            });
+            return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+        }
+
+        cx /= (6 * area);
+        cy /= (6 * area);
+
+        return { x: cx, y: cy };
     }
 
     isPointWithinArea(point, areaPoints) {

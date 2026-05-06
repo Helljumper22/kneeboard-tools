@@ -333,13 +333,13 @@ class MapFieldsUtils {
         const fieldId = field.attr('id');
         const value = field.attr('type') === 'checkbox' ? field.is(':checked') : field.val();
 
-        let data = this.bullseyeMap.getComponentData(mapComponent);
+        let componentData = this.bullseyeMap.getComponentData(mapComponent);
         const fieldPath = fieldId.split('.');
         const componentId = fieldPath.shift(); // Remove component id
 
         // Initialize data structure if needed
-        if (!data) {
-            data = mapComponent.type === 'multiple' ? [] : {};
+        if (!componentData) {
+            componentData = mapComponent.type === 'multiple' ? [] : {};
         }
 
         // Get all parent multiple-field-items and their indices
@@ -347,7 +347,7 @@ class MapFieldsUtils {
         let parentIndices = parentItems.map(item => $(item).data('index'));
 
         // Navigate through the data structure
-        let currentData = data;
+        let currentData = componentData;
         let currentFieldDef = { fields: mapComponent.fields };
         let pathParts = fieldPath.slice(0, -1); // All parts except the last one
         let currentIndex = 0;
@@ -382,7 +382,7 @@ class MapFieldsUtils {
             currentData[fieldName] = value;
         }
 
-        this.bullseyeMap.saveComponentData(mapComponent, data);
+        this.bullseyeMap.saveComponentData(mapComponent, componentData);
 
         this.bullseyeMap.updateMap();
     }
@@ -396,15 +396,15 @@ class MapFieldsUtils {
         const field = this.findFieldByPath(mapComponent, fieldId);
 
         // Get current data
-        let data = this.bullseyeMap.getComponentData(mapComponent);
-        if (!data) {
-            data = mapComponent.type === 'multiple' ? [] : {};
+        let componentData = this.bullseyeMap.getComponentData(mapComponent);
+        if (!componentData) {
+            componentData = mapComponent.type === 'multiple' ? [] : {};
         }
 
         const index = wrapper.children('.multiple-field-item').length;
 
         // Traverse to the correct location in the data structure
-        let currentData = data;
+        let currentData = componentData;
         for (let i = 0; i < fieldPath.length - 1; i++) {
             const pathPart = fieldPath[i];
             if (!currentData[pathPart]) {
@@ -443,7 +443,7 @@ class MapFieldsUtils {
         const itemContainer = this.createMultipleFieldItem(field, newItemData, fieldId, index);
         wrapper.children('.add-button').before(itemContainer);
 
-        this.bullseyeMap.saveComponentData(mapComponent, data);
+        this.bullseyeMap.saveComponentData(mapComponent, componentData);
 
         this.bullseyeMap.updateMap();
     }
@@ -460,7 +460,7 @@ class MapFieldsUtils {
         let componentData = this.bullseyeMap.getComponentData(mapComponent);
 
         try {
-            // Collect parent indices for nested multiple items
+            // Collect parent indices from outermost to innermost (.multiple-field-item ancestors of the wrapper, not the item itself)
             const parentItems = wrapper.parents('.multiple-field-item').toArray().reverse();
             const parentIndices = parentItems.map(it => $(it).data('index'));
 
@@ -470,6 +470,16 @@ class MapFieldsUtils {
 
             for (let i = 0; i < pathParts.length - 1; i++) {
                 const part = pathParts[i];
+
+                if (Array.isArray(target)) {
+                    // target is already an array, index into it
+                    const idx = parentIndices[parentCursor++] ?? 0;
+                    if (!target[idx]) target[idx] = {};
+                    target = target[idx];
+                    i--; // re-process this pathPart against the now-dereferenced object
+                    continue;
+                }
+
                 if (!target[part]) target[part] = [];
 
                 if (Array.isArray(target[part])) {
@@ -483,9 +493,8 @@ class MapFieldsUtils {
 
             const lastPart = pathParts[pathParts.length - 1];
 
-            // Perform deletion if possible
+            // Perform deletion
             if (pathParts.length === 0) {
-                // top-level array
                 if (Array.isArray(componentData) && index >= 0 && index < componentData.length) {
                     componentData.splice(index, 1);
                 }
@@ -496,11 +505,15 @@ class MapFieldsUtils {
             // Remove the item from DOM
             item.remove();
 
-            // If this was the last item in the wrapper, create a default child and push to storage
-            if (wrapper.find('.multiple-field-item').length === 0) {
+            // Rebuild indices on remaining DOM items
+            wrapper.find('> .multiple-field-item').each((idx, el) => {
+                $(el).data('index', idx);
+            });
+
+            // If wrapper is now empty, insert a default item
+            if (wrapper.find('> .multiple-field-item').length === 0) {
                 const field = this.findFieldByPath(mapComponent, fieldId);
 
-                // Create new item with proper structure
                 let newItemData = {};
                 if (field && field.fields) {
                     field.fields.forEach(subField => {
@@ -521,7 +534,6 @@ class MapFieldsUtils {
                 const itemContainer = this.createMultipleFieldItem(field, newItemData, fieldId, 0);
                 wrapper.children('.add-button').before(itemContainer);
 
-                // Ensure target array exists and push
                 if (pathParts.length === 0) {
                     if (!Array.isArray(componentData)) componentData = [];
                     componentData.push(newItemData);
@@ -529,16 +541,11 @@ class MapFieldsUtils {
                     if (!target[lastPart]) target[lastPart] = [];
                     target[lastPart].push(newItemData);
                 }
-            } else {
-                // Update indices of remaining items
-                wrapper.find('.multiple-field-item').each((idx, el) => {
-                    $(el).data('index', idx);
-                });
             }
 
             this.bullseyeMap.saveComponentData(mapComponent, componentData);
-
             this.bullseyeMap.updateMap();
+
         } catch (err) {
             console.error('Error deleting item:', err);
         }

@@ -218,7 +218,6 @@ class Kneeboard {
       for (const keyCoalition in missionData.coalition) {
         if (Object.hasOwn(missionData.coalition, keyCoalition)) {
           const coalition = missionData.coalition[keyCoalition];
-          console.log(coalition)
 
           for (const keyCountry in coalition.country) {
             if (Object.hasOwn(coalition.country, keyCountry)) {
@@ -693,7 +692,7 @@ class Kneeboard {
         this.resetFields();
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
