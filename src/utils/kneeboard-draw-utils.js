@@ -1,5 +1,5 @@
 class KneeboardDrawUtils {
-  constructor(rows, columns) {
+  constructor() {
     this.canvas = $('.kneeboard-canvas')[0];
     this.ctx = this.canvas.getContext('2d');
 
@@ -8,6 +8,8 @@ class KneeboardDrawUtils {
 
     this.rows = 0;
     this.columns = 0;
+    this.backgroundColor = 0;
+    this.borderColor = 0;
 
     this.height = 0;
     this.width = 0;
@@ -18,9 +20,11 @@ class KneeboardDrawUtils {
     this.inputFieldWidthScale = 0;
   }
 
-  initCanvas(rows, columns) {
+  initCanvas(rows, columns, backgroundColor = null, borderColor = null) {
     this.rows = rows;
     this.columns = columns;
+    this.backgroundColor = backgroundColor ?? "white";
+    this.borderColor = borderColor ?? "black";
 
     this.scaleCanvas();
   }
@@ -42,10 +46,10 @@ class KneeboardDrawUtils {
   clearCanvas() {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
-    this.ctx.fillStyle = "white";
+    this.ctx.fillStyle = this.backgroundColor;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
-    this.ctx.strokeStyle = "black";
+    this.ctx.strokeStyle = this.borderColor;
     this.ctx.rowWidth = 1;
     this.ctx.strokeRect(0.5, 0.5, this.width - 1.0, this.height - 1.0);
   }
@@ -56,7 +60,8 @@ class KneeboardDrawUtils {
     const width = ((columnEnd - columnStart) * this.cellWidth) - (padding * 2);
     const height = ((rowEnd - rowStart) * this.cellHeight) - (padding * 2);
 
-    this.ctx.clearRect(x, y, width, height)
+    this.ctx.fillStyle = this.backgroundColor;
+    this.ctx.fillRect(x, y, width, height)
   }
 
   clearInputFields() {
@@ -84,7 +89,7 @@ class KneeboardDrawUtils {
     this.setToForeground();
   }
 
-  drawTextCell(rowStart, rowEnd, columnStart, columnEnd, text = null, borderWidths = [1, 1, 1, 1], backgroundColor = null, _textOptions = {}) {
+  drawTextCell(rowStart, rowEnd, columnStart, columnEnd, text = null, borderWidths = [1, 1, 1, 1], backgroundColor = null, borderColor = null, _textOptions = {}) {
     const textOptions = {
       textAlign: _textOptions.textAlign ?? 'center',
       fontSize: _textOptions.fontSize ?? 14,
@@ -92,6 +97,7 @@ class KneeboardDrawUtils {
       padding: _textOptions.padding ?? 5,
       textOrientation: _textOptions.textOrientation ?? 'horizontal',
       bold: _textOptions.bold ?? true,
+      color: _textOptions.color ?? 'black'
     }
 
     if (this.checkRowsColumns(rowStart, rowEnd, columnStart, columnEnd)) {
@@ -110,7 +116,7 @@ class KneeboardDrawUtils {
         this.ctx.fillRect(backgroundX, backgroundY, backgroundWidth, backgroundHeight);
       }
 
-      this.ctx.strokeStyle = "black";
+      this.ctx.strokeStyle = borderColor ?? "black";
 
       if (borderWidths[0] > 0) {
         this.ctx.lineWidth = borderWidths[0];
@@ -163,6 +169,7 @@ class KneeboardDrawUtils {
         bold: _textOptions.bold ?? false,
         textOrientation: _textOptions.textOrientation ?? 'horizontal',
         characterLimit: _textOptions.characterLimit ?? 0,
+        color: _textOptions.color ?? '#000000',
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -188,7 +195,8 @@ class KneeboardDrawUtils {
               'line-height': `${textOptions.fontSize}px`, // Aligns the text with the canvas text, WTF.
               'margin': `${textOptions.padding}px`,
               'text-align': textOptions.textAlign,
-              'font-weight': textOptions.bold ? 'bold' : 'normal'
+              'font-weight': textOptions.bold ? 'bold' : 'normal',
+              'color': textOptions.color
             })
             .appendTo('.kneeboard-fields-container');
 
@@ -211,7 +219,8 @@ class KneeboardDrawUtils {
                   'line-height': `${textOptions.fontSize * 2}px`, // Aligns the text with the canvas text, WTF.
                   'padding': `0`,
                   'text-align': textOptions.textAlign,
-                  'font-weight': textOptions.bold ? 'bold' : 'normal'
+                  'font-weight': textOptions.bold ? 'bold' : 'normal',
+                  'color': textOptions.color
                 })
                 .appendTo('.kneeboard-fields-container');
               break;
@@ -228,7 +237,8 @@ class KneeboardDrawUtils {
                   'line-height': `${textOptions.fontSize * 2}px`, // Aligns the text with the canvas text, WTF.
                   'padding': `0 ${textOptions.padding}px`,
                   'text-align': textOptions.textAlign,
-                  'font-weight': textOptions.bold ? 'bold' : 'normal'
+                  'font-weight': textOptions.bold ? 'bold' : 'normal',
+                  'color': textOptions.color
                 })
                 .appendTo('.kneeboard-fields-container');
               break;
@@ -247,6 +257,7 @@ class KneeboardDrawUtils {
         bold: _selectOptions.bold ?? false,
         textAlign: _selectOptions.textAlign ?? (dropDownSide == 'left' ? 'right' : 'left'),
         selectColumns: _selectOptions.selectColumns ?? 1,
+        color: _selectOptions.color ?? '#000000',
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -263,7 +274,7 @@ class KneeboardDrawUtils {
           selectContainer =
             $(`<div class="custom-select-container">
               <div class="custom-select-display">
-                <input type="text" class="custom-select-input" id="${id}" style="padding: 0 ${selectOptions.padding}px" />
+                <input type="text" class="custom-select-input" id="${id}" style="padding: 0 ${selectOptions.padding}px; color: ${selectOptions.color}" />
                 <span class="custom-select-arrow ${dropDownSide}">▼</span>
               </div>
               <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
@@ -278,13 +289,14 @@ class KneeboardDrawUtils {
               'font-size': `${selectOptions.fontSize}px`,
               'text-align': selectOptions.textAlign,
               'font-weight': selectOptions.bold ? 'bold' : 'normal',
+              'color': selectOptions.color
             }).appendTo('.kneeboard-fields-container');
           break;
         case 'fields-select':
           selectContainer =
             $(`<div class="custom-select-container" id="${id}">
               <div class="custom-select-display">
-                <input type="text" class="custom-fields-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px"/>
+                <input type="text" class="custom-fields-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px; color: ${selectOptions.color}"/>
                 <span class="custom-select-arrow ${dropDownSide}">▼</span>
               </div>
               <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
@@ -298,6 +310,7 @@ class KneeboardDrawUtils {
               'font-size': `${selectOptions.fontSize}px`,
               'text-align': selectOptions.textAlign,
               'font-weight': selectOptions.bold ? 'bold' : 'normal',
+              'color': selectOptions.color
             }).appendTo('.kneeboard-fields-container');
           break;
         case 'select':
@@ -306,7 +319,7 @@ class KneeboardDrawUtils {
           selectContainer =
             $(`<div class="custom-select-container" id="${id}">
               <div class="custom-select-display">
-                <input type="text" class="custom-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px"/>
+                <input type="text" class="custom-select-input disabled" id="${id}" style="padding: 0 ${selectOptions.padding}px; color: ${selectOptions.color}"/>
                 <span class="custom-select-arrow ${dropDownSide}">▼</span>
               </div>
               <div class="custom-select-dropdown" style="width:${selectOptions.selectColumns * 100}%">
@@ -321,6 +334,7 @@ class KneeboardDrawUtils {
               'font-size': `${selectOptions.fontSize}px`,
               'text-align': selectOptions.textAlign,
               'font-weight': selectOptions.bold ? 'bold' : 'normal',
+              'color': selectOptions.color
             }).appendTo('.kneeboard-fields-container');
           break;
       }
@@ -370,6 +384,7 @@ class KneeboardDrawUtils {
         padding: _textOptions.padding ?? 5,
         bold: _textOptions.bold ?? false,
         textOrientation: _textOptions.textOrientation ?? 'horizontal',
+        color: _textOptions.color
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -396,6 +411,7 @@ class KneeboardDrawUtils {
           'padding': `0 ${textOptions.padding}px`,
           'text-align': textOptions.textAlign,
           'font-weight': textOptions.bold ? 'bold' : 'normal',
+          'color': textOptions.color
         })
         .appendTo('.kneeboard-fields-container');
     }
@@ -406,6 +422,7 @@ class KneeboardDrawUtils {
       const selectOptions = {
         selectColumns: Math.round(_selectOptions.selectColumns ?? 3),
         padding: _selectOptions.padding ?? 5,
+        color: _selectOptions.color ?? '#000000',
       }
 
       const cellWidth = this.cellWidth * this.inputFieldWidthScale;
@@ -446,6 +463,7 @@ class KneeboardDrawUtils {
           'width': `${width}px`,
           'height': `${height}px`,
           'text-align': dropDownSide == 'left' ? 'right' : 'left',
+          'color': selectOptions.color
         }).appendTo('.kneeboard-fields-container');
 
       const dropdown = $(selectContainer).find('.custom-path-select-dropdown');
@@ -494,6 +512,7 @@ class KneeboardDrawUtils {
       textareaCenter: _textOptions.textareaCenter ?? false,
       bold: _textOptions.bold ?? false,
       textOrientation: _textOptions.textOrientation ?? 'horizontal',
+      color: _textOptions.color ?? 'black',
     }
 
     textOptions.fontSize *= 1 / this.inputFieldHeightScale;
@@ -525,6 +544,7 @@ class KneeboardDrawUtils {
       textAlign: _textOptions.textAlign ?? 'left',
       bold: _textOptions.bold ?? false,
       textOrientation: _textOptions.textOrientation ?? 'horizontal',
+      color: _textOptions.color ?? 'black',
     }
 
     textOptions.fontSize *= 1 / this.inputFieldHeightScale;
@@ -556,7 +576,7 @@ class KneeboardDrawUtils {
     this.ctx.font = `${textOptions.bold ? 'bold' : ''} ${textOptions.fontSize}px sans-serif`;
     this.ctx.letterSpacing = '0.1px';
     this.ctx.textBaseline = 'middle';
-    this.ctx.fillStyle = "black";
+    this.ctx.fillStyle = textOptions.color ?? "black";
 
     let textX = 0, textY = 0;
     switch (textOptions.textAlign) {
@@ -615,38 +635,9 @@ class KneeboardDrawUtils {
         lines.forEach((line, index) => {
           this.ctx.fillText(line, textX, textY + index * textOptions.fontSize);
         });
-
-
-        /*const lines = text.split('\n');
-        let cursorY = textY;
-
-        for (const line of lines) {
-          let words = line.split(' ');
-          let currentLine = '';
-
-          for (let i = 0; i < words.length; i++) {
-            let testLine = currentLine + words[i] + ' ';
-            let testWidth = this.ctx.measureText(testLine).width;
-
-            if (testWidth > cellWidth - (textOptions.padding * 2) && currentLine !== '') {
-              this.ctx.fillText(currentLine.trim(), textX, cursorY);
-              currentLine = words[i] + ' ';
-              cursorY += textOptions.fontSize;
-            } else {
-              currentLine = testLine;
-            }
-          }
-
-          // Draw remaining part of the line
-          if (currentLine !== '' && cursorY < (textY + cellHeight - textOptions.padding - textOptions.fontSize)) {
-            this.ctx.fillText(currentLine.trim(), textX, cursorY);
-            cursorY += textOptions.fontSize;
-          }
-        }*/
         break;
       case 'text':
       default:
-
         switch (textOptions.textOrientation) {
           case 'slanted':
             const lineHeight = textOptions.fontSize * 1.2;
@@ -742,9 +733,10 @@ class KneeboardDrawUtils {
     }
   }
 
-  drawSvgShape(rowStart, rowEnd, columnStart, columnEnd, path, borderWidths = [1, 1, 1, 1], _shapeOptions = {}) {
+  drawSvgShape(rowStart, rowEnd, columnStart, columnEnd, path, borderWidths = [1, 1, 1, 1], backgroundColor = null, borderColor = null, _shapeOptions = {}) {
     const shapeOptions = {
       padding: _shapeOptions.padding ?? 5,
+      color: _shapeOptions.color ?? '#000000',
     }
 
     // In order to get the scaled path to fit.
@@ -756,7 +748,17 @@ class KneeboardDrawUtils {
       const width = ((columnEnd - columnStart) * this.cellWidth) - (borderWidths[3] % 2 == 0 ? 0.5 : 0.0) + (borderWidths[1] % 2 == 0 ? 0.5 : 0.0);
       const height = ((rowEnd - rowStart) * this.cellHeight) - (borderWidths[0] % 2 == 0 ? 0.5 : 0.0) + (borderWidths[2] % 2 == 0 ? 0.5 : 0.0);
 
-      this.ctx.strokeStyle = "black";
+      if (backgroundColor) {
+        const backgroundX = x + borderWidths[3] / 2;
+        const backgroundY = y + borderWidths[0] / 2;
+        const backgroundWidth = width - (borderWidths[1] / 2) - (borderWidths[3] / 2);
+        const backgroundHeight = height - (borderWidths[0] / 2) - (borderWidths[2] / 2);
+
+        this.ctx.fillStyle = backgroundColor;
+        this.ctx.fillRect(backgroundX, backgroundY, backgroundWidth, backgroundHeight);
+      }
+
+      this.ctx.strokeStyle = borderColor ?? "black";
 
       if (borderWidths[0] > 0) {
         this.ctx.lineWidth = borderWidths[0];
@@ -804,8 +806,8 @@ class KneeboardDrawUtils {
       const offsetX = x + (width - scaledWidth) / 2;
       const offsetY = y + (height - scaledHeight) / 2;
 
-      this.ctx.fillStyle = 'black';
-      this.ctx.strokeStyle = 'black';
+      this.ctx.fillStyle = shapeOptions.color;
+      this.ctx.strokeStyle = shapeOptions.color;
       this.ctx.lineWidth = 1;
 
       this.ctx.save();

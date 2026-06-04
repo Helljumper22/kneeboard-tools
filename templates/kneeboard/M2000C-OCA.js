@@ -76,7 +76,7 @@ const M2000C_OCA_1 = {
             _description: 'Pilots text',
             text: 'PILOTS',
             position: [1, 2, 0, 3],
-            borderWidths: [2, 2, 1, 1]
+            borderWidths: [2, 2, 1, 2]
         },
         {
             _name: 'Callsign',
@@ -2637,7 +2637,7 @@ const M2000C_OCA_1 = {
             id: 'additional-lead-type',
             _description: 'Additional lead type field',
             position: [30, 31, 9, 11],
-            borderWidths: [1, 1, 2, 1],
+            borderWidths: [1, 1, 2, 2],
             textAlign: 'center',
             fontSize: '11',
             bold: true,
@@ -4404,8 +4404,8 @@ const M2000C_OCA_2 = {
                         },
                         // Row 8
                         {
-                            id: 'pilot-6-shot-phi',
-                            _description: 'Pilot 6 shot phi text field',
+                            id: 'pilot-6-lock-phi',
+                            _description: 'Pilot 6 lock phi text field',
                             position: [7, 8, 5, 8],
                             borderWidths: [1, 1, 2, 1],
                             textAlign: 'center',
@@ -5189,7 +5189,7 @@ const M2000C_OCA_2 = {
             id: 'hold-ref',
             _description: 'Hold reference text field',
             position: [14, 15, 4, 5],
-            borderWidths: [0, 2, 0, 0],
+            borderWidths: [0, 2, 2, 0],
             textAlign: 'center',
             padding: 0,
         },
@@ -5197,7 +5197,7 @@ const M2000C_OCA_2 = {
             id: 'cap-ref',
             _description: 'CAP reference text field',
             position: [14, 15, 10, 11],
-            borderWidths: [0, 2, 0, 0],
+            borderWidths: [0, 2, 2, 0],
             textAlign: 'center',
             padding: 0,
         },
@@ -5395,7 +5395,7 @@ const M2000C_OCA_2 = {
             id: 'nav-point-11-name',
             _description: 'Nav point 11 name text field',
             position: [34, 35, 1, 5],
-            borderWidths: [1, 2, 1, 2],
+            borderWidths: [2, 2, 1, 2],
             textAlign: 'center',
             padding: 0,
             fontSize: 11,

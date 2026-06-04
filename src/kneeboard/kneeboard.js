@@ -1,22 +1,36 @@
 class Kneeboard {
+
   constructor() {
     this.kneeboardDrawUtils = new KneeboardDrawUtils();
     this.utils = new Utils();
 
+    this.defaultbackgroundColor = ['#ffffff', '#000000']
+    this.defaultBorderColor = ['#000000', '#e9e9e9']
+    this.defaultPathColor = ['#000000', '#e9e9e9']
+    this.defaultTextColor = ['#000000', '#e9e9e9']
+
     this.kneeboardDataKey = 'kneeboard-data';
     this.kneeboardPageKey = 'kneeboard-page';
+    this.kneeboardDarkModeKey = 'kneeboard-dark-mode';
 
     this.kneeboardTemplate = null;
     this.kneeboardName = '';
     this.kneeboardId = '';
     this.currentPage = 0;
     this.currentPageId = '';
+    this.darkMode = false;
+    this.focusFieldId = null;
 
     this.kneeboardData = {};
   }
 
   init() {
     this.getCurrentPage();
+
+    this.getDarkMode();
+
+    // Update kneeboard data when dark mode is changed.
+    $('.kneeboard-dark-mode').on('change', () => this.updateDarkMode());
 
     this.runPagination();
 
@@ -61,6 +75,11 @@ class Kneeboard {
     }
   }
 
+  getDarkMode() {
+    this.darkMode = localStorage.getItem(this.kneeboardDarkModeKey) === 'true';
+    $('.kneeboard-dark-mode').prop('checked', this.darkMode);
+  }
+
   runPagination() {
     $('.kneeboard-container').find('.previous-arrow').toggleClass('hide', this.currentPage == 0);
 
@@ -103,80 +122,124 @@ class Kneeboard {
 
   runArrowNavigation() {
     $(document).on('keydown', (event) => {
-      const textFieldCells = this.kneeboardTemplate.pages[this.currentPage].textFieldCells;
       if (!event.altKey) return;
 
       const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-      if (arrowKeys.includes(event.key)) {
-        event.preventDefault();
+      if (!arrowKeys.includes(event.key)) return;
 
-        const currentId = $(':focus').attr('id');
-        const currentCell = textFieldCells.find((textFieldCell) => textFieldCell.id === currentId);
-        if (currentCell) {
-          let nextCellCandidates = [];
-          switch (event.key) {
-            case 'ArrowLeft':
-              nextCellCandidates = textFieldCells.filter(c =>
-                c.position[3] <= currentCell.position[2]
-                && c.position[1] > currentCell.position[0]
-                && c.position[0] < currentCell.position[1]
-              );
+      event.preventDefault();
 
-              nextCellCandidates.sort((a, b) => {
-                const dxA = a.position[2] - currentCell.position[2];
-                const dxB = b.position[2] - currentCell.position[2];
+      const currentId = $(':focus').attr('id');
 
-                return Math.abs(dxA) - Math.abs(dxB);
-              });
-              break;
-            case 'ArrowRight':
-              nextCellCandidates = textFieldCells.filter(c =>
-                c.position[2] >= currentCell.position[3]
-                && c.position[1] > currentCell.position[0]
-                && c.position[0] < currentCell.position[1]
-              );
+      // Build the effective flat list of navigable fields:
+      // start with the page's top-level textFieldCells, then for each
+      // fields-select, find the currently selected option index and
+      // splice in its nested textFieldCells.
+      const baseFields = this.kneeboardTemplate.pages[this.currentPage].textFieldCells;
 
-              nextCellCandidates.sort((a, b) => {
-                const dxA = a.position[2] - currentCell.position[2];
-                const dxB = b.position[2] - currentCell.position[2];
-
-                return Math.abs(dxA) - Math.abs(dxB);
-              });
-              break;
-            case 'ArrowUp':
-              nextCellCandidates = textFieldCells.filter(c =>
-                c.position[1] <= currentCell.position[0]
-                && c.position[3] > currentCell.position[2]
-                && c.position[2] < currentCell.position[3]
-              );
-
-              nextCellCandidates.sort((a, b) => {
-                const dyA = a.position[0] - currentCell.position[0];
-                const dyB = b.position[0] - currentCell.position[0];
-
-                return Math.abs(dyA) - Math.abs(dyB);
-              });
-              break;
-            case 'ArrowDown':
-              nextCellCandidates = textFieldCells.filter(c =>
-                c.position[0] >= currentCell.position[1]
-                && c.position[3] > currentCell.position[2]
-                && c.position[2] < currentCell.position[3]
-              );
-
-              nextCellCandidates.sort((a, b) => {
-                const dyA = a.position[0] - currentCell.position[0];
-                const dyB = b.position[0] - currentCell.position[0];
-
-                return Math.abs(dyA) - Math.abs(dyB);
-              });
-              break;
+      const effectiveFields = baseFields.flatMap((cell) => {
+        if (cell.type === 'fields-select') {
+          const selectedValue = $(`#${cell.id}`).find('.custom-fields-select-input').val();
+          const selectedIndex = cell.options.indexOf(selectedValue);
+          if (selectedIndex >= 0 && cell.fields[selectedIndex]?.textFieldCells) {
+            return cell.fields[selectedIndex].textFieldCells;
           }
-
-          if (nextCellCandidates.length > 0) {
-            $(`#${nextCellCandidates[0].id}`).focus().select();
-          }
+          return [];
         }
+        return [cell];
+      });
+
+      const currentCell = effectiveFields.find((c) => c.id === currentId);
+      if (!currentCell) return;
+
+      // Types that are not keyboard-navigable targets
+      const NON_NAVIGABLE_TYPES = ['path-select'];
+
+      const midRow = (p) => (p[0] + p[1]) / 2;
+      const midCol = (p) => (p[2] + p[3]) / 2;
+
+      const cur = this.utils.getAbsoluteCellPosition(currentCell);
+      const curMidCol = midCol(cur);
+      const curMidRow = midRow(cur);
+
+      const isNavigable = (c) =>
+        c.id !== currentCell.id && !NON_NAVIGABLE_TYPES.includes(c.type);
+
+      // Prefer center-containment, fall back to any edge overlap
+      const colOverlap = (p) =>
+        (p[2] < curMidCol && p[3] > curMidCol) || (p[2] < cur[3] && p[3] > cur[2]);
+      const rowOverlap = (p) =>
+        (p[0] < curMidRow && p[1] > curMidRow) || (p[0] < cur[1] && p[1] > cur[0]);
+
+      let nextCellCandidates = [];
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          nextCellCandidates = effectiveFields.filter((c) => {
+            if (!isNavigable(c)) return false;
+            const p = this.utils.getAbsoluteCellPosition(c);
+            return p[3] <= cur[2] && rowOverlap(p);
+          });
+          nextCellCandidates.sort((a, b) => {
+            const pa = this.utils.getAbsoluteCellPosition(a), pb = this.utils.getAbsoluteCellPosition(b);
+            const dxA = Math.abs(pa[3] - cur[2]);
+            const dxB = Math.abs(pb[3] - cur[2]);
+            if (dxA !== dxB) return dxA - dxB;
+            return Math.abs(midRow(pa) - curMidRow) - Math.abs(midRow(pb) - curMidRow);
+          });
+          break;
+
+        case 'ArrowRight':
+          nextCellCandidates = effectiveFields.filter((c) => {
+            if (!isNavigable(c)) return false;
+            const p = this.utils.getAbsoluteCellPosition(c);
+            return p[2] >= cur[3] && rowOverlap(p);
+          });
+          nextCellCandidates.sort((a, b) => {
+            const pa = this.utils.getAbsoluteCellPosition(a), pb = this.utils.getAbsoluteCellPosition(b);
+            const dxA = Math.abs(pa[2] - cur[3]);
+            const dxB = Math.abs(pb[2] - cur[3]);
+            if (dxA !== dxB) return dxA - dxB;
+            return Math.abs(midRow(pa) - curMidRow) - Math.abs(midRow(pb) - curMidRow);
+          });
+          break;
+
+        case 'ArrowUp':
+          nextCellCandidates = effectiveFields.filter((c) => {
+            if (!isNavigable(c)) return false;
+            const p = this.utils.getAbsoluteCellPosition(c);
+            return p[1] <= cur[0] && colOverlap(p);
+          });
+          nextCellCandidates.sort((a, b) => {
+            const pa = this.utils.getAbsoluteCellPosition(a), pb = this.utils.getAbsoluteCellPosition(b);
+            const dyA = Math.abs(pa[1] - cur[0]);
+            const dyB = Math.abs(pb[1] - cur[0]);
+            if (dyA !== dyB) return dyA - dyB;
+            return Math.abs(midCol(pa) - curMidCol) - Math.abs(midCol(pb) - curMidCol);
+          });
+          break;
+
+        case 'ArrowDown':
+          nextCellCandidates = effectiveFields.filter((c) => {
+            if (!isNavigable(c)) return false;
+            const p = this.utils.getAbsoluteCellPosition(c);
+            return p[0] >= cur[1] && colOverlap(p);
+          });
+          nextCellCandidates.sort((a, b) => {
+            const pa = this.utils.getAbsoluteCellPosition(a), pb = this.utils.getAbsoluteCellPosition(b);
+            const dyA = Math.abs(pa[0] - cur[1]);
+            const dyB = Math.abs(pb[0] - cur[1]);
+            if (dyA !== dyB) return dyA - dyB;
+            return Math.abs(midCol(pa) - curMidCol) - Math.abs(midCol(pb) - curMidCol);
+          });
+          break;
+      }
+
+      console.log(currentId, nextCellCandidates)
+
+      if (nextCellCandidates.length > 0) {
+        this.focusFieldId = nextCellCandidates[0].id;
+        $(`#${this.focusFieldId}`).focus().select();
       }
     });
   }
@@ -309,7 +372,7 @@ class Kneeboard {
     $(downloadModal).find('.download-kneeboard-button').off('click').on('click', () => {
       const kneeboardImages = {};
       this.kneeboardTemplate.pages.forEach((template, index) => {
-        this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns);
+        this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[index].rows, this.kneeboardTemplate.pages[index].columns, this.darkMode ? "black" : "white", this.darkMode ? "white" : "black");
         this.kneeboardDrawUtils.clearCanvas();
         this.kneeboardDrawUtils.clearInputFields();
 
@@ -364,7 +427,7 @@ class Kneeboard {
   }
 
   displayKneeboard() {
-    this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[this.currentPage].rows, this.kneeboardTemplate.pages[this.currentPage].columns);
+    this.kneeboardDrawUtils.initCanvas(this.kneeboardTemplate.pages[this.currentPage].rows, this.kneeboardTemplate.pages[this.currentPage].columns, this.darkMode ? "black" : "white", this.darkMode ? "white" : "black");
     this.kneeboardDrawUtils.clearCanvas();
     this.kneeboardDrawUtils.clearInputFields();
 
@@ -398,12 +461,22 @@ class Kneeboard {
     // Handle chained fields
     this.runChainedFields(this.kneeboardTemplate.pages[this.currentPage]);
 
+    // Restore focus if set by arrow navigation
+    if (this.focusFieldId) {
+      $(`#${this.focusFieldId}`).focus().select();
+      this.focusFieldId = null;
+    }
+
     this.saveData();
   }
 
   displayStaticContent(template) {
     template.textCells?.forEach((textCell) => {
       if (textCell.type == 'path') {
+        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let borderColor = this.utils.getCellColor(textCell.borderColor, this.darkMode, this.defaultBorderColor);
+        let pathColor = this.utils.getCellColor(textCell.pathColor, this.darkMode, this.defaultPathColor);
+
         this.kneeboardDrawUtils.drawSvgShape(
           textCell.position[0],
           textCell.position[1],
@@ -411,11 +484,18 @@ class Kneeboard {
           textCell.position[3],
           textCell.path,
           textCell.borderWidths,
+          backgroundColor,
+          borderColor,
           {
             padding: textCell.padding ?? 5,
+            color: pathColor
           }
         );
       } else {
+        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let borderColor = this.utils.getCellColor(textCell.borderColor, this.darkMode, this.defaultBorderColor);
+        let textColor = this.utils.getCellColor(textCell.textColor, this.darkMode, this.defaultTextColor);
+
         this.kneeboardDrawUtils.drawTextCell(
           textCell.position[0],
           textCell.position[1],
@@ -423,34 +503,49 @@ class Kneeboard {
           textCell.position[3],
           textCell.text,
           textCell.borderWidths ?? [1, 1, 1, 1],
-          textCell.backgroundColor ?? null,
+          backgroundColor,
+          borderColor,
           {
             fontSize: textCell.fontSize ?? 14,
             minFontSize: textCell.minFontSize ?? 12,
             textAlign: textCell.textAlign ?? 'center',
             textOrientation: textCell.textOrientation ?? 'horizontal',
             padding: textCell.padding ?? 5,
+            color: textColor
           }
         );
       }
     });
 
-    template.textFieldCells?.forEach((textCell) => {
-      this.kneeboardDrawUtils.drawTextCell(
-        textCell.position[0],
-        textCell.position[1],
-        textCell.position[2],
-        textCell.position[3],
-        null,
-        textCell.borderWidths ?? [1, 1, 1, 1],
-        textCell.backgroundColor ?? null
-      );
+    template.textFieldCells?.forEach((textFieldCell) => {
+      if (!template.textCells ||
+        template.textCells.findIndex(textCell =>
+          textCell.position[0] === textFieldCell.position[0] &&
+          textCell.position[1] === textFieldCell.position[1] &&
+          textCell.position[2] === textFieldCell.position[2] &&
+          textCell.position[3] === textFieldCell.position[3]
+        ) === -1) {
+        let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
 
+        this.kneeboardDrawUtils.drawTextCell(
+          textFieldCell.position[0],
+          textFieldCell.position[1],
+          textFieldCell.position[2],
+          textFieldCell.position[3],
+          null,
+          textFieldCell.borderWidths ?? [1, 1, 1, 1],
+          backgroundColor,
+          borderColor
+        );
+      }
     });
   }
 
   displayFields(template, kneeboardData) {
     template.textFieldCells.forEach((textFieldCell) => {
+      let textColor = this.utils.getCellColor(textFieldCell.textColor, this.darkMode, this.defaultTextColor);
+
       switch (textFieldCell.type) {
         case 'path-field':
           this.kneeboardDrawUtils.drawTextFieldPath(
@@ -472,6 +567,7 @@ class Kneeboard {
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
               textOrientation: textFieldCell.textOrientation ?? null,
+              color: textColor
             },
           );
           break;
@@ -487,6 +583,7 @@ class Kneeboard {
             {
               selectColumns: textFieldCell.selectColumns ?? 3,
               padding: textFieldCell.padding ?? 5,
+              color: textColor
             },
             textFieldCell.dropdownSide ?? 'right'
           );
@@ -510,6 +607,7 @@ class Kneeboard {
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
               selectColumns: textFieldCell.selectColumns ?? 1,
+              color: textColor
             },
             textFieldCell.dropdownSide ?? 'right'
           );
@@ -530,6 +628,7 @@ class Kneeboard {
               textAlign: textFieldCell.textAlign ?? null,
               padding: textFieldCell.padding ?? 5,
               bold: textFieldCell.bold ?? false,
+              color: textColor
             },
             textFieldCell.dropdownSide ?? 'right'
           );
@@ -568,6 +667,7 @@ class Kneeboard {
               bold: textFieldCell.bold ?? false,
               textOrientation: textFieldCell.textOrientation ?? null,
               characterLimit: textFieldCell.characterLimit ?? 0,
+              color: textColor
             },
           );
           break;
@@ -601,6 +701,11 @@ class Kneeboard {
         }
 
         if (textFieldCell) {
+          let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+          let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
+          let pathColor = this.utils.getCellColor(textFieldCell.pathColor, this.darkMode, this.defaultPathColor);
+          let textColor = this.utils.getCellColor(textFieldCell.textColor, this.darkMode, this.defaultTextColor);
+
           switch (textFieldCell.type) {
             case 'path-select':
               this.kneeboardDrawUtils.drawSvgShape(
@@ -610,8 +715,11 @@ class Kneeboard {
                 textFieldCell.position[3],
                 textFieldCell.options[kneeboardField.value],
                 textFieldCell.borderWidths,
+                backgroundColor,
+                borderColor,
                 {
                   padding: textFieldCell.padding ?? 5,
+                  color: pathColor
                 }
               );
               break;
@@ -635,6 +743,7 @@ class Kneeboard {
                   padding: textFieldCell.padding ?? 5,
                   bold: textFieldCell.bold ?? false,
                   textOrientation: textFieldCell.textOrientation ?? null,
+                  color: textColor
                 },
               );
               break;
@@ -671,7 +780,8 @@ class Kneeboard {
                   textareaCenter: textFieldCell.textareaCenter ?? false,
                   bold: textFieldCell.bold ?? false,
                   textOrientation: textFieldCell.textOrientation ?? 'horizontal',
-                  padding: textFieldCell.padding
+                  padding: textFieldCell.padding,
+                  color: textColor
                 }
               )
               break;
@@ -724,6 +834,10 @@ class Kneeboard {
         if (textFieldCell) {
           switch (textFieldCell.type) {
             case 'path-select':
+              let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+              let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
+              let pathColor = this.utils.getCellColor(textFieldCell.pathColor, this.darkMode, this.defaultPathColor);
+
               this.kneeboardDrawUtils.drawSvgShape(
                 textFieldCell.position[0],
                 textFieldCell.position[1],
@@ -731,12 +845,17 @@ class Kneeboard {
                 textFieldCell.position[3],
                 textFieldCell.options[kneeboardField.value],
                 textFieldCell.borderWidths,
+                backgroundColor,
+                borderColor,
                 {
                   padding: textFieldCell.padding ?? 5,
+                  color: pathColor
                 }
               );
               break;
             default:
+              let textColor = this.utils.getCellColor(textFieldCell.textColor, this.darkMode, this.defaultTextColor);
+
               if (textFieldCell.textOrientation == 'slanted') {
                 this.kneeboardDrawUtils.drawCellContent(
                   textFieldCell.position[0],
@@ -749,6 +868,7 @@ class Kneeboard {
                   {
                     textOrientation: textFieldCell.textOrientation,
                     bold: textFieldCell.bold ?? false,
+                    color: textColor
                   }
                 );
               }
@@ -840,6 +960,8 @@ class Kneeboard {
       $(event.target).on('focusout', (event) => {
         $(event.target).off('focusout');
 
+        let textColor = this.utils.getCellColor(textFieldCell.textColor, this.darkMode, this.defaultTextColor);
+
         this.kneeboardDrawUtils.drawCellContent(
           textFieldCell.position[0],
           textFieldCell.position[1],
@@ -851,6 +973,7 @@ class Kneeboard {
           {
             textOrientation: textFieldCell.textOrientation,
             bold: textFieldCell.bold ?? false,
+            color: textColor,
           }
         );
       });
@@ -976,11 +1099,18 @@ class Kneeboard {
     this.saveData();
   }
 
+  updateDarkMode() {
+    this.darkMode = $('.kneeboard-dark-mode').is(':checked');
+
+    this.displayKneeboard();
+  }
+
   saveData() {
     const kneeboardData = JSON.parse(localStorage.getItem(this.kneeboardDataKey));
     localStorage.setItem(this.kneeboardDataKey, JSON.stringify({ ...kneeboardData, ...this.kneeboardData }));
 
     localStorage.setItem(this.kneeboardPageKey, this.currentPageId);
+    localStorage.setItem(this.kneeboardDarkModeKey, this.darkMode);
   }
 
   importGroupData(selectedFlight, theatreOrigin) {
