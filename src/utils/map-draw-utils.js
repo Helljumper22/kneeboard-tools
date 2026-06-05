@@ -99,7 +99,7 @@ class MapDrawUtils {
     this.ctx.fill();
   }
 
-  drawBaseLines(location, magneticDeclination, mapOrientation) {
+  drawBaseLines(location, magneticDeclination, mapOrientation, color = false) {
     const base_xPx = 60;
     const base_yPx = 60;
     const height = 60;
@@ -127,8 +127,8 @@ class MapDrawUtils {
     this.ctx.font = `12px sans-serif`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
-    this.ctx.strokeStyle = 'black';
-    this.ctx.fillStyle = 'black';
+    this.ctx.strokeStyle = color ?? 'black';
+    this.ctx.fillStyle = color ?? 'black';
     this.ctx.lineWidth = 2;
 
     this.ctx.save();
@@ -571,7 +571,7 @@ class MapDrawUtils {
     this.ctx.stroke();
   }
 
-  drawText(x, y, text, type = 'square', fontsize = 16, offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2, fill = false) {
+  drawText(x, y, text, type = 'square', fontsize = 16, offsetDistance = 0, offsetAngle = 0, textAngle = 0, padding = 2, fillColor = false, textColor = false, borderColor = false) {
     let xPx = (x * this.nmToPixels) + this.centerX - padding;
     let yPx = (y * this.nmToPixels) + this.centerY - padding;
 
@@ -603,11 +603,13 @@ class MapDrawUtils {
     this.ctx.translate(xPx, yPx);
     this.ctx.rotate(textAngle);
 
+    this.ctx.fillStyle = fillColor ? fillColor : "white";
+    this.ctx.strokeStyle = borderColor ? borderColor : "black";
+
     let textX = 0, textY = 0;
     switch (type) {
       case 'plus-top':
       case 'plus-bottom':
-        this.ctx.strokeStyle = "black";
         this.ctx.beginPath();
         this.ctx.moveTo((textHeight / 2), padding);
         this.ctx.lineTo(-(textHeight / 2), padding);
@@ -621,7 +623,6 @@ class MapDrawUtils {
           textY += textHeight + padding * 2;
         }
 
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - padding);
         break;
       case 'octogone':
@@ -653,14 +654,11 @@ class MapDrawUtils {
         }
         this.ctx.closePath();
 
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fill();
-        this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
 
         if (text.length > 2) {
-          this.ctx.fillStyle = fill ? fill : "white";
           this.ctx.fillRect(textX - (textWidth / 2) + padding, textY - (textHeight / 2) - (padding / 2), textWidth - padding, textHeight - padding);
         }
         break;
@@ -684,9 +682,7 @@ class MapDrawUtils {
         this.ctx.quadraticCurveTo(rs_x, rs_y, rs_x + rs_radius, rs_y);
         this.ctx.closePath();
 
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fill();
-        this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.stroke();
 
@@ -695,9 +691,7 @@ class MapDrawUtils {
         break;
       case 'square':
         // Draw black square with colored background
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fillRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
-        this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.strokeRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
 
@@ -706,14 +700,12 @@ class MapDrawUtils {
         break;
       case 'triangle':
         // Draw black triangle with colored background
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.beginPath();
         this.ctx.moveTo(padding, (-triangleWidth / 2) - (padding * 2));
         this.ctx.lineTo((triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
         this.ctx.lineTo((-triangleWidth * 0.6) + padding, (triangleWidth / 2) - (padding * 2));
         this.ctx.fill();
 
-        this.ctx.strokeStyle = "black";
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.moveTo(padding, (-triangleWidth / 2) - (padding * 2));
@@ -726,13 +718,11 @@ class MapDrawUtils {
         textY = padding * 1.3;
 
         if (text.length > 2) {
-          this.ctx.fillStyle = fill ? fill : "white";
           this.ctx.fillRect(textX - (textWidth / 2), textY - (textHeight / 2), textWidth, textHeight - (padding / 3));
         }
         break;
       case 'no-border':
         // Draw colored background
-        this.ctx.fillStyle = fill ? fill : "white";
         this.ctx.fillRect(-textWidth / 2, (-padding / 2) - textHeight / 2, boxWidth, boxHeight);
 
         textX = padding;
@@ -755,7 +745,7 @@ class MapDrawUtils {
     }
 
     // Draw the text centered in the rectangle
-    this.ctx.fillStyle = "black";
+    this.ctx.fillStyle = textColor ? textColor : "black";
     this.ctx.fillText(text, textX, textY);
 
     this.ctx.restore();

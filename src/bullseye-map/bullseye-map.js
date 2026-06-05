@@ -643,8 +643,21 @@ class BullseyeMap {
     this.furthestPointMargin = 1.25;
     this.defaultScale = 100;
 
+    this.backgroundColor = ['#FFFFFF', '#000000'];
+    this.bullseyeLinesColor = ['#555555', '#AAAAAA'];
+    this.defaultLineColor = ['#000000', '#e9e9e9'];
+
+    this.bullseyeMapDataKey = 'bullseye-map-data';
+    this.bullseyeDarkModeKey = 'bullseye-dark-mode';
+
     this.boundingBoxPoints = [];
     this.pointNamesData = [];
+    this.darkMode = false;
+
+    this.getDarkMode();
+
+    // Update bullseye data when dark mode is changed.
+    $('.bullseye-dark-mode').on('change', () => this.updateDarkMode());
 
     this.mapFieldsUtils.displayComponentListButtons();
 
@@ -656,8 +669,15 @@ class BullseyeMap {
     $('.reset-map-map-button').off('click').on('click', () => this.resetMap());
   }
 
+  getDarkMode() {
+    this.darkMode = localStorage.getItem(this.bullseyeDarkModeKey) === 'true';
+    $('.bullseye-dark-mode').prop('checked', this.darkMode);
+  }
+
   updateMap() {
     this.furthestPoint = 0;
+
+    $('.map-canvas').css('background', this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0])
 
     this.mapDrawUtils.clearCanvas();
     this.mapDrawUtils.setToForeground();
@@ -810,7 +830,7 @@ class BullseyeMap {
       // Get all data
       let allData = {};
       try {
-        allData = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+        allData = JSON.parse(localStorage.getItem(this.bullseyeMapDataKey)) || {};
       } catch (e) {
         allData = {};
       }
@@ -864,7 +884,7 @@ class BullseyeMap {
       });
 
       // Save updated data
-      localStorage.setItem('bullseye-map-data', JSON.stringify(allData));
+      localStorage.setItem(this.bullseyeMapDataKey, JSON.stringify(allData));
 
       // Update map
       this.updateMap();
@@ -902,7 +922,7 @@ class BullseyeMap {
       for (let angle = 0; angle < 360; angle += linesAngle) {
         if (angle < 180) {
           const angleRad = (angle * Math.PI / 180) + (mapOrientation * Math.PI / 180);
-          this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, '#555', dashed); // Draw lines at specified angles
+          this.mapDrawUtils.drawInfiniteLine(0, 0, angleRad, this.darkMode ? this.bullseyeLinesColor[1] : this.bullseyeLinesColor[0], dashed); // Draw lines at specified angles
         }
 
         if (displayText) {
@@ -967,7 +987,7 @@ class BullseyeMap {
         for (let i = 1; i <= ringCount + 1; i++) {
           const radius = i * bullseyeData['ring-ranges'];
 
-          this.mapDrawUtils.drawRing(0, 0, radius, '#555'); // Draw each ring
+          this.mapDrawUtils.drawRing(0, 0, radius, this.darkMode ? this.bullseyeLinesColor[1] : this.bullseyeLinesColor[0]); // Draw each ring
 
           // Add rings range to drawPoints array
           if (bullseyeData['ring-range-positions']?.length > 0) {
@@ -999,7 +1019,7 @@ class BullseyeMap {
       }
 
       // Draw bullseye dot
-      this.mapDrawUtils.drawBullseye(0, 0, 'black');
+      this.mapDrawUtils.drawBullseye(0, 0, this.darkMode ? this.backgroundColor[0] : this.backgroundColor[1]);
 
       if (bullseyeData['name'] != '' && bullseyeData['name'] != undefined && bullseyeData['display']) {
         const angleRad = ((bullseyeData['name-position'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
@@ -1025,7 +1045,12 @@ class BullseyeMap {
     const baselineData = this.getComponentData(component);
 
     if (baselineData && baselineData.display) {
-      this.mapDrawUtils.drawBaseLines(baselineData['location'] ?? 'top-left', this.utils.isNumber(magneticDeclination) ? magneticDeclination : 0, !trueNorth ? mapOrientation - magneticDeclination : mapOrientation);
+      this.mapDrawUtils.drawBaseLines(
+        baselineData['location'] ?? 'top-left',
+        this.utils.isNumber(magneticDeclination) ? magneticDeclination : 0,
+        !trueNorth ? mapOrientation - magneticDeclination : mapOrientation,
+        this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0]
+      );
     }
   }
 
@@ -1063,7 +1088,7 @@ class BullseyeMap {
             const endX = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.cos(endAngleRad);
             const endY = mapAreaData.points[nextAreaPointIndex]['distance'] * Math.sin(endAngleRad);
 
-            this.mapDrawUtils.drawLine(startX, startY, endX, endY, 'black', 3, 'simple');
+            this.mapDrawUtils.drawLine(startX, startY, endX, endY, this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0], 3, 'simple');
           }
         }
       };
@@ -1094,8 +1119,12 @@ class BullseyeMap {
               const endX = lineData.points[i]['distance'] * Math.cos(endAngleRad);
               const endY = lineData.points[i]['distance'] * Math.sin(endAngleRad);
 
-              const color = lineData['color'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'color').default;
+              let color = lineData['color'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'color').default;
               const type = lineData['type'] ?? component.fields.find(field => field.id == 'lines').fields.find(field => field.id == 'type').default;
+
+              if (this.darkMode && color == this.defaultLineColor[0]) {
+                color = this.defaultLineColor[1];
+              }
 
               this.mapDrawUtils.drawLine(startX, startY, endX, endY, color, 3, type);
             }
@@ -1123,8 +1152,12 @@ class BullseyeMap {
           const x = ring['distance'] * Math.cos(angleRad);
           const y = ring['distance'] * Math.sin(angleRad);
 
-          const color = ring['color'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'color').default;
+          let color = ring['color'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'color').default;
           const fill = ring['fill'] ?? component.fields.find(field => field.id == 'rings').fields.find(field => field.id == 'fill').default;
+
+          if (this.darkMode && color == this.defaultLineColor[0]) {
+            color = this.defaultLineColor[1];
+          }
 
           this.mapDrawUtils.drawRing(x, y, ring.radius, color, 2, fill);
 
@@ -1173,9 +1206,13 @@ class BullseyeMap {
 
           const corners = [];
 
-          const color = area['color'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'color').default;
+          let color = area['color'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'color').default;
           const type = area['type'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'type').default;
           const fill = area['fill'] ?? component.fields.find(field => field.id == 'areas').fields.find(field => field.id == 'fill').default;
+
+          if (this.darkMode && color == this.defaultLineColor[0]) {
+            color = this.defaultLineColor[1];
+          }
 
           area.points.forEach(areaPoint => {
             let angleRad = ((areaPoint['azimuth'] - 90) * Math.PI / 180) + (mapOrientation * Math.PI / 180);
@@ -1230,7 +1267,12 @@ class BullseyeMap {
           const y = racetrack['distance'] * Math.sin(angleRad);
 
           const side = racetrack['side'] ? racetrack['side'] == 'left' : component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'side').default == 'left';
-          const color = racetrack['color'] ?? component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'color').default;
+          let color = racetrack['color'] ?? component.fields.find(field => field.id == 'racetracks').fields.find(field => field.id == 'color').default;
+
+          if (this.darkMode && color == this.defaultLineColor[0]) {
+            color = this.defaultLineColor[1];
+          }
+
           let trackAngleRad = (racetrack['orientation'] * Math.PI / 180) + (mapOrientation * Math.PI / 180);
           if (!trueNorth) trackAngleRad -= magneticDeclination * Math.PI / 180;
 
@@ -1292,7 +1334,11 @@ class BullseyeMap {
           const x = object['distance'] * Math.cos(angleRad);
           const y = object['distance'] * Math.sin(angleRad);
 
-          const color = object['color'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'color').default;
+          let color = object['color'] ?? component.fields.find(field => field.id == 'objects').fields.find(field => field.id == 'color').default;
+
+          if (this.darkMode && color == this.defaultLineColor[0]) {
+            color = this.defaultLineColor[1];
+          }
 
           let objectAngleRad = object['orientation'] * Math.PI / 180 + (mapOrientation * Math.PI / 180);
           if (!trueNorth) objectAngleRad -= magneticDeclination * Math.PI / 180;
@@ -1359,6 +1405,7 @@ class BullseyeMap {
           const type = point['type'] ?? component.fields.find(field => field.id == 'points').fields.find(field => field.id == 'type').default;
           const fill = point['fill'] ?? component.fields.find(field => field.id == 'points').fields.find(field => field.id == 'fill').default;
 
+
           if (point['name'] != '' && point['name'] != undefined) {
             this.pointNamesData.push({
               limitToArea: false,
@@ -1385,16 +1432,39 @@ class BullseyeMap {
         this.mapDrawUtils.clipCanvas(areaPoints);
       }
 
-      this.mapDrawUtils.drawText(pointNameData.x, pointNameData.y, pointNameData.text, pointNameData.type, pointNameData.fontSize, pointNameData.offsetDistance, pointNameData.offsetAngle, pointNameData.textAngle, pointNameData.padding, pointNameData.fill);
+      let fillColor = pointNameData.fill
+      if (this.darkMode && (!fillColor || fillColor.toUpperCase() == this.backgroundColor[0].toUpperCase())) {
+        fillColor = this.backgroundColor[1];
+      }
+
+      let textColor = this.backgroundColor[1]
+      if (this.darkMode) {
+        textColor = this.backgroundColor[0];
+      }
+
+      let borderColor = this.backgroundColor[1]
+      if (this.darkMode) {
+        borderColor = this.backgroundColor[0];
+      }
+
+      this.mapDrawUtils.drawText(pointNameData.x, pointNameData.y, pointNameData.text, pointNameData.type, pointNameData.fontSize, pointNameData.offsetDistance, pointNameData.offsetAngle, pointNameData.textAngle, pointNameData.padding, fillColor, textColor, borderColor);
 
       this.mapDrawUtils.unclipCanvas();
     });
   }
 
+  updateDarkMode() {
+    this.darkMode = $('.bullseye-dark-mode').is(':checked');
+
+    localStorage.setItem(this.bullseyeDarkModeKey, this.darkMode);
+
+    this.updateMap();
+  }
+
   getComponentData(mapComponent) {
     let store = null;
     try {
-      store = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+      store = JSON.parse(localStorage.getItem(this.bullseyeMapDataKey)) || {};
     } catch (e) {
       store = {};
     }
@@ -1416,7 +1486,7 @@ class BullseyeMap {
     // Persist into a single object under 'bullseye-map-data'
     let store = {};
     try {
-      store = JSON.parse(localStorage.getItem('bullseye-map-data')) || {};
+      store = JSON.parse(localStorage.getItem(this.bullseyeMapDataKey)) || {};
     } catch (e) {
       store = {};
     }
@@ -1425,14 +1495,14 @@ class BullseyeMap {
     if (!key) return;
 
     store[key] = componentData;
-    localStorage.setItem('bullseye-map-data', JSON.stringify(store));
+    localStorage.setItem(this.bullseyeMapDataKey, JSON.stringify(store));
   }
 
   async importData() {
     const mapData = await this.utils.importData('.json');
 
     if (mapData) {
-      localStorage.setItem('bullseye-map-data', JSON.stringify(mapData));
+      localStorage.setItem(this.bullseyeMapDataKey, JSON.stringify(mapData));
 
       this.updateMap();
     }
@@ -1451,7 +1521,7 @@ class BullseyeMap {
     });
 
     $(exportModal).find('.export-data-button').off('click').on('click', () => {
-      const mapData = localStorage.getItem('bullseye-map-data');
+      const mapData = localStorage.getItem(this.bullseyeMapDataKey);
 
       const fileName = $(exportModal).find('.file-name').val();
       this.utils.exportData(mapData, fileName != '' ? fileName : 'bullseye_map');
@@ -1483,7 +1553,7 @@ class BullseyeMap {
       }
 
       if (!$(downloadModal).find('.transparent-background').is(':checked')) {
-        this.mapDrawUtils.drawBackground('white');
+        this.mapDrawUtils.drawBackground(this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0]);
       }
 
       const fileName = $(downloadModal).find('.file-name').val();
@@ -1502,7 +1572,7 @@ class BullseyeMap {
     if (window.confirm('Are you sure ? All data will be lost.')) {
       this.mapFieldsUtils.displayComponentListButtons();
 
-      localStorage.removeItem('bullseye-map-data');
+      localStorage.removeItem(this.bullseyeMapDataKey);
 
       this.updateMap();
     }

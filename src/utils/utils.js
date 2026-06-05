@@ -383,4 +383,63 @@ class Utils {
 
         return $(tag).width();
     }
+
+    getAbsoluteCellPosition(cell) {
+        if (cell.type === 'path-field' && cell.internalPosition) {
+            const [rowStart, rowEnd, colStart, colEnd] = cell.position;
+            const [ix, iy, iw, ih] = cell.internalPosition;
+            const cellHeight = rowEnd - rowStart;
+            const cellWidth = colEnd - colStart;
+            const absRowStart = rowStart + iy * cellHeight;
+            const absColStart = colStart + ix * cellWidth;
+            return [
+                absRowStart,
+                absRowStart + ih * cellHeight,
+                absColStart,
+                absColStart + iw * cellWidth,
+            ];
+        }
+        return cell.position;
+    };
+
+    getCellColor(cellColor, darkMode, defaultColor) {
+        if (!cellColor) {
+            if (Array.isArray(defaultColor)) {
+                if (defaultColor.length > 1) {
+                    return darkMode ? defaultColor[1] : defaultColor[0];
+                } else {
+                    defaultColor = defaultColor[0];
+                }
+            }
+
+            return darkMode ? this.invertHexColor(defaultColor) : defaultColor;
+        }
+
+        if (Array.isArray(cellColor)) {
+            if (cellColor.length > 1) {
+                return darkMode ? cellColor[1] : cellColor[0];
+            } else {
+                cellColor = cellColor[0];
+            }
+        }
+
+        return darkMode ? this.invertHexColor(cellColor) : cellColor;
+    }
+
+    invertHexColor(hex) {
+        // Remove the # if present
+        hex = hex.replace('#', '');
+
+        // Parse the hex string into RGB
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+
+        // Invert each channel
+        const invertedR = (255 - r).toString(16).padStart(2, '0');
+        const invertedG = (255 - g).toString(16).padStart(2, '0');
+        const invertedB = (255 - b).toString(16).padStart(2, '0');
+
+        return `#${invertedR}${invertedG}${invertedB}`.toUpperCase();
+    }
 }
