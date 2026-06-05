@@ -4,10 +4,10 @@ class Kneeboard {
     this.kneeboardDrawUtils = new KneeboardDrawUtils();
     this.utils = new Utils();
 
-    this.defaultbackgroundColor = ['#ffffff', '#000000']
-    this.defaultBorderColor = ['#000000', '#e9e9e9']
-    this.defaultPathColor = ['#000000', '#e9e9e9']
-    this.defaultTextColor = ['#000000', '#e9e9e9']
+    this.defaultBackgroundColor = ['#ffffff', '#000000'];
+    this.defaultBorderColor = ['#000000', '#e9e9e9'];
+    this.defaultPathColor = ['#000000', '#e9e9e9'];
+    this.defaultTextColor = ['#000000', '#e9e9e9'];
 
     this.kneeboardDataKey = 'kneeboard-data';
     this.kneeboardPageKey = 'kneeboard-page';
@@ -234,8 +234,6 @@ class Kneeboard {
           });
           break;
       }
-
-      console.log(currentId, nextCellCandidates)
 
       if (nextCellCandidates.length > 0) {
         this.focusFieldId = nextCellCandidates[0].id;
@@ -473,7 +471,7 @@ class Kneeboard {
   displayStaticContent(template) {
     template.textCells?.forEach((textCell) => {
       if (textCell.type == 'path') {
-        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultBackgroundColor);
         let borderColor = this.utils.getCellColor(textCell.borderColor, this.darkMode, this.defaultBorderColor);
         let pathColor = this.utils.getCellColor(textCell.pathColor, this.darkMode, this.defaultPathColor);
 
@@ -492,7 +490,7 @@ class Kneeboard {
           }
         );
       } else {
-        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let backgroundColor = this.utils.getCellColor(textCell.backgroundColor, this.darkMode, this.defaultBackgroundColor);
         let borderColor = this.utils.getCellColor(textCell.borderColor, this.darkMode, this.defaultBorderColor);
         let textColor = this.utils.getCellColor(textCell.textColor, this.darkMode, this.defaultTextColor);
 
@@ -525,7 +523,7 @@ class Kneeboard {
           textCell.position[2] === textFieldCell.position[2] &&
           textCell.position[3] === textFieldCell.position[3]
         ) === -1) {
-        let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+        let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultBackgroundColor);
         let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
 
         this.kneeboardDrawUtils.drawTextCell(
@@ -701,7 +699,7 @@ class Kneeboard {
         }
 
         if (textFieldCell) {
-          let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+          let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultBackgroundColor);
           let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
           let pathColor = this.utils.getCellColor(textFieldCell.pathColor, this.darkMode, this.defaultPathColor);
           let textColor = this.utils.getCellColor(textFieldCell.textColor, this.darkMode, this.defaultTextColor);
@@ -834,7 +832,7 @@ class Kneeboard {
         if (textFieldCell) {
           switch (textFieldCell.type) {
             case 'path-select':
-              let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultbackgroundColor);
+              let backgroundColor = this.utils.getCellColor(textFieldCell.backgroundColor, this.darkMode, this.defaultBackgroundColor);
               let borderColor = this.utils.getCellColor(textFieldCell.borderColor, this.darkMode, this.defaultBorderColor);
               let pathColor = this.utils.getCellColor(textFieldCell.pathColor, this.darkMode, this.defaultPathColor);
 
@@ -1102,6 +1100,8 @@ class Kneeboard {
   updateDarkMode() {
     this.darkMode = $('.kneeboard-dark-mode').is(':checked');
 
+    localStorage.setItem(this.kneeboardDarkModeKey, this.darkMode);
+
     this.displayKneeboard();
   }
 
@@ -1110,7 +1110,6 @@ class Kneeboard {
     localStorage.setItem(this.kneeboardDataKey, JSON.stringify({ ...kneeboardData, ...this.kneeboardData }));
 
     localStorage.setItem(this.kneeboardPageKey, this.currentPageId);
-    localStorage.setItem(this.kneeboardDarkModeKey, this.darkMode);
   }
 
   importGroupData(selectedFlight, theatreOrigin) {

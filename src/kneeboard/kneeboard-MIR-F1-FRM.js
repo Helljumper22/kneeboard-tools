@@ -68,7 +68,6 @@ class KneeboardMIR_F1_FRM extends Kneeboard {
       for (const keyCoalition in missionData.coalition) {
         if (Object.hasOwn(missionData.coalition, keyCoalition)) {
           const coalition = missionData.coalition[keyCoalition];
-          console.log(coalition)
 
           for (const keyCountry in coalition.country) {
             if (Object.hasOwn(coalition.country, keyCountry)) {
@@ -88,8 +87,6 @@ class KneeboardMIR_F1_FRM extends Kneeboard {
       $(mizImportGroupModal).find('.modal-inner-content').removeClass('hide');
 
       $(mizImportGroupModal).find('.selected-group option').remove();
-
-      console.log(flights);
 
       if (flights.length > 0) {
         for (const keyFlight in flights) {
