@@ -442,4 +442,29 @@ class Utils {
 
         return `#${invertedR}${invertedG}${invertedB}`.toUpperCase();
     }
+
+    generateId() {
+        if (crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+        // fallback for non-secure contexts
+        return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    getCanvasClickPosition(clickX, clickY, canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: Math.round((event.clientX - rect.left) * scaleX),
+            y: Math.round((event.clientY - rect.top) * scaleY),
+        };
+    };
+
+    formatTimeLabel(totalSeconds) {
+        if (totalSeconds < 60) return `${totalSeconds}"`;
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+        return s === 0 ? `${m}'` : `${m}'${s}"`;
+    }
 }

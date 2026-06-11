@@ -1,0 +1,45 @@
+body .container .tabs-container .tabs .tab[attr-tab="attack-planner-tab"] {
+  .tab-content {
+    height: 100%;
+
+    .sidebar {
+      height: 100%;
+
+      .sidebar-header {
+        .header-buttons {
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        }
+      }
+    }
+
+    .attack-planner-container {
+      display: flex;
+      position: relative;
+      justify-content: center;
+      align-items: center;
+      background: #1e1e1e;
+      width: 100%;
+
+      .attack-planner-canvas-wrapper {
+        position: relative;
+        height: 800px;
+        width: 565px;
+        flex-shrink: 0;
+
+        .attack-planner-background-canvas,
+        .attack-planner-canvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          border: 1px solid black;
+          height: 800px;
+          width: 565px;
+        }
+
+        .attack-planner-canvas {
+          z-index: 1;
+        }
+      }
+    }
+  }
+}

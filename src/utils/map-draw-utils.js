@@ -32,6 +32,20 @@ class MapDrawUtils {
     ];
   }
 
+  getImage(imageBase64) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+
+      img.onload = () => {
+        resolve(img);
+      };
+
+      img.onerror = reject;
+
+      img.src = imageBase64;
+    });
+  }
+
   setToBackground() {
     this.ctx.globalCompositeOperation = 'destination-over';
   }
@@ -224,13 +238,47 @@ class MapDrawUtils {
     this.ctx.stroke();
   }
 
-  drawFullSquare(x, y, color, length = 10) {
+  drawSquare(x, y, length, strokeWidth = 2, color = 'black', clearBackground = false) {
+    const xPx = (x * this.nmToPixels) + this.centerX - (length / 2);
+    const yPx = (y * this.nmToPixels) + this.centerY - (length / 2);
+
+    if (clearBackground) {
+      this.ctx.clearRect(xPx, yPx, length, length);
+    }
+
+    this.ctx.lineWidth = strokeWidth;
+    this.ctx.strokeStyle = color;
+
+    this.ctx.strokeRect(xPx, yPx, length, length);
+  }
+
+  drawFullSquare(x, y, length, color = 'black') {
     const xPx = (x * this.nmToPixels) + this.centerX - (length / 2);
     const yPx = (y * this.nmToPixels) + this.centerY - (length / 2);
 
     this.ctx.fillStyle = color;
 
     this.ctx.fillRect(xPx, yPx, length, length);
+  }
+
+  drawCircle(x, y, diameter, strokeWidth = 2, color = 'black', clearBackground = false) {
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    if (clearBackground) {
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(xPx, yPx, diameter / 2, 0, 2 * Math.PI);
+      this.ctx.clip();
+      this.ctx.clearRect(xPx - diameter / 2, yPx - diameter / 2, diameter, diameter);
+      this.ctx.restore();
+    }
+
+    this.ctx.lineWidth = strokeWidth;
+    this.ctx.strokeStyle = color;
+    this.ctx.beginPath();
+    this.ctx.arc(xPx, yPx, diameter / 2, 0, 2 * Math.PI);
+    this.ctx.stroke();
   }
 
   drawPolygon(corners, color, strokeWidth = 1, type = 'simple', fillColor = false) {
@@ -554,6 +602,76 @@ class MapDrawUtils {
     this.ctx.setLineDash([]);
   }
 
+  drawLegMarkers(startX, startY, endX, endY, tickIntervalPx, labelFn, color = 'black', side = 1, startMargin = 0, endMargin = 0) {
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const legLengthPx = Math.hypot(dx, dy);
+    if (legLengthPx < tickIntervalPx) return;
+
+    const ux = dx / legLengthPx;
+    const uy = dy / legLengthPx;
+    const rx = uy * side;
+    const ry = -ux * side;
+
+    const tickLength = 15;
+    let labelOffset = 19;
+
+    let textAngle = Math.atan2(ry, rx);
+    let textAlign = 'left';
+    const P4 = Math.PI / 4;
+    if (Math.abs(textAngle) > 3 * P4) {
+      textAngle -= Math.PI;
+      textAlign = 'right';
+    } else if (textAngle > P4) {
+      textAngle -= Math.PI / 2;
+      textAlign = 'center';
+      labelOffset = 26;
+    } else if (textAngle > -P4) {
+      textAlign = 'left';
+    } else {
+      textAngle += Math.PI / 2;
+      textAlign = 'center';
+      labelOffset = 26;
+    }
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.font = '20px sans-serif';
+    this.ctx.fillStyle = color;
+    this.ctx.textAlign = textAlign;
+    this.ctx.textBaseline = 'middle';
+
+    let d = tickIntervalPx;
+    let tickIndex = 1;
+
+    while (d < legLengthPx) {
+      if (d < startMargin || d > legLengthPx - endMargin) {
+        d += tickIntervalPx;
+        tickIndex++;
+        continue;
+      }
+      const tx = startX + ux * d;
+      const ty = startY + uy * d;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(tx, ty);
+      this.ctx.lineTo(tx + rx * tickLength, ty + ry * tickLength);
+      this.ctx.stroke();
+
+      this.ctx.save();
+      this.ctx.translate(tx + rx * labelOffset, ty + ry * labelOffset);
+      this.ctx.rotate(textAngle);
+      this.ctx.fillText(labelFn(tickIndex), 0, 0);
+      this.ctx.restore();
+
+      d += tickIntervalPx;
+      tickIndex++;
+    }
+
+    this.ctx.restore();
+  }
+
   drawRing(x, y, radius, color, strokeWidth = 1, fillColor = false) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
@@ -799,6 +917,19 @@ class MapDrawUtils {
     this.ctx.restore();
   }
 
+  drawTurnArc(x, y, radius, startAngle, endAngle, clockwise, color = 'black', lineWidth = 2) {
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.arc(xPx, yPx, radius, startAngle, endAngle, !clockwise);
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = lineWidth;
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
   drawGate(x, y, length, angle, color) {
     const lengthPx = length;
     const widthPx = (length / 2.5);
@@ -958,5 +1089,63 @@ class MapDrawUtils {
     this.ctx.stroke();
 
     this.ctx.restore();
+  }
+
+  drawImage(image, x, y, scale, rotation) {
+    const drawW = image.width * scale;
+    const drawH = image.height * scale;
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    this.ctx.rotate(rotation);
+    this.ctx.drawImage(image, -drawW / 2, -drawH / 2, drawW, drawH);
+    this.ctx.restore();
+  }
+
+  drawSelectionOutline(bounds, strokeWidth = 3, color = '#4af', drawAimingCross = false) {
+    bounds = bounds.slice(0, 4);
+    const pixelBounds = bounds.map(bound => ({
+      x: (bound.x * this.nmToPixels) + this.centerX,
+      y: (bound.y * this.nmToPixels) + this.centerY
+    }));
+
+    const padding = 4;
+    const cx = pixelBounds.reduce((sum, p) => sum + p.x, 0) / pixelBounds.length;
+    const cy = pixelBounds.reduce((sum, p) => sum + p.y, 0) / pixelBounds.length;
+    const paddedBounds = pixelBounds.map(p => {
+      const dx = p.x - cx;
+      const dy = p.y - cy;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      return { x: p.x + (dx / len) * padding, y: p.y + (dy / len) * padding };
+    });
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = strokeWidth;
+    this.ctx.setLineDash([2, 2]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(paddedBounds[0].x, paddedBounds[0].y);
+    for (let i = 1; i < paddedBounds.length; i++) {
+      this.ctx.lineTo(paddedBounds[i].x, paddedBounds[i].y);
+    }
+    this.ctx.closePath();
+    this.ctx.stroke();
+    this.ctx.restore();
+
+    this.ctx.setLineDash([0]);
+
+    if (drawAimingCross) {
+      this.ctx.strokeStyle = 'black';
+      this.ctx.lineWidth = 1;
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(pixelBounds[0].x, pixelBounds[0].y);
+      this.ctx.lineTo(pixelBounds[2].x, pixelBounds[2].y);
+      this.ctx.stroke();
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(pixelBounds[1].x, pixelBounds[1].y);
+      this.ctx.lineTo(pixelBounds[3].x, pixelBounds[3].y);
+      this.ctx.stroke();
+    }
   }
 }
