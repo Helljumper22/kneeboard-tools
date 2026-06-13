@@ -9,7 +9,8 @@ body .container .tabs-container .tabs {
         height: 100%;
 
         .sidebar-component-list-container,
-        .sidebar-component-container {
+        .sidebar-component-container,
+        .sidebar-edit-instructions-container {
           background: #2b2b2b;
           padding: 10px 20px;
           height: 100%;
@@ -175,6 +176,17 @@ body .container .tabs-container .tabs {
             .show-sub-component-button {
               margin: 10px 0 10px 0;
             }
+          }
+        }
+
+        .sidebar-edit-instructions-container {
+          &.hide {
+            display: none;
+          }
+
+          .sidebar-edit-instructions-text {
+            padding: 10px 5px;
+            line-height: 1.5;
           }
         }
       }

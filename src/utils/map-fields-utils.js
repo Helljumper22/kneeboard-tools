@@ -8,6 +8,7 @@ class MapFieldsUtils {
         this.componentContainer = $(tab).find('.sidebar-component-container');
         this.componentHeader = $(tab).find('.sidebar-component-header');
         this.componentDescription = $(tab).find('.sidebar-component-description');
+        this.editInstructionsContainer = $(tab).find('.sidebar-edit-instructions-container');
     }
 
     displayComponentListButtons() {
@@ -23,6 +24,23 @@ class MapFieldsUtils {
 
             $(this.componentListButtons).append(componentButton);
         });
+    }
+
+    showEditInstructions(text) {
+        $(this.menuContainer).addClass('hide');
+        $(this.componentContainer).addClass('hide');
+        $(this.editInstructionsContainer).removeClass('hide');
+        $(this.editInstructionsContainer).find('.sidebar-edit-instructions-text').text(text);
+        $(this.editInstructionsContainer).find('.sidebar-edit-instructions-back-button')
+            .off('click')
+            .on('click', () => this.tabConstructor.setSelectMode());
+    }
+
+    hideEditInstructions() {
+        if ($(this.editInstructionsContainer).hasClass('hide')) return;
+        $(this.editInstructionsContainer).addClass('hide');
+        $(this.menuContainer).addClass('hide');
+        $(this.componentContainer).removeClass('hide');
     }
 
     displayComponent(mapComponent) {
@@ -414,7 +432,7 @@ class MapFieldsUtils {
 
         const fieldDef = this.findFieldByPath(mapComponent, fieldId);
         if (fieldDef?.onChangeFunction) {
-            fieldDef.onChangeFunction(value, currentData, fieldId);
+            fieldDef.onChangeFunction(value, currentData, fieldId, event.target);
         }
 
         this.tabConstructor.saveComponentData(mapComponent, componentData);

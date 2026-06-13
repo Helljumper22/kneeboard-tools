@@ -113,10 +113,10 @@ class MapDrawUtils {
     this.ctx.fill();
   }
 
-  drawBaseLines(location, magneticDeclination, mapOrientation, color = false) {
-    const base_xPx = 60;
-    const base_yPx = 60;
-    const height = 60;
+  drawBaseLines(location, magneticDeclination, mapOrientation, color = false, size = 1) {
+    const base_xPx = 60 * size;
+    const base_yPx = 60 * size;
+    const height = 60 * size;
 
     let xPx = 0, yPx = 0;
     switch (location) {
@@ -138,12 +138,12 @@ class MapDrawUtils {
         break;
     }
 
-    this.ctx.font = `12px sans-serif`;
+    this.ctx.font = `${12 * size}px sans-serif`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
     this.ctx.strokeStyle = color ?? 'black';
     this.ctx.fillStyle = color ?? 'black';
-    this.ctx.lineWidth = 2;
+    this.ctx.lineWidth = 2 * size;
 
     this.ctx.save();
 
@@ -238,13 +238,9 @@ class MapDrawUtils {
     this.ctx.stroke();
   }
 
-  drawSquare(x, y, length, strokeWidth = 2, color = 'black', clearBackground = false) {
+  drawSquare(x, y, length, strokeWidth = 2, color = 'black') {
     const xPx = (x * this.nmToPixels) + this.centerX - (length / 2);
     const yPx = (y * this.nmToPixels) + this.centerY - (length / 2);
-
-    if (clearBackground) {
-      this.ctx.clearRect(xPx, yPx, length, length);
-    }
 
     this.ctx.lineWidth = strokeWidth;
     this.ctx.strokeStyle = color;
@@ -261,23 +257,68 @@ class MapDrawUtils {
     this.ctx.fillRect(xPx, yPx, length, length);
   }
 
-  drawCircle(x, y, diameter, strokeWidth = 2, color = 'black', clearBackground = false) {
+  drawCircle(x, y, diameter, strokeWidth = 2, color = 'black') {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
-
-    if (clearBackground) {
-      this.ctx.save();
-      this.ctx.beginPath();
-      this.ctx.arc(xPx, yPx, diameter / 2, 0, 2 * Math.PI);
-      this.ctx.clip();
-      this.ctx.clearRect(xPx - diameter / 2, yPx - diameter / 2, diameter, diameter);
-      this.ctx.restore();
-    }
 
     this.ctx.lineWidth = strokeWidth;
     this.ctx.strokeStyle = color;
     this.ctx.beginPath();
     this.ctx.arc(xPx, yPx, diameter / 2, 0, 2 * Math.PI);
+    this.ctx.stroke();
+  }
+
+  drawNavPoint(x, y, type, size, strokeWidth = 4, color = 'black', cornerRadius = 4) {
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    if (type === 'turning-point') {
+      const r = size / 2;
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(xPx, yPx, r, 0, 2 * Math.PI);
+      this.ctx.clip();
+      this.ctx.clearRect(xPx - r, yPx - r, size, size);
+      this.ctx.restore();
+
+      this.ctx.lineWidth = strokeWidth;
+      this.ctx.strokeStyle = color;
+      this.ctx.beginPath();
+      this.ctx.arc(xPx, yPx, r, 0, 2 * Math.PI);
+      this.ctx.stroke();
+      return;
+    }
+
+    const cr = Math.min(cornerRadius, size * 0.25);
+
+    const buildPath = () => {
+      this.ctx.beginPath();
+      if (type === 'initial-point') {
+        const half = size / 2;
+        this.ctx.roundRect(xPx - half, yPx - half, size, size, cr);
+      } else {
+        const h = size;
+        const triTop = { x: xPx, y: yPx - (2 * h / 3) };
+        const triBotR = { x: xPx + h / Math.sqrt(3), y: yPx + h / 3 };
+        const triBotL = { x: xPx - h / Math.sqrt(3), y: yPx + h / 3 };
+
+        this.ctx.moveTo((triBotL.x + triTop.x) / 2, (triBotL.y + triTop.y) / 2);
+        this.ctx.arcTo(triTop.x, triTop.y, triBotR.x, triBotR.y, cr);
+        this.ctx.arcTo(triBotR.x, triBotR.y, triBotL.x, triBotL.y, cr);
+        this.ctx.arcTo(triBotL.x, triBotL.y, triTop.x, triTop.y, cr);
+        this.ctx.closePath();
+      }
+    };
+
+    this.ctx.save();
+    buildPath();
+    this.ctx.clip();
+    this.ctx.clearRect(xPx - size, yPx - size, size * 2, size * 2);
+    this.ctx.restore();
+
+    this.ctx.lineWidth = strokeWidth;
+    this.ctx.strokeStyle = color;
+    buildPath();
     this.ctx.stroke();
   }
 
@@ -672,6 +713,108 @@ class MapDrawUtils {
     this.ctx.restore();
   }
 
+  _legHeadingGeometry(legStartX, legStartY, legEndX, legEndY, t, side) {
+    const dx = legEndX - legStartX;
+    const dy = legEndY - legStartY;
+    const legLen = Math.hypot(dx, dy);
+    if (legLen < 20) return null;
+
+    const ux = dx / legLen;
+    const uy = dy / legLen;
+    const rx = uy * side;
+    const ry = -ux * side;
+
+    let textAngle = Math.atan2(ry, rx);
+    const P4 = Math.PI / 4;
+    if (Math.abs(textAngle) > 3 * P4) textAngle -= Math.PI;
+    else if (textAngle > P4) textAngle -= Math.PI / 2;
+    else if (textAngle <= -P4) textAngle += Math.PI / 2;
+
+    const lx = legStartX + t * dx;
+    const ly = legStartY + t * dy;
+    const offsetDist = 26;
+    const px = lx + rx * offsetDist;
+    const py = ly + ry * offsetDist;
+
+    return { ux, uy, rx, ry, textAngle, px, py };
+  }
+
+  getLegHeadingBounds(legStartX, legStartY, legEndX, legEndY, headingText, t = 0.5, side = 1) {
+    const g = this._legHeadingGeometry(legStartX, legStartY, legEndX, legEndY, t, side);
+    if (!g) return [];
+
+    const fontSize = 20;
+    const pad = 4;
+
+    this.ctx.save();
+    this.ctx.font = `${fontSize}px sans-serif`;
+    const textWidth = this.ctx.measureText(headingText).width;
+    this.ctx.restore();
+
+    const hw = textWidth / 2 + pad;
+    const hh = fontSize / 2 + pad;
+    const cos = Math.cos(g.textAngle);
+    const sin = Math.sin(g.textAngle);
+
+    return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].map(([lx, ly]) => ({
+      x: g.px + lx * cos - ly * sin,
+      y: g.py + lx * sin + ly * cos,
+    }));
+  }
+
+  drawLegHeading(legStartX, legStartY, legEndX, legEndY, headingText, t = 0.5, side = 1, color = 'black') {
+    const g = this._legHeadingGeometry(legStartX, legStartY, legEndX, legEndY, t, side);
+    if (!g) return;
+
+    const { ux, uy, textAngle, px, py } = g;
+
+    const fontSize = 20;
+    const arrowSize = 10;
+    const gap = 4;
+
+    this.ctx.save();
+    this.ctx.translate(px, py);
+    this.ctx.rotate(textAngle);
+
+    this.ctx.font = `${fontSize}px sans-serif`;
+    this.ctx.fillStyle = color;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    const textWidth = this.ctx.measureText(headingText).width;
+    this.ctx.fillText(headingText, 0, 0);
+
+    // Travel direction projected onto the rotated text frame
+    const forwardX = ux * Math.cos(textAngle) + uy * Math.sin(textAngle);
+    const forwardY = -ux * Math.sin(textAngle) + uy * Math.cos(textAngle);
+
+    if (Math.abs(forwardX) >= Math.abs(forwardY)) {
+      // Arrow at the leading end of text (along-leg case)
+      const dir = forwardX > 0 ? 1 : -1;
+      const baseX = dir * (textWidth / 2 + gap);
+      const tipX = dir * (textWidth / 2 + gap + arrowSize);
+      this.ctx.beginPath();
+      this.ctx.moveTo(tipX, 0);
+      this.ctx.lineTo(baseX, -arrowSize / 2);
+      this.ctx.lineTo(baseX, arrowSize / 2);
+      this.ctx.closePath();
+      this.ctx.fill();
+    } else {
+      // Arrow above or below text (near-vertical leg case)
+      const arrowDir = forwardY > 0 ? 1 : -1;
+      const baseY = arrowDir * (fontSize / 2 + gap);
+      const tipY = arrowDir * (fontSize / 2 + gap + arrowSize);
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, tipY);
+      this.ctx.lineTo(-arrowSize / 2, baseY);
+      this.ctx.lineTo(arrowSize / 2, baseY);
+      this.ctx.closePath();
+      this.ctx.fill();
+    }
+
+    this.ctx.restore();
+  }
+
   drawRing(x, y, radius, color, strokeWidth = 1, fillColor = false) {
     const xPx = (x * this.nmToPixels) + this.centerX;
     const yPx = (y * this.nmToPixels) + this.centerY;
@@ -869,6 +1012,29 @@ class MapDrawUtils {
     this.ctx.restore();
   }
 
+  getTextBounds(x, y, text, fontSize, offsetDistance, offsetAngle, padding = 2) {
+    const xPx = (x * this.nmToPixels) + this.centerX;
+    const yPx = (y * this.nmToPixels) + this.centerY;
+
+    this.ctx.font = `${fontSize}px sans-serif`;
+    const textWidth = this.ctx.measureText(text).width;
+    const boxWidth = textWidth + padding * 2;
+    const boxHeight = fontSize + padding * 2;
+
+    const offsetX = offsetDistance * Math.cos(offsetAngle) + Math.abs(Math.cos(offsetAngle)) * (boxWidth / 2) * Math.cos(offsetAngle);
+    const offsetY = offsetDistance * Math.sin(offsetAngle) + Math.abs(Math.sin(offsetAngle)) * (boxHeight / 2) * Math.sin(offsetAngle);
+
+    const cx = xPx + offsetX;
+    const cy = yPx + offsetY;
+
+    return [
+      { x: cx - boxWidth / 2, y: cy - boxHeight / 2 },
+      { x: cx + boxWidth / 2, y: cy - boxHeight / 2 },
+      { x: cx + boxWidth / 2, y: cy + boxHeight / 2 },
+      { x: cx - boxWidth / 2, y: cy + boxHeight / 2 },
+    ];
+  }
+
   drawRacetrack(x, y, length, width, orientation, leftSide, color) {
     const nmToPx = this.nmToPixels;
     const lengthPx = length * nmToPx;
@@ -914,6 +1080,82 @@ class MapDrawUtils {
 
     this.ctx.closePath();
     this.ctx.stroke();
+    this.ctx.restore();
+  }
+
+  drawDirectDistanceMarkers(legStartX, legStartY, legEndX, legEndY, targetX, targetY, stepNm, nmToCanvasPx, color = 'black', side = 1, startMarginPx = 0, endMarginPx = 0) {
+    const dx = legEndX - legStartX;
+    const dy = legEndY - legStartY;
+    const legLenPx = Math.hypot(dx, dy);
+    if (legLenPx < 1) return;
+
+    const ux = dx / legLenPx;
+    const uy = dy / legLenPx;
+    const rx = uy * side;
+    const ry = -ux * side;
+
+    const tickLength = 15;
+    let labelOffset = 19;
+    let textAngle = Math.atan2(ry, rx);
+    let textAlign = 'left';
+    const P4 = Math.PI / 4;
+    if (Math.abs(textAngle) > 3 * P4) {
+      textAngle -= Math.PI; textAlign = 'right';
+    } else if (textAngle > P4) {
+      textAngle -= Math.PI / 2; textAlign = 'center'; labelOffset = 26;
+    } else if (textAngle > -P4) {
+      textAlign = 'left';
+    } else {
+      textAngle += Math.PI / 2; textAlign = 'center'; labelOffset = 26;
+    }
+
+    // Quadratic coefficients: |legStart + t*d - target|^2 = (k*stepNm*nmToCanvasPx)^2
+    const ex = legStartX - targetX;
+    const ey = legStartY - targetY;
+    const a = dx * dx + dy * dy;
+    const b2 = 2 * (ex * dx + ey * dy);
+
+    const distStartNm = Math.hypot(legStartX - targetX, legStartY - targetY) / nmToCanvasPx;
+    const distEndNm = Math.hypot(legEndX - targetX, legEndY - targetY) / nmToCanvasPx;
+    const kMin = Math.ceil(Math.min(distStartNm, distEndNm) / stepNm);
+    const kMax = Math.floor(Math.max(distStartNm, distEndNm) / stepNm);
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.font = '20px sans-serif';
+    this.ctx.fillStyle = color;
+    this.ctx.textAlign = textAlign;
+    this.ctx.textBaseline = 'middle';
+
+    for (let k = kMin; k <= kMax; k++) {
+      const rPx = k * stepNm * nmToCanvasPx;
+      const c = ex * ex + ey * ey - rPx * rPx;
+      const disc = b2 * b2 - 4 * a * c;
+      if (disc < 0) continue;
+      const sqrtD = Math.sqrt(disc);
+
+      for (const t of [(-b2 - sqrtD) / (2 * a), (-b2 + sqrtD) / (2 * a)]) {
+        if (t < 0 || t > 1) continue;
+        const dFromStart = t * legLenPx;
+        if (dFromStart < startMarginPx || dFromStart > legLenPx - endMarginPx) continue;
+
+        const tx = legStartX + t * dx;
+        const ty = legStartY + t * dy;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(tx, ty);
+        this.ctx.lineTo(tx + rx * tickLength, ty + ry * tickLength);
+        this.ctx.stroke();
+
+        this.ctx.save();
+        this.ctx.translate(tx + rx * labelOffset, ty + ry * labelOffset);
+        this.ctx.rotate(textAngle);
+        this.ctx.fillText(`${k * stepNm}`, 0, 0);
+        this.ctx.restore();
+      }
+    }
+
     this.ctx.restore();
   }
 

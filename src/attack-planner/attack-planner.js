@@ -7,6 +7,8 @@ const AttackPlannerMode = {
   DRAG_MAP: 'drag-map',
   EDIT_RULER: 'edit-ruler',
   DRAG_RULER: 'drag-ruler',
+  EDIT_LABEL: 'edit-label',
+  DRAG_LABEL: 'drag-label',
 };
 
 const NavPointType = {
@@ -36,6 +38,61 @@ class AttackPlanner {
       description: '',
       fields: [
         {
+          id: 'map-north-offset',
+          label: 'Map north offset (°)',
+          type: 'number',
+          default: 0,
+        },
+        {
+          id: 'magnetic-declination',
+          label: 'Magnetic declination (°)',
+          type: 'number',
+          default: 0,
+        },
+        {
+          id: 'map-north',
+          label: 'Map north',
+          type: 'select',
+          options: {
+            'magnetic': 'Magnetic',
+            'true': 'True',
+          },
+          default: 'magnetic',
+        },
+        {
+          id: 'overlay-opacity',
+          label: 'Overlay opacity',
+          type: 'range',
+          options: {
+            min: 0,
+            max: 50
+          },
+          default: 0,
+        },
+        {
+          id: 'upload-map',
+          label: 'Upload map',
+          type: 'button',
+          clickFunction: this.uploadBackgroundMap.bind(this)
+        },
+        {
+          id: 'edit-map',
+          label: 'Edit map',
+          type: 'button',
+          clickFunction: this.editBackgroundMap.bind(this)
+        },
+        {
+          id: 'rule-scale',
+          label: 'Rule scale (nm)',
+          type: 'number',
+        },
+        {
+          id: 'edit-scale',
+          label: 'Edit scale',
+          type: 'button',
+          clickFunction: this.editBackgroundScale.bind(this)
+        },
+        {
           id: 'x',
           label: 'x',
           type: 'hidden',
@@ -56,11 +113,6 @@ class AttackPlanner {
           type: 'hidden',
         },
         {
-          id: 'rule-scale',
-          label: 'Rule scale (nm)',
-          type: 'number',
-        },
-        {
           id: 'ruler-point-1',
           label: 'ruler-point-1',
           type: 'hidden',
@@ -75,27 +127,33 @@ class AttackPlanner {
           label: 'nm-per-image-pixel',
           type: 'hidden',
         },
-        {
-          id: 'upload-map',
-          label: 'Upload map',
-          type: 'button',
-          clickFunction: this.uploadBackgroundMap.bind(this)
-        },
-        {
-          id: 'edit-map',
-          label: 'Edit map',
-          type: 'button',
-          clickFunction: this.editBackgroundMap.bind(this)
-        },
-        {
-          id: 'edit-scale',
-          label: 'Edit scale',
-          type: 'button',
-          clickFunction: this.editBackgroundScale.bind(this)
-        }
       ],
-      drawFunction: this.drawBackgroundMap.bind(this)
+      drawFunction: this.drawBackgroundMap.bind(this),
     }, // Background map
+    {
+      id: 'base-lines',
+      label: 'Base Lines',
+      fields: [
+        {
+          id: 'display',
+          label: 'Display',
+          type: 'checkbox',
+        },
+        {
+          id: 'location',
+          label: 'Location',
+          type: 'select',
+          options: {
+            'top-left': 'Top left',
+            'top-right': 'Top right',
+            'bottom-right': 'Bottom right',
+            'bottom-left': 'Bottom left',
+          },
+          default: 'top-left',
+        },
+      ],
+      drawFunction: this.drawBaseLines.bind(this)
+    }, // Base Lines
     {
       id: 'flight-plans',
       label: 'Flight plans',
@@ -106,6 +164,7 @@ class AttackPlanner {
           label: 'Flight plans',
           type: 'multiple',
           options: {
+            deletable: true,
             addSubComponentButton: 'Add flight plan',
           },
           fields: [
@@ -123,6 +182,17 @@ class AttackPlanner {
                 sortable: true
               },
               fields: [
+                {
+                  id: 'name',
+                  label: 'Name',
+                  type: 'text',
+                },
+                {
+                  id: 'name-position',
+                  label: 'name-position',
+                  type: 'hidden',
+                  default: Math.PI,
+                },
                 {
                   id: 'ground-speed',
                   label: 'Ground speed (kt)',
@@ -154,6 +224,23 @@ class AttackPlanner {
                   type: 'number',
                   default: 2,
                   onChangeFunction: this.syncBankAngleLoadFactor.bind(this),
+                },
+                {
+                  id: 'show-leg-heading',
+                  label: 'Show leg heading',
+                  type: 'checkbox',
+                },
+                {
+                  id: 'leg-heading-position',
+                  label: 'leg-heading-position',
+                  type: 'hidden',
+                  default: 0.5,
+                },
+                {
+                  id: 'leg-heading-side',
+                  label: 'leg-heading-side',
+                  type: 'hidden',
+                  default: 1,
                 },
                 {
                   id: 'leg-information',
@@ -203,7 +290,7 @@ class AttackPlanner {
           ],
         }
       ],
-      drawFunction: this.drawFlightPlan.bind(this)
+      drawFunction: this.drawFlightPlan.bind(this),
     }, // Flight plan
   ]
 
@@ -214,6 +301,8 @@ class AttackPlanner {
     this.utils = new Utils();
     this.mapDrawUtils = new MapDrawUtils(this.attackPlannerCanvas);
     this.backgroundMapDrawUtils = new MapDrawUtils(this.attackPlannerBackgroundCanvas);
+    this.attackPlannerUtils = new AttackPlannerUtils(this, this.mapDrawUtils, this.backgroundMapDrawUtils);
+    this.flightPlanUtils = new AttackPlannerFlightPlanUtils(this.mapDrawUtils, this.attackPlannerUtils, this.utils);
     this.mapFieldsUtils = new MapFieldsUtils(this, $('.tab[attr-tab="attack-planner-tab"]'), false);
 
     this.height = 1056;
@@ -233,6 +322,9 @@ class AttackPlanner {
     this.darkMode = false;
     this.attackPlannerMode = AttackPlannerMode.SELECT;
     this.selectedComponentPath = null;
+    this.selectedLabel = null;
+    this.selectedLabelPath = null;
+    this.pendingLabels = [];
     this.nmPerImagePixel = null;
 
     this.init();
@@ -269,8 +361,10 @@ class AttackPlanner {
 
   setSelectMode() {
     this.selectedComponentPath = null;
+    this.selectedLabel = null;
 
     this.attackPlannerMode = AttackPlannerMode.SELECT;
+    this.mapFieldsUtils.hideEditInstructions();
 
     console.log('SELECT MODE');
 
@@ -284,21 +378,57 @@ class AttackPlanner {
 
     this.update();
 
-    const selectableComponents = this.getMapComponents(this.getComponentData()).map(mc => {
-      const cp = this.imageToCanvas(mc.component.x, mc.component.y);
-      return { x: cp.x, y: cp.y, size: mc.component.size / 1.5 };
+    const selectableComponents = this.getMapComponents(this.getComponentData()).flatMap(mc => {
+      const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
+      const items = [{ x: cp.x, y: cp.y, size: mc.component.size / 1.5 }];
+      if (mc.component.type !== NavPointType.TURN && mc.component.name) {
+        const labelBounds = this.getComponentLabelBounds(mc.component);
+        if (labelBounds.length) items.push({ points: labelBounds });
+      }
+      return items;
     });
+
+    const headingHoverables = this.pendingLabels
+      .filter(l => l.type === 'heading-label')
+      .flatMap(l => {
+        const t = l.navPoint['leg-heading-position'] ?? 0.5;
+        const side = l.navPoint['leg-heading-side'] ?? 1;
+        const bounds = this.mapDrawUtils.getLegHeadingBounds(l.legStart.x, l.legStart.y, l.legEnd.x, l.legEnd.y, l.headingText, t, side);
+        return bounds.length ? [{ points: bounds }] : [];
+      });
 
     $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
       const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-
-      this.updateCursor(pos.x, pos.y, selectableComponents);
+      this.updateCursor(pos.x, pos.y, [...selectableComponents, ...headingHoverables]);
     });
   }
 
   setEditMode(clickX, clickY) {
+    for (let i = this.pendingLabels.length - 1; i >= 0; i--) {
+      const label = this.pendingLabels[i];
+      if (label.type !== 'heading-label') continue;
+      const t = label.navPoint['leg-heading-position'] ?? 0.5;
+      const side = label.navPoint['leg-heading-side'] ?? 1;
+      const bounds = this.mapDrawUtils.getLegHeadingBounds(label.legStart.x, label.legStart.y, label.legEnd.x, label.legEnd.y, label.headingText, t, side);
+      if (bounds.length && this.utils.isPointWithinArea({ x: clickX, y: clickY }, bounds)) {
+        this.setLabelDragMode(label, label.componentPath, clickX, clickY);
+        return;
+      }
+    }
+
     const mapComponents = this.getMapComponents(this.getComponentData());
+
+    for (let i = mapComponents.length - 1; i >= 0; i--) {
+      const { component, path } = mapComponents[i];
+      if (component.type === NavPointType.TURN || !component.name) continue;
+      const labelBounds = this.getComponentLabelBounds(component);
+      if (labelBounds.length && this.utils.isPointWithinArea({ x: clickX, y: clickY }, labelBounds)) {
+        this.setLabelDragMode(component, path, clickX, clickY);
+        return;
+      }
+    }
+
     for (let i = mapComponents.length - 1; i >= 0; i--) {
       const componentBounds = this.getObjectBounds(mapComponents[i].component);
       if (this.utils.isPointWithinArea({ x: clickX, y: clickY }, componentBounds)) {
@@ -345,7 +475,7 @@ class AttackPlanner {
   }
 
   setDragMode(component, componentPath, startX, startY) {
-    if (this.attackPlannerMode != AttackPlannerMode.SELECT && this.attackPlannerMode != AttackPlannerMode.EDIT) {
+    if (this.attackPlannerMode != AttackPlannerMode.SELECT && this.attackPlannerMode != AttackPlannerMode.EDIT && this.attackPlannerMode != AttackPlannerMode.EDIT_LABEL) {
       return;
     }
 
@@ -355,16 +485,21 @@ class AttackPlanner {
 
     $(this.attackPlannerCanvas).css('cursor', 'grabbing');
 
-    this.mapFieldsUtils.displayComponent(this.mapComponentList.find(mapComponent => mapComponent.id == componentPath[0]));
+    const dragMapComponent = this.mapComponentList.find(mapComponent => mapComponent.id == componentPath[0]);
+    this.mapFieldsUtils.displayComponent(dragMapComponent);
     this.mapFieldsUtils.selectField(this.selectedComponentPath);
+    const dragInstructions = this.attackPlannerUtils.getInstructionText(AttackPlannerMode.DRAG);
+    if (dragInstructions) {
+      this.mapFieldsUtils.showEditInstructions(dragInstructions);
+    }
 
     let lastCanvasPos = { x: startX, y: startY };
 
     $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
       const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-      const curr = this.canvasToImage(canvasPos.x, canvasPos.y);
-      const last = this.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
+      const curr = this.attackPlannerUtils.canvasToImage(canvasPos.x, canvasPos.y);
+      const last = this.attackPlannerUtils.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
 
       const precision = event.altKey ? 0.1 : 1;
       component.x += (curr.x - last.x) * precision;
@@ -402,7 +537,7 @@ class AttackPlanner {
       this.editObject(component, componentPath);
 
       const hoverables = this.getMapComponents(this.getComponentData()).map(mc => {
-        const cp = this.imageToCanvas(mc.component.x, mc.component.y);
+        const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
         return { x: cp.x, y: cp.y, size: mc.component.size / 1.5 };
       });
 
@@ -413,6 +548,138 @@ class AttackPlanner {
         const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
         this.updateCursor(pos.x, pos.y, hoverables);
       });
+    });
+  }
+
+  setLabelDragMode(component, componentPath, startX, startY) {
+    this.attackPlannerMode = AttackPlannerMode.DRAG_LABEL;
+    this.selectedLabel = component;
+    this.selectedLabelPath = componentPath;
+
+    const labelMapComponent = this.mapComponentList.find(mc => mc.id === 'flight-plans');
+    this.mapFieldsUtils.displayComponent(labelMapComponent);
+    this.mapFieldsUtils.selectField(componentPath);
+
+    $(this.attackPlannerCanvas).css('cursor', 'grabbing');
+
+    if (component.type === 'heading-label') {
+      const instructions = 'Drag to reposition the leg heading along the leg and across sides.';
+      this.mapFieldsUtils.showEditInstructions(instructions);
+
+      const { legStart, legEnd, navPoint } = component;
+      const dx = legEnd.x - legStart.x;
+      const dy = legEnd.y - legStart.y;
+      const legLen = Math.hypot(dx, dy);
+      const ux = dx / legLen;
+      const uy = dy / legLen;
+
+      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
+        const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
+        const mx = canvasPos.x - legStart.x;
+        const my = canvasPos.y - legStart.y;
+        navPoint['leg-heading-position'] = Math.max(0.05, Math.min(0.95, (mx * ux + my * uy) / legLen));
+        navPoint['leg-heading-side'] = (mx * uy - my * ux) >= 0 ? 1 : -1;
+
+        let mapComponent = this.getComponentData(componentPath[0]);
+        const recurse = (currentComponent, pathIndex) => {
+          if (componentPath[pathIndex] !== undefined) {
+            const key = componentPath[pathIndex];
+            if (currentComponent[key] !== undefined) {
+              currentComponent[key] = recurse(currentComponent[key], pathIndex + 1);
+            }
+            return currentComponent;
+          }
+          return navPoint;
+        };
+        mapComponent = recurse(mapComponent, 1);
+        this.saveComponentData(componentPath[0], mapComponent);
+        this.update();
+      });
+    } else {
+      this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.DRAG_LABEL));
+
+      const navPointCanvasPos = this.attackPlannerUtils.imageToCanvas(component.x, component.y);
+
+      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
+        const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
+        const mouseAngle = Math.atan2(canvasPos.y - navPointCanvasPos.y, canvasPos.x - navPointCanvasPos.x);
+        component['name-position'] = ((mouseAngle * 180 / Math.PI) + 90 + 360) % 360;
+
+        let mapComponent = this.getComponentData(componentPath[0]);
+        const recurse = (currentComponent, pathIndex) => {
+          if (componentPath[pathIndex] !== undefined) {
+            const key = componentPath[pathIndex];
+            if (currentComponent[key] !== undefined) {
+              currentComponent[key] = recurse(currentComponent[key], pathIndex + 1);
+            }
+            return currentComponent;
+          }
+          return component;
+        };
+        mapComponent = recurse(mapComponent, 1);
+        this.saveComponentData(componentPath[0], mapComponent);
+        this.update();
+      });
+    }
+
+    $(this.attackPlannerCanvas).off('mouseup').on('mouseup', () => {
+      $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
+      this.editLabel(component, componentPath);
+    });
+  }
+
+  editLabel(component, componentPath) {
+    this.attackPlannerMode = AttackPlannerMode.EDIT_LABEL;
+
+    this.update();
+
+    const getBounds = () => {
+      if (component.type === 'heading-label') {
+        const t = component.navPoint['leg-heading-position'] ?? 0.5;
+        const side = component.navPoint['leg-heading-side'] ?? 1;
+        return this.mapDrawUtils.getLegHeadingBounds(component.legStart.x, component.legStart.y, component.legEnd.x, component.legEnd.y, component.headingText, t, side);
+      }
+      return this.getComponentLabelBounds(component);
+    };
+
+    const getOtherHoverables = () => [
+      ...this.getMapComponents(this.getComponentData()).flatMap(mc => {
+        const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
+        const items = [{ x: cp.x, y: cp.y, size: mc.component.size / 1.5 }];
+        if (mc.component.type !== NavPointType.TURN && mc.component.name) {
+          const lb = this.getComponentLabelBounds(mc.component);
+          if (lb.length) items.push({ points: lb });
+        }
+        return items;
+      }),
+      ...this.pendingLabels
+        .filter(l => l.type === 'heading-label')
+        .flatMap(l => {
+          const t = l.navPoint['leg-heading-position'] ?? 0.5;
+          const side = l.navPoint['leg-heading-side'] ?? 1;
+          const bounds = this.mapDrawUtils.getLegHeadingBounds(l.legStart.x, l.legStart.y, l.legEnd.x, l.legEnd.y, l.headingText, t, side);
+          return bounds.length ? [{ points: bounds }] : [];
+        }),
+    ];
+
+    $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
+      const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
+      const labelBounds = getBounds();
+      if (labelBounds.length && this.utils.isPointWithinArea({ x: pos.x, y: pos.y }, labelBounds)) {
+        $(this.attackPlannerCanvas).css('cursor', 'pointer');
+      } else {
+        this.updateCursor(pos.x, pos.y, getOtherHoverables());
+      }
+    });
+
+    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
+      const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
+      const labelBounds = getBounds();
+      if (labelBounds.length && this.utils.isPointWithinArea({ x: clickPos.x, y: clickPos.y }, labelBounds)) {
+        this.setLabelDragMode(component, componentPath, clickPos.x, clickPos.y);
+      } else {
+        this.setEditMode(clickPos.x, clickPos.y);
+      }
     });
   }
 
@@ -436,13 +703,38 @@ class AttackPlanner {
     this.mapDrawUtils.setCenter(this.width / 2, this.height / 2);
 
     const bgData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id === 'background-map'))
-    this.nmPerImagePixel = this.computeRulerCalibration(bgData['ruler-point-1'], bgData['ruler-point-2'], bgData['rule-scale']);
+    this.nmPerImagePixel = this.attackPlannerUtils.computeRulerCalibration(bgData['ruler-point-1'], bgData['ruler-point-2'], bgData['rule-scale']);
+
+    const mapNorthOffset = bgData['map-north-offset'] ?? 0;
+    const imageRotationDeg = (bgData.rotation ?? 0) * (180 / Math.PI);
+    const mapOrientation = mapNorthOffset + imageRotationDeg;
+    const magneticDeclination = bgData['magnetic-declination'] ?? 0;
+    const trueNorth = bgData['map-north'] === 'true';
+
+    this.pendingLabels = [];
 
     this.mapComponentList.forEach(mapComponent => {
       if (mapComponent.id != 'background-map') {
-        mapComponent.drawFunction(mapComponent);
+        mapComponent.drawFunction(mapComponent, mapOrientation, magneticDeclination, trueNorth);
       }
     });
+
+    const fillColor = this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0];
+    const textColor = this.darkMode ? this.backgroundColor[0] : this.backgroundColor[1];
+    const borderColor = this.darkMode ? this.backgroundColor[0] : this.backgroundColor[1];
+    const lineColor = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
+    for (const label of this.pendingLabels) {
+      if (label.type === 'heading-label') {
+        const t = label.navPoint['leg-heading-position'] ?? 0.5;
+        const side = label.navPoint['leg-heading-side'] ?? 1;
+        this.mapDrawUtils.drawLegHeading(label.legStart.x, label.legStart.y, label.legEnd.x, label.legEnd.y, label.headingText, t, side, lineColor);
+      } else {
+        const { x, y, navPoint } = label;
+        const offsetAngle = this.getComponentLabelOffsetAngle(navPoint);
+        const offsetDistance = (navPoint.size ?? 30) / 2 + 12;
+        this.mapDrawUtils.drawText(x, y, navPoint.name, 'square', 18, offsetDistance, offsetAngle, 0, 2, fillColor, textColor, borderColor);
+      }
+    }
 
     switch (this.attackPlannerMode) {
       case AttackPlannerMode.EDIT:
@@ -464,7 +756,7 @@ class AttackPlanner {
       case AttackPlannerMode.EDIT_MAP:
       case AttackPlannerMode.DRAG_MAP:
         if (this.backgroundImageObject) {
-          const { x, y, scale, rotation } = this.getBackgroundTransform();
+          const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
           const halfW = (this.backgroundImageObject.width * scale) / 2;
           const halfH = (this.backgroundImageObject.height * scale) / 2;
           const cos = Math.cos(rotation);
@@ -484,11 +776,41 @@ class AttackPlanner {
         break;
       case AttackPlannerMode.EDIT_RULER:
       case AttackPlannerMode.DRAG_RULER:
-        const rulerPoint1 = bgData['ruler-point-1'] ? this.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y) : null;
-        const rulerPoint2 = bgData['ruler-point-2'] ? this.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y) : null;
+        const rulerPoint1 = bgData['ruler-point-1'] ? this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y) : null;
+        const rulerPoint2 = bgData['ruler-point-2'] ? this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y) : null;
         this.drawRuler(rulerPoint1, rulerPoint2);
 
         break;
+      case AttackPlannerMode.EDIT_LABEL:
+      case AttackPlannerMode.DRAG_LABEL:
+        if (this.selectedLabel) {
+          if (this.selectedLabel.type === 'heading-label') {
+            const { legStart, legEnd, headingText, navPoint } = this.selectedLabel;
+            const t = navPoint['leg-heading-position'] ?? 0.5;
+            const side = navPoint['leg-heading-side'] ?? 1;
+            const bounds = this.mapDrawUtils.getLegHeadingBounds(legStart.x, legStart.y, legEnd.x, legEnd.y, headingText, t, side);
+            if (bounds.length) {
+              this.mapDrawUtils.drawSelectionOutline(bounds, 2, '#4af', false);
+            }
+          } else {
+            const labelBounds = this.getComponentLabelBounds(this.selectedLabel);
+            if (labelBounds.length) {
+              this.mapDrawUtils.drawSelectionOutline(labelBounds, 2, '#4af', false);
+            }
+          }
+        }
+        break;
+    }
+
+
+    const backgroundMapData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'background-map'));
+    if (backgroundMapData['overlay-opacity'] && backgroundMapData['overlay-opacity'] > 0) {
+      const alpha = (backgroundMapData['overlay-opacity']) / 100;
+      const backgroundColor = this.darkMode
+        ? `rgba(0, 0, 0, ${alpha})`
+        : `rgba(255, 255, 255, ${alpha})`;
+
+      this.mapDrawUtils.drawBackground(backgroundColor);
     }
   }
 
@@ -541,13 +863,15 @@ class AttackPlanner {
 
     this.attackPlannerMode = AttackPlannerMode.EDIT_MAP;
     const bgMapComponent = this.mapComponentList.find(mc => mc.id === 'background-map');
+    this.mapFieldsUtils.displayComponent(bgMapComponent);
+    this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.EDIT_MAP));
 
     const bindMapHoverCursor = () => {
       $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
         if (this.attackPlannerMode !== AttackPlannerMode.EDIT_MAP) return;
         const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-        const { x, y, scale, rotation } = this.getBackgroundTransform();
+        const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(this.getComponentData(bgMapComponent), this.backgroundImageObject);
         const halfW = this.backgroundImageObject.width * scale / 2;
         const halfH = this.backgroundImageObject.height * scale / 2;
         const cos = Math.cos(rotation), sin = Math.sin(rotation);
@@ -560,8 +884,9 @@ class AttackPlanner {
 
     $(this.attackPlannerCanvas).off('wheel').on('wheel', (event) => {
       event.preventDefault();
-      const transform = this.getBackgroundTransform();
       const bgData = this.getComponentData(bgMapComponent) || {};
+
+      const transform = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
       bgData.x = transform.x;
       bgData.y = transform.y;
 
@@ -582,15 +907,17 @@ class AttackPlanner {
       this.attackPlannerMode = AttackPlannerMode.DRAG_MAP;
       $(this.attackPlannerCanvas).css('cursor', 'grabbing');
 
+      const bgData = this.getComponentData(bgMapComponent) || {};
+
       const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const transform = this.getBackgroundTransform();
+      const transform = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
       const dragOffset = { x: clickPos.x - transform.x, y: clickPos.y - transform.y };
 
       $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
         console.log('DRAG MAP MODE');
 
         const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        const bgData = this.getComponentData(bgMapComponent) || {};
+
         bgData.x = pos.x - dragOffset.x;
         bgData.y = pos.y - dragOffset.y;
         bgData.scale = bgData.scale ?? transform.scale;
@@ -603,9 +930,13 @@ class AttackPlanner {
       $(this.attackPlannerCanvas).off('mouseup').on('mouseup', (event) => {
         $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
         this.attackPlannerMode = AttackPlannerMode.EDIT_MAP;
+
         bindMapHoverCursor();
+
+        const bgData = this.getComponentData(bgMapComponent) || {};
+
         const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        const { x, y, scale, rotation } = this.getBackgroundTransform();
+        const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
         const halfW = this.backgroundImageObject.width * scale / 2;
         const halfH = this.backgroundImageObject.height * scale / 2;
         const cos = Math.cos(rotation), sin = Math.sin(rotation);
@@ -625,12 +956,14 @@ class AttackPlanner {
 
     this.attackPlannerMode = AttackPlannerMode.EDIT_RULER;
     const bgMapComponent = this.mapComponentList.find(mc => mc.id === 'background-map');
+    this.mapFieldsUtils.displayComponent(bgMapComponent);
+    this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.EDIT_RULER));
     const bgData = this.getComponentData(bgMapComponent) || {};
 
     // Initialize the points to their default positions.
     if (!bgData['ruler-point-1'] || !bgData['ruler-point-2']) {
-      bgData['ruler-point-1'] = bgData['ruler-point-1'] ?? this.canvasToImage(this.width / 2, this.height / 2 - 50);
-      bgData['ruler-point-2'] = bgData['ruler-point-2'] ?? this.canvasToImage(this.width / 2, this.height / 2 + 50);
+      bgData['ruler-point-1'] = bgData['ruler-point-1'] ?? this.attackPlannerUtils.canvasToImage(this.width / 2, this.height / 2 - 50);
+      bgData['ruler-point-2'] = bgData['ruler-point-2'] ?? this.attackPlannerUtils.canvasToImage(this.width / 2, this.height / 2 + 50);
 
       this.saveComponentData(bgMapComponent, bgData);
     }
@@ -639,15 +972,15 @@ class AttackPlanner {
       if (this.attackPlannerMode !== AttackPlannerMode.EDIT_RULER) return;
       const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-      const ruler1CanvasPosition = this.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-      const ruler2CanvasPosition = this.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
+      const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
+      const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
 
       this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
     });
 
     $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
       const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const hitPoint = this.getRulerPointHit(clickPos.x, clickPos.y, bgData['ruler-point-1'], bgData['ruler-point-2']);
+      const hitPoint = this.attackPlannerUtils.getRulerPointHit(clickPos.x, clickPos.y, bgData['ruler-point-1'], bgData['ruler-point-2']);
 
       let lastCanvasPos = { x: clickPos.x, y: clickPos.y };
 
@@ -661,8 +994,8 @@ class AttackPlanner {
         $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
           const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-          const curr = this.canvasToImage(canvasPos.x, canvasPos.y);
-          const last = this.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
+          const curr = this.attackPlannerUtils.canvasToImage(canvasPos.x, canvasPos.y);
+          const last = this.attackPlannerUtils.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
 
           const precision = event.altKey ? 0.1 : 1;
           if (hitPoint === 1) {
@@ -684,23 +1017,23 @@ class AttackPlanner {
           $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
           this.attackPlannerMode = AttackPlannerMode.EDIT_RULER;
 
-          bgData['nm-per-image-pixel'] = this.computeRulerCalibration(bgData['ruler-point-1'], bgData['ruler-point-2'], bgData['rule-scale']);
+          bgData['nm-per-image-pixel'] = this.attackPlannerUtils.computeRulerCalibration(bgData['ruler-point-1'], bgData['ruler-point-2'], bgData['rule-scale']);
 
           this.saveComponentData(bgMapComponent, bgData);
 
           this.update();
 
           const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-          const ruler1CanvasPosition = this.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-          const ruler2CanvasPosition = this.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
+          const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
+          const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
           this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
 
           $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
             if (this.attackPlannerMode !== AttackPlannerMode.EDIT_RULER) return;
             const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
 
-            const ruler1CanvasPosition = this.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-            const ruler2CanvasPosition = this.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
+            const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
+            const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
 
             this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
           });
@@ -733,7 +1066,7 @@ class AttackPlanner {
         $(this.attackPlannerCanvas)[0]
       );
 
-      const imageRelativePosition = this.canvasToImage(clickPosition.x, clickPosition.y)
+      const imageRelativePosition = this.attackPlannerUtils.canvasToImage(clickPosition.x, clickPosition.y)
 
       const navPointsField = component.fields.find(f => f.id === 'nav-points');
       if (!navPointsField) return;
@@ -763,7 +1096,7 @@ class AttackPlanner {
   drawBackgroundMap() {
     this.backgroundMapDrawUtils.clearCanvas();
     if (this.backgroundImageObject) {
-      const { x, y, scale, rotation } = this.getBackgroundTransform();
+      const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(this.getComponentData(this.mapComponentList.find(mc => mc.id === 'background-map')), this.backgroundImageObject);
       this.backgroundMapDrawUtils.drawImage(this.backgroundImageObject, x, y, scale, rotation);
     }
   }
@@ -783,231 +1116,84 @@ class AttackPlanner {
     }
   }
 
-  drawFlightPlan(component) {
+  drawBaseLines(component, mapOrientation, magneticDeclination, trueNorth) {
+    const baselineData = this.getComponentData(component);
+
+    if (baselineData && baselineData.display) {
+      this.mapDrawUtils.drawBaseLines(
+        baselineData['location'] ?? 'top-left',
+        this.utils.isNumber(magneticDeclination) ? magneticDeclination : 0,
+        mapOrientation,
+        this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0],
+        1.2
+      );
+    }
+  }
+
+  drawFlightPlan(component, mapOrientation, magneticDeclination, trueNorth) {
     const flightPlansData = this.getComponentData(component);
+    if (!flightPlansData?.['flight-plans']?.length) return;
 
-    if (flightPlansData && flightPlansData['flight-plans']?.length > 0) {
+    flightPlansData['flight-plans'].forEach((flightPlanData, fpIdx) => {
+      const navPoints = flightPlanData['nav-points'];
+      if (!navPoints?.length) return;
 
-      flightPlansData['flight-plans'].forEach(flightPlanData => {
-        if (flightPlanData['nav-points'] && flightPlanData['nav-points'].length > 0) {
-          const navPoints = flightPlanData['nav-points'];
+      const bgData = this.getComponentData(this.mapComponentList.find(mc => mc.id === 'background-map'));
+      const { scale } = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
+      const turnTangents = this.flightPlanUtils.computeTurnTangents(navPoints, this.nmPerImagePixel, scale);
 
-          // Pass 1: pre-compute turn tangents for all TURN nav points.
-          const turnTangents = {};
-          if (this.nmPerImagePixel) {
-            const { scale } = this.getBackgroundTransform();
+      for (let i = 0; i < navPoints.length; i++) {
+        const navPoint = navPoints[i];
+        const nextNavPoint = navPoints[i + 1];
+        const navPointCanvasPosition = this.attackPlannerUtils.imageToCanvas(navPoint.x, navPoint.y);
 
-            for (let i = 0; i < navPoints.length; i++) {
-              const navPoint = navPoints[i];
-
-              const prevNavPoint = navPoints[i - 1];
-              const nextNavPoint = navPoints[i + 1];
-              if (!prevNavPoint || !nextNavPoint) continue;
-
-              const prev = this.imageToCanvas(prevNavPoint.x, prevNavPoint.y);
-              const curr = this.imageToCanvas(navPoint.x, navPoint.y);
-              const next = this.imageToCanvas(nextNavPoint.x, nextNavPoint.y);
-
-              // If the previous nav point has a computed arc, the aircraft exits at T2 — use that as the effective incoming origin.
-              const prevExit = turnTangents[i - 1] ? turnTangents[i - 1].T2 : prev;
-              const lenIn = Math.hypot(curr.x - prevExit.x, curr.y - prevExit.y);
-              const lenOut = Math.hypot(next.x - curr.x, next.y - curr.y);
-              const dIn = { x: (curr.x - prevExit.x) / lenIn, y: (curr.y - prevExit.y) / lenIn };
-              const dOut = { x: (next.x - curr.x) / lenOut, y: (next.y - curr.y) / lenOut };
-
-              const delta = Math.atan2(
-                dIn.x * dOut.y - dIn.y * dOut.x,
-                dIn.x * dOut.x + dIn.y * dOut.y
-              );
-
-              const bankAngleDeg = Math.max(30, Math.min(90, parseFloat(navPoint['bank-angle']) || 60));
-              const V = (navPoint['ground-speed'] ?? 0) * 0.5144;
-              const R_nm = (V * V) / (9.81 * Math.tan(bankAngleDeg * Math.PI / 180)) / 1852;
-              const R = R_nm / this.nmPerImagePixel * scale;
-              if (R <= 0) continue;
-
-              const clockwise = delta > 0;
-              const perpSign = clockwise ? 1 : -1;
-
-              if (navPoint['overfly']) {
-                const T1 = curr;
-                const center = {
-                  x: curr.x + (-dIn.y * perpSign) * R,
-                  y: curr.y + (dIn.x * perpSign) * R,
-                };
-
-                // Iteratively refine T2: start with dOut (curr→next), then correct using the
-                // actual T2→next direction until convergence (removes the kink at the arc exit).
-                let dOutIter = dOut;
-                let T2 = { x: 0, y: 0 };
-                for (let iter = 0; iter < 4; iter++) {
-                  T2 = {
-                    x: center.x + dOutIter.y * perpSign * R,
-                    y: center.y - dOutIter.x * perpSign * R,
-                  };
-                  const dx2 = next.x - T2.x, dy2 = next.y - T2.y;
-                  const len2 = Math.hypot(dx2, dy2);
-                  if (len2 < 1e-6) break;
-                  dOutIter = { x: dx2 / len2, y: dy2 / len2 };
-                }
-
-                const tangentLengthOut = Math.hypot(T2.x - curr.x, T2.y - curr.y);
-
-                if (tangentLengthOut <= lenOut * 0.95) {
-                  turnTangents[i] = {
-                    T1, T2, center, R,
-                    tangentLengthIn: 0,
-                    tangentLengthOut,
-                    startAngle: Math.atan2(T1.y - center.y, T1.x - center.x),
-                    endAngle: Math.atan2(T2.y - center.y, T2.x - center.x),
-                    clockwise,
-                    overfly: true,
-                  };
-                }
-              } else {
-                const rawTangentLength = R * Math.abs(Math.tan(delta / 2));
-                const maxTangent = Math.min(lenIn, lenOut) * 0.95;
-
-                if (rawTangentLength <= maxTangent) {
-                  const T1 = { x: curr.x - dIn.x * rawTangentLength, y: curr.y - dIn.y * rawTangentLength };
-                  const T2 = { x: curr.x + dOut.x * rawTangentLength, y: curr.y + dOut.y * rawTangentLength };
-                  const center = {
-                    x: T1.x + (-dIn.y * perpSign) * R,
-                    y: T1.y + (dIn.x * perpSign) * R,
-                  };
-
-                  turnTangents[i] = {
-                    T1, T2, center, R,
-                    tangentLengthIn: rawTangentLength,
-                    tangentLengthOut: rawTangentLength,
-                    startAngle: Math.atan2(T1.y - center.y, T1.x - center.x),
-                    endAngle: Math.atan2(T2.y - center.y, T2.x - center.x),
-                    clockwise,
-                    overfly: false,
-                  };
-                }
-              }
+        if (nextNavPoint) {
+          const nextNavPointCanvasPosition = this.attackPlannerUtils.imageToCanvas(nextNavPoint.x, nextNavPoint.y);
+          const legStart = turnTangents[i] ? turnTangents[i].T2 : navPointCanvasPosition;
+          const legEnd = turnTangents[i + 1] ? turnTangents[i + 1].T1 : nextNavPointCanvasPosition;
+          this.flightPlanUtils.drawLeg(legStart, legEnd);
+          if (nextNavPoint['show-leg-heading']) {
+            const headingText = this.flightPlanUtils.computeLegHeadingText(legStart, legEnd, mapOrientation, magneticDeclination, trueNorth);
+            if (headingText) {
+              this.pendingLabels.push({
+                type: 'heading-label',
+                legStart: { x: legStart.x, y: legStart.y },
+                legEnd: { x: legEnd.x, y: legEnd.y },
+                headingText,
+                navPoint: nextNavPoint,
+                componentPath: ['flight-plans', 'flight-plans', fpIdx, 'nav-points', i + 1],
+              });
             }
           }
-
-          // Pass 2: draw legs, markers and nav point symbols.
-          for (let i = 0; i < navPoints.length; i++) {
-            const navPoint = navPoints[i];
-            const nextNavPoint = navPoints[i + 1];
-
-            const navPointCanvasPosition = this.imageToCanvas(navPoint.x, navPoint.y);
-
-            if (nextNavPoint) {
-              const nextNavPointCanvasPosition = this.imageToCanvas(nextNavPoint.x, nextNavPoint.y);
-
-              // Clip leg endpoints to turn arc tangent points where applicable.
-              const legStart = turnTangents[i] ? turnTangents[i].T2 : navPointCanvasPosition;
-              const legEnd = turnTangents[i + 1] ? turnTangents[i + 1].T1 : nextNavPointCanvasPosition;
-
-              this.mapDrawUtils.drawLine(legStart.x, legStart.y, legEnd.x, legEnd.y, 'black', 4);
-
-              if (nextNavPoint['leg-information'] && nextNavPoint['leg-information'] !== 'none') {
-                if (this.nmPerImagePixel) {
-                  const { scale } = this.getBackgroundTransform();
-                  const nmToCanvasPx = scale / this.nmPerImagePixel;
-
-                  const sliderValue = parseInt(nextNavPoint['leg-information-scale'] ?? 50);
-                  const targetPxPerTick = 300 * Math.pow(20 / 300, sliderValue / 100);
-
-                  const showDistance = ['distance', 'both'].includes(nextNavPoint['leg-information']);
-                  const showTime = ['time', 'both'].includes(nextNavPoint['leg-information']);
-
-                  const arcAngleRad = (t) => {
-                    let d = t.endAngle - t.startAngle;
-                    if (t.clockwise) { if (d < 0) d += 2 * Math.PI; }
-                    else { if (d > 0) d -= 2 * Math.PI; }
-                    return Math.abs(d);
-                  };
-                  const arcNm = (t) => t ? t.R * arcAngleRad(t) / nmToCanvasPx : 0;
-
-                  // Outgoing arc for current point: full arc for overfly, half for standard.
-                  const startArcNm = turnTangents[i]
-                    ? arcNm(turnTangents[i]) * (turnTangents[i].overfly ? 1 : 0.5)
-                    : 0;
-                  // Incoming arc for next point: zero for overfly (arc is on the next outgoing leg), half for standard.
-                  const endArcNm = (turnTangents[i + 1] && !turnTangents[i + 1].overfly)
-                    ? arcNm(turnTangents[i + 1]) * 0.5
-                    : 0;
-
-                  // Unit vector along the leg (legStart → legEnd).
-                  const legDx = legEnd.x - legStart.x;
-                  const legDy = legEnd.y - legStart.y;
-                  const legLenPx = Math.hypot(legDx, legDy);
-                  const nx = legLenPx > 0 ? legDx / legLenPx : 0;
-                  const ny = legLenPx > 0 ? legDy / legLenPx : 0;
-
-                  if (showDistance) {
-                    const idealStepNm = targetPxPerTick / nmToCanvasPx;
-                    const stepNm = this.nearestStep(DISTANCE_STEPS_NM, idealStepNm);
-                    // Extend start past legEnd toward B by endArcNm so the step grid is anchored at B.
-                    const distOffsetPx = endArcNm * nmToCanvasPx;
-                    const distBarStart = { x: legEnd.x + nx * distOffsetPx, y: legEnd.y + ny * distOffsetPx };
-                    this.mapDrawUtils.drawLegMarkers(
-                      distBarStart.x, distBarStart.y,
-                      legStart.x, legStart.y,
-                      stepNm * nmToCanvasPx,
-                      (i) => `${i * stepNm}`,
-                      'black', -1, distOffsetPx, 0
-                    );
-                  }
-
-                  if (showTime) {
-                    const groundSpeed = parseFloat(nextNavPoint['ground-speed']);
-                    if (groundSpeed > 0) {
-                      const idealStepSec = (targetPxPerTick / nmToCanvasPx) / groundSpeed * 3600;
-                      const stepSec = this.nearestStep(TIME_STEPS_SEC, idealStepSec);
-                      const stepNm = stepSec * groundSpeed / 3600;
-                      // Extend start before legStart by startArcNm so the step grid is anchored at arc start.
-                      const timeOffsetPx = startArcNm * nmToCanvasPx;
-                      const timeBarStart = { x: legStart.x - nx * timeOffsetPx, y: legStart.y - ny * timeOffsetPx };
-                      this.mapDrawUtils.drawLegMarkers(
-                        timeBarStart.x, timeBarStart.y,
-                        legEnd.x, legEnd.y,
-                        stepNm * nmToCanvasPx,
-                        (i) => this.utils.formatTimeLabel(i * stepSec),
-                        'black', -1, timeOffsetPx, 0
-                      );
-                    }
-                  }
-                }
-              }
-            }
-
-            switch (navPoint.type) {
-              case NavPointType.TURN:
-                if (turnTangents[i]) {
-                  const { center, R, startAngle, endAngle, clockwise } = turnTangents[i];
-                  this.mapDrawUtils.drawTurnArc(center.x, center.y, R, startAngle, endAngle, clockwise, 'black', 4);
-                }
-                break;
-              case NavPointType.TURNING_POINT:
-                if (turnTangents[i]) {
-                  const { center, R, startAngle, endAngle, clockwise } = turnTangents[i];
-                  this.mapDrawUtils.drawTurnArc(center.x, center.y, R, startAngle, endAngle, clockwise, 'black', 4);
-                }
-
-                this.mapDrawUtils.drawCircle(navPointCanvasPosition.x, navPointCanvasPosition.y, navPoint.size, 4, 'black', true);
-                break;
-              case NavPointType.INITIAL_POINT:
-                if (turnTangents[i]) {
-                  const { center, R, startAngle, endAngle, clockwise } = turnTangents[i];
-                  this.mapDrawUtils.drawTurnArc(center.x, center.y, R, startAngle, endAngle, clockwise, 'black', 4);
-                }
-
-                this.mapDrawUtils.drawSquare(navPointCanvasPosition.x, navPointCanvasPosition.y, navPoint.size, 4, 'black', true);
-                break;
-            }
-          };
-
-          this.mapDrawUtils.unclipCanvas();
+          const effectiveTarget = this.flightPlanUtils.getEffectiveLegTarget(navPoints, turnTangents, i, this.nmPerImagePixel, scale);
+          this.flightPlanUtils.drawLegInfo(legStart, legEnd, navPoints, i, turnTangents, this.nmPerImagePixel, scale, effectiveTarget);
         }
-      });
-    }
+
+        switch (navPoint.type) {
+          case NavPointType.TURN:
+            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
+            break;
+          case NavPointType.TURNING_POINT:
+            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TURNING_POINT, navPoint.size, 4, 'black');
+            break;
+          case NavPointType.INITIAL_POINT:
+            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.INITIAL_POINT, navPoint.size, 4, 'black');
+            break;
+          case NavPointType.TARGET_POINT:
+            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TARGET_POINT, navPoint.size, 4, 'black');
+            break;
+        }
+
+        if (navPoint.type !== NavPointType.TURN && navPoint.name) {
+          this.pendingLabels.push({ x: navPointCanvasPosition.x, y: navPointCanvasPosition.y, navPoint });
+        }
+      }
+
+      this.mapDrawUtils.unclipCanvas();
+    });
   }
 
   updateDarkMode() {
@@ -1159,19 +1345,18 @@ class AttackPlanner {
   getObjectBounds(object) {
     const points = []
 
-    const canvasRelativePosition = this.imageToCanvas(object.x, object.y)
+    const canvasRelativePosition = this.attackPlannerUtils.imageToCanvas(object.x, object.y)
 
     switch (object.type) {
       case MapObjectType.TURN:
       case MapObjectType.TURNING_POINT:
       case MapObjectType.INITIAL_POINT:
+      case MapObjectType.TARGET_POINT:
         const radius = object.size / 2;
         points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y - radius });
         points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y - radius });
         points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y + radius });
         points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y + radius });
-        break;
-      case MapObjectType.TARGET_POINT:
         break;
     }
 
@@ -1199,84 +1384,32 @@ class AttackPlanner {
     return objects;
   }
 
-  getBackgroundTransform() {
-    const canvasW = this.backgroundMapDrawUtils.canvas.width;
-    const canvasH = this.backgroundMapDrawUtils.canvas.height;
-    const bgData = this.getComponentData(this.mapComponentList.find(mc => mc.id === 'background-map'));
-
-    if (bgData?.x !== undefined) {
-      return {
-        x: bgData.x,
-        y: bgData.y,
-        scale: bgData.scale,
-        rotation: bgData.rotation ?? 0,
-      };
-    }
-
-    // Default: scale to fit canvas, centered
-    const fitScale = this.backgroundImageObject
-      ? Math.min(canvasW / this.backgroundImageObject.width, canvasH / this.backgroundImageObject.height)
-      : 1;
-    return { x: canvasW / 2, y: canvasH / 2, scale: fitScale, rotation: 0 };
-  }
-
-  getRulerPointHit(x, y, rulerPoint1, rulerPoint2) {
-    const hitRadius = 12;
-    if (rulerPoint1) {
-      const cp1 = this.imageToCanvas(rulerPoint1.x, rulerPoint1.y);
-      if (Math.hypot(x - cp1.x, y - cp1.y) <= hitRadius) return 1;
-    }
-    if (rulerPoint2) {
-      const cp2 = this.imageToCanvas(rulerPoint2.x, rulerPoint2.y);
-      if (Math.hypot(x - cp2.x, y - cp2.y) <= hitRadius) return 2;
-    }
-    return null;
-  }
-
-  computeRulerCalibration(rulerPoint1, rulerPoint2, ruleScale) {
-    if (rulerPoint1 && rulerPoint2) {
-      const rulerNm = parseFloat(ruleScale);
-      if (rulerNm > 0) {
-        const imagePixelDistance = Math.hypot(rulerPoint2.x - rulerPoint1.x, rulerPoint2.y - rulerPoint1.y);
-        return rulerNm / imagePixelDistance;
-      }
-    }
-
-    return null;
-  }
-
-  canvasToImage(cx, cy) {
-    const { x, y, scale, rotation } = this.getBackgroundTransform();
-    const dx = cx - x, dy = cy - y;
-    const cos = Math.cos(-rotation), sin = Math.sin(-rotation);
-    return { x: (dx * cos - dy * sin) / scale, y: (dx * sin + dy * cos) / scale };
-  }
-
-  imageToCanvas(ix, iy) {
-    const { x, y, scale, rotation } = this.getBackgroundTransform();
-    const cos = Math.cos(rotation), sin = Math.sin(rotation);
-    const dx = ix * scale, dy = iy * scale;
-    return { x: x + dx * cos - dy * sin, y: y + dx * sin + dy * cos };
-  }
-
-  nearestStep(steps, idealInterval) {
-    return steps.reduce((best, step) =>
-      Math.abs(Math.log(step / idealInterval)) < Math.abs(Math.log(best / idealInterval)) ? step : best
-    );
-  }
-
-  syncBankAngleLoadFactor(value, navPointData, fieldId) {
+  syncBankAngleLoadFactor(value, navPointData, fieldId, target) {
     const parsed = parseFloat(value);
     if (isNaN(parsed)) return;
+
+    const navPointItem = $(target).closest('.multiple-field-item');
 
     if (fieldId.endsWith('bank-angle')) {
       const loadFactor = Math.min(Math.max(Math.round((1 / Math.cos(parsed * Math.PI / 180)) * 10) / 10, 1), 10);
       navPointData['load-factor'] = loadFactor;
-      $(`#${CSS.escape(fieldId.replace(/[^.]+$/, 'load-factor'))}`).val(loadFactor);
+      navPointItem.find('[id$=".load-factor"]').val(loadFactor);
     } else {
       const bankAngle = Math.min(Math.max(Math.round(Math.acos(1 / parsed) * 180 / Math.PI), 0), 90);
       navPointData['bank-angle'] = bankAngle;
-      $(`#${CSS.escape(fieldId.replace(/[^.]+$/, 'bank-angle'))}`).val(bankAngle);
+      navPointItem.find('[id$=".bank-angle"]').val(bankAngle);
     }
+  }
+
+  getComponentLabelOffsetAngle(component) {
+    return ((component['name-position'] ?? 270) - 90) * Math.PI / 180;
+  }
+
+  getComponentLabelBounds(component) {
+    if (!component.name) return [];
+    const pos = this.attackPlannerUtils.imageToCanvas(component.x, component.y);
+    const offsetAngle = this.getComponentLabelOffsetAngle(component);
+    const offsetDistance = (component.size ?? 30) / 2 + 12;
+    return this.mapDrawUtils.getTextBounds(pos.x, pos.y, component.name, 18, offsetDistance, offsetAngle, 2);
   }
 }
