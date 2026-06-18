@@ -3,12 +3,8 @@ const AttackPlannerMode = {
   PLACE: 'place',
   EDIT: 'edit',
   DRAG: 'drag',
-  EDIT_MAP: 'edit-map',
-  DRAG_MAP: 'drag-map',
-  EDIT_RULER: 'edit-ruler',
-  DRAG_RULER: 'drag-ruler',
-  EDIT_LABEL: 'edit-label',
-  DRAG_LABEL: 'drag-label',
+  MAP: 'map',
+  RULER: 'ruler',
 };
 
 const NavPointType = {
@@ -194,17 +190,17 @@ class AttackPlanner {
                   default: Math.PI,
                 },
                 {
-                  id: 'ground-speed',
-                  label: 'Ground speed (kt)',
-                  type: 'number',
-                  default: 400
-                },
-                {
                   id: 'type',
                   label: 'Type',
                   type: 'select',
                   options: AttackPlannerNavPointText,
                   default: NavPointType.TURN,
+                },
+                {
+                  id: 'ground-speed',
+                  label: 'Ground speed (kt)',
+                  type: 'number',
+                  default: 400
                 },
                 {
                   id: 'overfly',
@@ -250,7 +246,9 @@ class AttackPlanner {
                     'none': 'None',
                     'distance': 'Distance',
                     'time': 'Time',
-                    'both': 'Both',
+                    'duration': 'Duration',
+                    'distance-time': 'Distance & time',
+                    'distance-duration': 'Distance & duration',
                   },
                   default: 'none',
                 },
@@ -291,7 +289,223 @@ class AttackPlanner {
         }
       ],
       drawFunction: this.drawFlightPlan.bind(this),
+      pageToggleFunction: (open) => { this.showTurnPoints = open; this.update(); },
     }, // Flight plan
+    {
+      id: 'popup-plan',
+      label: 'Popup plan',
+      fields: [
+        {
+          id: 'popup-plan',
+          label: 'Popup plan',
+          type: 'multiple',
+          options: {
+            deletable: true,
+          },
+          fields: [
+            {
+              id: 'offset-turn-distance',
+              label: 'Offset turn distance (nm)',
+              type: 'number',
+            },
+            {
+              id: 'initiate-popup-distance',
+              label: 'Initiate popup distance (nm)',
+              type: 'number',
+            },
+            {
+              id: 'start-altitude',
+              label: 'Start altitude (kft)',
+              type: 'number',
+            },
+            {
+              id: 'roll-over-altitude',
+              label: 'Roll over altitude (kft)',
+              type: 'number',
+            },
+            {
+              id: 'apogee-altitude',
+              label: 'Apogee altitude (kft)',
+              type: 'number',
+            },
+            {
+              id: 'designate-minimum-altitude',
+              label: 'Designate minimum altitude (kft)',
+              type: 'number',
+            },
+            {
+              id: 'minimum-release-altitude',
+              label: 'Minimum release altitude (kft)',
+              type: 'number',
+            },
+            {
+              id: 'x',
+              label: 'x',
+              type: 'hidden',
+            },
+            {
+              id: 'y',
+              label: 'y',
+              type: 'hidden',
+            },
+          ]
+        },
+        {
+          id: 'add-popup-plan',
+          label: 'Add popup plan',
+          type: 'button',
+          clickFunction: this.placeComponentItem.bind(this)
+        }
+      ],
+      drawFunction: this.drawPopupPlan.bind(this)
+    }, // Popup plan
+    {
+      id: 'blast-indicator',
+      label: 'Blast indicator',
+      fields: [
+        {
+          id: 'blast-indicator',
+          label: 'Blast indicator',
+          type: 'multiple',
+          options: {
+            deletable: true,
+          },
+          fields: [
+            {
+              id: 'weapon-name',
+              label: 'Weapon name',
+              type: 'text',
+            },
+            {
+              id: 'blast-height',
+              label: 'Blast height (ft)',
+              type: 'number',
+            },
+            {
+              id: 'blast-radius',
+              label: 'Blast radius (ft)',
+              type: 'number',
+            },
+            {
+              id: 'x',
+              label: 'x',
+              type: 'hidden',
+            },
+            {
+              id: 'y',
+              label: 'y',
+              type: 'hidden',
+            },
+          ]
+        },
+        {
+          id: 'add-blast-indicator',
+          label: 'Add blast indicator',
+          type: 'button',
+          clickFunction: this.placeComponentItem.bind(this)
+        }
+      ],
+      drawFunction: this.drawBlastIndicator.bind(this)
+    }, // Blast indicator
+    {
+      id: 'arrow',
+      label: 'Arrow',
+      fields: [
+        {
+          id: 'arrow',
+          label: 'Arrow',
+          type: 'multiple',
+          options: {
+            deletable: true,
+          },
+          fields: [
+            {
+              id: 'type',
+              label: 'Type',
+              type: 'select',
+              options: {
+                'single-arrow': 'Single arrow',
+                'double-arrow': 'Double arrow',
+                'single-arrow-distance': 'Single arrow & distance',
+                'double-arrow-distance': 'Double arrow & distance',
+              },
+              default: 'double-arrow-distance',
+            },
+            {
+              id: 'x-start',
+              label: 'x-start',
+              type: 'hidden',
+            },
+            {
+              id: 'y-start',
+              label: 'y-start',
+              type: 'hidden',
+            },
+            {
+              id: 'x-end',
+              label: 'x-end',
+              type: 'hidden',
+            },
+            {
+              id: 'y-end',
+              label: 'y-end',
+              type: 'hidden',
+            },
+          ]
+        },
+        {
+          id: 'add-arrow',
+          label: 'Add arrow',
+          type: 'button',
+          clickFunction: this.placeArrow.bind(this)
+        }
+      ],
+      drawFunction: this.drawArrow.bind(this),
+      pageToggleFunction: (open) => { this.showArrowPoints = open; this.update(); },
+    }, // Arrow
+    {
+      id: 'fuel-plan',
+      label: 'Fuel plan',
+      fields: [
+        {
+          id: 'fuel-plan',
+          label: 'Fuel plan',
+          type: 'multiple',
+          options: {
+            deletable: true,
+          },
+          fields: [
+            {
+              id: 'estimated-fuel',
+              label: 'Estimated fuel',
+              type: 'text',
+            },
+            {
+              id: 'minimum-fuel',
+              label: 'Minimum fuel',
+              type: 'text',
+            },
+            {
+              id: 'x',
+              label: 'x',
+              type: 'hidden',
+            },
+            {
+              id: 'y',
+              label: 'y',
+              type: 'hidden',
+            },
+          ]
+        },
+        {
+          id: 'add-fuel-plan',
+          label: 'Add fuel plan',
+          type: 'button',
+          clickFunction: this.placeComponentItem.bind(this)
+        }
+      ],
+      drawFunction: this.drawFuelPlan.bind(this),
+    }, // Arrow
   ]
 
   constructor() {
@@ -310,7 +524,6 @@ class AttackPlanner {
     this.furthestPoint = this.width / 2;
 
     this.backgroundColor = ['#FFFFFF', '#000000'];
-    this.bullseyeLinesColor = ['#555555', '#AAAAAA'];
     this.defaultLineColor = ['#000000', '#e9e9e9'];
 
     this.attackPlannerDataKey = 'attack-planner-data';
@@ -321,11 +534,12 @@ class AttackPlanner {
 
     this.darkMode = false;
     this.attackPlannerMode = AttackPlannerMode.SELECT;
-    this.selectedComponentPath = null;
-    this.selectedLabel = null;
-    this.selectedLabelPath = null;
-    this.pendingLabels = [];
+    this.activeMode = null;
+    this.selectedTarget = null;
+    this.interactiveTargets = [];
     this.nmPerImagePixel = null;
+    this.showTurnPoints = false;
+    this.showArrowPoints = false;
 
     this.init();
 
@@ -340,7 +554,7 @@ class AttackPlanner {
 
     $(this.attackPlannerBackgroundCanvas).css('background', this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0])
 
-    // Update bullseye data when dark mode is changed.
+    // Update attack planner data when dark mode is changed.
     $('.attack-planner-dark-mode').on('change', () => this.updateDarkMode());
 
     const backgroundImage = localStorage.getItem(this.attackPlannerBackgroundImageKey);
@@ -349,338 +563,102 @@ class AttackPlanner {
       this.drawBackgroundMap();
     }
 
-    this.setSelectMode()
+    this.bindCanvasEvents();
+    this.setMode(new SelectMode(this));
 
     this.mapFieldsUtils.displayComponentListButtons();
   }
 
   getDarkMode() {
     this.darkMode = localStorage.getItem(this.attackPlannerDarkModeKey) === 'true';
-    $('.bullseye-dark-mode').prop('checked', this.darkMode);
+    $('.attack-planner-dark-mode').prop('checked', this.darkMode);
+  }
+
+  bindCanvasEvents() {
+    const canvas = $(this.attackPlannerCanvas);
+    const posOf = (event) => this.utils.getCanvasClickPosition(event.clientX, event.clientY, canvas[0]);
+    canvas.on('mousedown', (event) => this.activeMode?.onMouseDown?.(posOf(event), event));
+    canvas.on('mousemove', (event) => this.activeMode?.onMouseMove?.(posOf(event), event));
+    canvas.on('mouseup', (event) => this.activeMode?.onMouseUp?.(posOf(event), event));
+    canvas.on('click', (event) => this.activeMode?.onClick?.(posOf(event), event));
+    canvas.on('wheel', (event) => this.activeMode?.onWheel?.(event));
+  }
+
+  setMode(mode) {
+    this.activeMode?.onExit?.();
+    this.activeMode = mode;
+    this.attackPlannerMode = mode.id;
+    mode.onEnter?.();
+    this.update();
   }
 
   setSelectMode() {
-    this.selectedComponentPath = null;
-    this.selectedLabel = null;
-
-    this.attackPlannerMode = AttackPlannerMode.SELECT;
-    this.mapFieldsUtils.hideEditInstructions();
-
-    console.log('SELECT MODE');
-
-    $(this.attackPlannerCanvas).off('wheel').css('cursor', 'default');
-
-    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', async (event) => {
-      const clickPosition = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-      this.setEditMode(clickPosition.x, clickPosition.y)
-    });
-
-    this.update();
-
-    const selectableComponents = this.getMapComponents(this.getComponentData()).flatMap(mc => {
-      const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
-      const items = [{ x: cp.x, y: cp.y, size: mc.component.size / 1.5 }];
-      if (mc.component.type !== NavPointType.TURN && mc.component.name) {
-        const labelBounds = this.getComponentLabelBounds(mc.component);
-        if (labelBounds.length) items.push({ points: labelBounds });
-      }
-      return items;
-    });
-
-    const headingHoverables = this.pendingLabels
-      .filter(l => l.type === 'heading-label')
-      .flatMap(l => {
-        const t = l.navPoint['leg-heading-position'] ?? 0.5;
-        const side = l.navPoint['leg-heading-side'] ?? 1;
-        const bounds = this.mapDrawUtils.getLegHeadingBounds(l.legStart.x, l.legStart.y, l.legEnd.x, l.legEnd.y, l.headingText, t, side);
-        return bounds.length ? [{ points: bounds }] : [];
-      });
-
-    $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-      const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-      this.updateCursor(pos.x, pos.y, [...selectableComponents, ...headingHoverables]);
-    });
+    this.setMode(new SelectMode(this));
   }
 
-  setEditMode(clickX, clickY) {
-    for (let i = this.pendingLabels.length - 1; i >= 0; i--) {
-      const label = this.pendingLabels[i];
-      if (label.type !== 'heading-label') continue;
-      const t = label.navPoint['leg-heading-position'] ?? 0.5;
-      const side = label.navPoint['leg-heading-side'] ?? 1;
-      const bounds = this.mapDrawUtils.getLegHeadingBounds(label.legStart.x, label.legStart.y, label.legEnd.x, label.legEnd.y, label.headingText, t, side);
-      if (bounds.length && this.utils.isPointWithinArea({ x: clickX, y: clickY }, bounds)) {
-        this.setLabelDragMode(label, label.componentPath, clickX, clickY);
-        return;
+  hitTest(pos) {
+    const priority = ['heading-label', 'name-label', 'nav-point', 'popup-plan', 'blast-indicator', 'fuel-plan', 'arrow-start', 'arrow-end'];
+    for (const kind of priority) {
+      for (let i = this.interactiveTargets.length - 1; i >= 0; i--) {
+        const target = this.interactiveTargets[i];
+        if (target.kind !== kind) continue;
+        const bounds = target.getBounds();
+        if (bounds.length && this.utils.isPointWithinArea(pos, bounds)) return target;
       }
     }
-
-    const mapComponents = this.getMapComponents(this.getComponentData());
-
-    for (let i = mapComponents.length - 1; i >= 0; i--) {
-      const { component, path } = mapComponents[i];
-      if (component.type === NavPointType.TURN || !component.name) continue;
-      const labelBounds = this.getComponentLabelBounds(component);
-      if (labelBounds.length && this.utils.isPointWithinArea({ x: clickX, y: clickY }, labelBounds)) {
-        this.setLabelDragMode(component, path, clickX, clickY);
-        return;
-      }
-    }
-
-    for (let i = mapComponents.length - 1; i >= 0; i--) {
-      const componentBounds = this.getObjectBounds(mapComponents[i].component);
-      if (this.utils.isPointWithinArea({ x: clickX, y: clickY }, componentBounds)) {
-        this.selectedComponentPath = mapComponents[i].path;
-
-        this.setDragMode(mapComponents[i].component, mapComponents[i].path, clickX, clickY);
-
-        this.update();
-
-        $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
-          const clickPosition = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-          if (!this.utils.isPointWithinArea({ x: clickPosition.x, y: clickPosition.y }, componentBounds)) {
-            this.setEditMode(clickPosition.x, clickPosition.y);
-          }
-        });
-        return;
-      }
-    }
-
-    this.setSelectMode();
+    return null;
   }
 
-  editObject(component, componentPath) {
-    if (this.attackPlannerMode != AttackPlannerMode.DRAG) {
-      return;
-    }
-
-    this.attackPlannerMode = AttackPlannerMode.EDIT;
-
-    console.log('EDIT MODE');
-
-    const objectBounds = this.getObjectBounds(component);
-
-    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
-      const clickPosition = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-      if (this.utils.isPointWithinArea({ x: clickPosition.x, y: clickPosition.y }, objectBounds)) {
-        this.setDragMode(component, componentPath, clickPosition.x, clickPosition.y);
-      } else {
-        this.setEditMode(clickPosition.x, clickPosition.y);
-      }
-    });
+  beginDrag(target, pos) {
+    this.selectedTarget = { kind: target.kind, componentPath: target.componentPath };
+    target.onDragStart?.(pos);
+    this.setMode(new DragMode(this, target));
   }
 
-  setDragMode(component, componentPath, startX, startY) {
-    if (this.attackPlannerMode != AttackPlannerMode.SELECT && this.attackPlannerMode != AttackPlannerMode.EDIT && this.attackPlannerMode != AttackPlannerMode.EDIT_LABEL) {
-      return;
-    }
-
-    this.attackPlannerMode = AttackPlannerMode.DRAG;
-
-    console.log('DRAG MODE');
-
-    $(this.attackPlannerCanvas).css('cursor', 'grabbing');
-
-    const dragMapComponent = this.mapComponentList.find(mapComponent => mapComponent.id == componentPath[0]);
-    this.mapFieldsUtils.displayComponent(dragMapComponent);
-    this.mapFieldsUtils.selectField(this.selectedComponentPath);
-    const dragInstructions = this.attackPlannerUtils.getInstructionText(AttackPlannerMode.DRAG);
-    if (dragInstructions) {
-      this.mapFieldsUtils.showEditInstructions(dragInstructions);
-    }
-
-    let lastCanvasPos = { x: startX, y: startY };
-
-    $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-      const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-      const curr = this.attackPlannerUtils.canvasToImage(canvasPos.x, canvasPos.y);
-      const last = this.attackPlannerUtils.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
-
-      const precision = event.altKey ? 0.1 : 1;
-      component.x += (curr.x - last.x) * precision;
-      component.y += (curr.y - last.y) * precision;
-
-      lastCanvasPos = canvasPos;
-
-      let mapComponent = this.getComponentData(componentPath[0]);
-
-      const recurse = (currentComponent, pathIndex) => {
-        if (componentPath[pathIndex] !== undefined) {
-          const key = componentPath[pathIndex];
-
-          if (currentComponent[key]) {
-            currentComponent[key] = recurse(
-              currentComponent[key],
-              pathIndex + 1
-            );
-          }
-          return currentComponent;
-        }
-
-        return component;
-      };
-      mapComponent = recurse(mapComponent, 1);
-
-      this.saveComponentData(componentPath[0], mapComponent);
-
-      this.update();
-    });
-
-    $(this.attackPlannerCanvas).off('mouseup').on('mouseup', (event) => {
-      $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
-
-      this.editObject(component, componentPath);
-
-      const hoverables = this.getMapComponents(this.getComponentData()).map(mc => {
-        const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
-        return { x: cp.x, y: cp.y, size: mc.component.size / 1.5 };
-      });
-
-      const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      this.updateCursor(pos.x, pos.y, hoverables);
-
-      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-        const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        this.updateCursor(pos.x, pos.y, hoverables);
-      });
-    });
+  samePath(a, b) {
+    return Array.isArray(a) && Array.isArray(b) && a.length === b.length && a.every((v, i) => v === b[i]);
   }
 
-  setLabelDragMode(component, componentPath, startX, startY) {
-    this.attackPlannerMode = AttackPlannerMode.DRAG_LABEL;
-    this.selectedLabel = component;
-    this.selectedLabelPath = componentPath;
-
-    const labelMapComponent = this.mapComponentList.find(mc => mc.id === 'flight-plans');
-    this.mapFieldsUtils.displayComponent(labelMapComponent);
-    this.mapFieldsUtils.selectField(componentPath);
-
-    $(this.attackPlannerCanvas).css('cursor', 'grabbing');
-
-    if (component.type === 'heading-label') {
-      const instructions = 'Drag to reposition the leg heading along the leg and across sides.';
-      this.mapFieldsUtils.showEditInstructions(instructions);
-
-      const { legStart, legEnd, navPoint } = component;
-      const dx = legEnd.x - legStart.x;
-      const dy = legEnd.y - legStart.y;
-      const legLen = Math.hypot(dx, dy);
-      const ux = dx / legLen;
-      const uy = dy / legLen;
-
-      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-        const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        const mx = canvasPos.x - legStart.x;
-        const my = canvasPos.y - legStart.y;
-        navPoint['leg-heading-position'] = Math.max(0.05, Math.min(0.95, (mx * ux + my * uy) / legLen));
-        navPoint['leg-heading-side'] = (mx * uy - my * ux) >= 0 ? 1 : -1;
-
-        let mapComponent = this.getComponentData(componentPath[0]);
-        const recurse = (currentComponent, pathIndex) => {
-          if (componentPath[pathIndex] !== undefined) {
-            const key = componentPath[pathIndex];
-            if (currentComponent[key] !== undefined) {
-              currentComponent[key] = recurse(currentComponent[key], pathIndex + 1);
-            }
-            return currentComponent;
-          }
-          return navPoint;
-        };
-        mapComponent = recurse(mapComponent, 1);
-        this.saveComponentData(componentPath[0], mapComponent);
-        this.update();
-      });
-    } else {
-      this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.DRAG_LABEL));
-
-      const navPointCanvasPos = this.attackPlannerUtils.imageToCanvas(component.x, component.y);
-
-      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-        const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        const mouseAngle = Math.atan2(canvasPos.y - navPointCanvasPos.y, canvasPos.x - navPointCanvasPos.x);
-        component['name-position'] = ((mouseAngle * 180 / Math.PI) + 90 + 360) % 360;
-
-        let mapComponent = this.getComponentData(componentPath[0]);
-        const recurse = (currentComponent, pathIndex) => {
-          if (componentPath[pathIndex] !== undefined) {
-            const key = componentPath[pathIndex];
-            if (currentComponent[key] !== undefined) {
-              currentComponent[key] = recurse(currentComponent[key], pathIndex + 1);
-            }
-            return currentComponent;
-          }
-          return component;
-        };
-        mapComponent = recurse(mapComponent, 1);
-        this.saveComponentData(componentPath[0], mapComponent);
-        this.update();
-      });
-    }
-
-    $(this.attackPlannerCanvas).off('mouseup').on('mouseup', () => {
-      $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
-      this.editLabel(component, componentPath);
-    });
+  resolveSelectedTarget() {
+    if (!this.selectedTarget) return null;
+    return this.interactiveTargets.find(t =>
+      t.kind === this.selectedTarget.kind && this.samePath(t.componentPath, this.selectedTarget.componentPath)
+    ) ?? null;
   }
 
-  editLabel(component, componentPath) {
-    this.attackPlannerMode = AttackPlannerMode.EDIT_LABEL;
-
-    this.update();
-
-    const getBounds = () => {
-      if (component.type === 'heading-label') {
-        const t = component.navPoint['leg-heading-position'] ?? 0.5;
-        const side = component.navPoint['leg-heading-side'] ?? 1;
-        return this.mapDrawUtils.getLegHeadingBounds(component.legStart.x, component.legStart.y, component.legEnd.x, component.legEnd.y, component.headingText, t, side);
-      }
-      return this.getComponentLabelBounds(component);
-    };
-
-    const getOtherHoverables = () => [
-      ...this.getMapComponents(this.getComponentData()).flatMap(mc => {
-        const cp = this.attackPlannerUtils.imageToCanvas(mc.component.x, mc.component.y);
-        const items = [{ x: cp.x, y: cp.y, size: mc.component.size / 1.5 }];
-        if (mc.component.type !== NavPointType.TURN && mc.component.name) {
-          const lb = this.getComponentLabelBounds(mc.component);
-          if (lb.length) items.push({ points: lb });
-        }
-        return items;
-      }),
-      ...this.pendingLabels
-        .filter(l => l.type === 'heading-label')
-        .flatMap(l => {
-          const t = l.navPoint['leg-heading-position'] ?? 0.5;
-          const side = l.navPoint['leg-heading-side'] ?? 1;
-          const bounds = this.mapDrawUtils.getLegHeadingBounds(l.legStart.x, l.legStart.y, l.legEnd.x, l.legEnd.y, l.headingText, t, side);
-          return bounds.length ? [{ points: bounds }] : [];
-        }),
-    ];
-
-    $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-      const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const labelBounds = getBounds();
-      if (labelBounds.length && this.utils.isPointWithinArea({ x: pos.x, y: pos.y }, labelBounds)) {
+  updateHoverCursor(pos) {
+    const selected = this.resolveSelectedTarget();
+    if (selected) {
+      const bounds = selected.getBounds();
+      if (bounds.length && this.utils.isPointWithinArea(pos, bounds)) {
         $(this.attackPlannerCanvas).css('cursor', 'pointer');
-      } else {
-        this.updateCursor(pos.x, pos.y, getOtherHoverables());
+        return;
       }
-    });
+    }
+    const hovering = this.hitTest(pos);
+    $(this.attackPlannerCanvas).css('cursor', hovering ? 'pointer' : 'default');
+  }
 
-    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
-      const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const labelBounds = getBounds();
-      if (labelBounds.length && this.utils.isPointWithinArea({ x: clickPos.x, y: clickPos.y }, labelBounds)) {
-        this.setLabelDragMode(component, componentPath, clickPos.x, clickPos.y);
-      } else {
-        this.setEditMode(clickPos.x, clickPos.y);
-      }
-    });
+  drawSelectedTargetOutline() {
+    const target = this.resolveSelectedTarget();
+    if (!target) return;
+    const bounds = target.getBounds();
+    if (bounds.length) {
+      this.mapDrawUtils.drawSelectionOutline(bounds, target.outlineWidth, '#4af', target.outlineFilled, this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0]);
+    }
+  }
+
+  persistTarget(target) {
+    const rootKey = target.componentPath[0];
+    let root = this.getComponentData(rootKey);
+    const recurse = (node, pathIndex) => {
+      if (target.componentPath[pathIndex] === undefined) return target.navPoint;
+      const key = target.componentPath[pathIndex];
+      if (node[key] !== undefined) node[key] = recurse(node[key], pathIndex + 1);
+      return node;
+    };
+    root = recurse(root, 1);
+    this.saveComponentData(rootKey, root);
   }
 
   updateCursor(x, y, hoverables = []) {
@@ -711,7 +689,7 @@ class AttackPlanner {
     const magneticDeclination = bgData['magnetic-declination'] ?? 0;
     const trueNorth = bgData['map-north'] === 'true';
 
-    this.pendingLabels = [];
+    this.interactiveTargets = [];
 
     this.mapComponentList.forEach(mapComponent => {
       if (mapComponent.id != 'background-map') {
@@ -719,88 +697,13 @@ class AttackPlanner {
       }
     });
 
-    const fillColor = this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0];
-    const textColor = this.darkMode ? this.backgroundColor[0] : this.backgroundColor[1];
-    const borderColor = this.darkMode ? this.backgroundColor[0] : this.backgroundColor[1];
-    const lineColor = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
-    for (const label of this.pendingLabels) {
-      if (label.type === 'heading-label') {
-        const t = label.navPoint['leg-heading-position'] ?? 0.5;
-        const side = label.navPoint['leg-heading-side'] ?? 1;
-        this.mapDrawUtils.drawLegHeading(label.legStart.x, label.legStart.y, label.legEnd.x, label.legEnd.y, label.headingText, t, side, lineColor);
-      } else {
-        const { x, y, navPoint } = label;
-        const offsetAngle = this.getComponentLabelOffsetAngle(navPoint);
-        const offsetDistance = (navPoint.size ?? 30) / 2 + 12;
-        this.mapDrawUtils.drawText(x, y, navPoint.name, 'square', 18, offsetDistance, offsetAngle, 0, 2, fillColor, textColor, borderColor);
-      }
+    // Interactive labels (names, leg headings) draw on top of all other content.
+    for (const target of this.interactiveTargets) {
+      target.draw?.();
     }
 
-    switch (this.attackPlannerMode) {
-      case AttackPlannerMode.EDIT:
-      case AttackPlannerMode.DRAG:
-        if (this.selectedComponentPath) {
-          const [fieldIdFirst, ...remainingPath] = this.selectedComponentPath;
-          let component = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id === fieldIdFirst))
-
-          remainingPath.forEach(path => {
-            component = component[path];
-          });
-
-          const bounds = this.getObjectBounds(component);
-          if (bounds.length !== 0) {
-            this.mapDrawUtils.drawSelectionOutline(bounds, 4, '#4af', true);
-          }
-        }
-        break;
-      case AttackPlannerMode.EDIT_MAP:
-      case AttackPlannerMode.DRAG_MAP:
-        if (this.backgroundImageObject) {
-          const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
-          const halfW = (this.backgroundImageObject.width * scale) / 2;
-          const halfH = (this.backgroundImageObject.height * scale) / 2;
-          const cos = Math.cos(rotation);
-          const sin = Math.sin(rotation);
-          const toWorld = (lx, ly) => ({
-            x: x + lx * cos - ly * sin,
-            y: y + lx * sin + ly * cos,
-          });
-
-          this.mapDrawUtils.drawSelectionOutline([
-            toWorld(-halfW, -halfH),
-            toWorld(+halfW, -halfH),
-            toWorld(+halfW, +halfH),
-            toWorld(-halfW, +halfH),
-          ], 4, '#4af');
-        }
-        break;
-      case AttackPlannerMode.EDIT_RULER:
-      case AttackPlannerMode.DRAG_RULER:
-        const rulerPoint1 = bgData['ruler-point-1'] ? this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y) : null;
-        const rulerPoint2 = bgData['ruler-point-2'] ? this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y) : null;
-        this.drawRuler(rulerPoint1, rulerPoint2);
-
-        break;
-      case AttackPlannerMode.EDIT_LABEL:
-      case AttackPlannerMode.DRAG_LABEL:
-        if (this.selectedLabel) {
-          if (this.selectedLabel.type === 'heading-label') {
-            const { legStart, legEnd, headingText, navPoint } = this.selectedLabel;
-            const t = navPoint['leg-heading-position'] ?? 0.5;
-            const side = navPoint['leg-heading-side'] ?? 1;
-            const bounds = this.mapDrawUtils.getLegHeadingBounds(legStart.x, legStart.y, legEnd.x, legEnd.y, headingText, t, side);
-            if (bounds.length) {
-              this.mapDrawUtils.drawSelectionOutline(bounds, 2, '#4af', false);
-            }
-          } else {
-            const labelBounds = this.getComponentLabelBounds(this.selectedLabel);
-            if (labelBounds.length) {
-              this.mapDrawUtils.drawSelectionOutline(labelBounds, 2, '#4af', false);
-            }
-          }
-        }
-        break;
-    }
+    // Mode-specific chrome (selection outline, ruler, map bounds).
+    this.activeMode?.drawOverlay?.();
 
 
     const backgroundMapData = this.getComponentData(this.mapComponentList.find(mapComponent => mapComponent.id == 'background-map'));
@@ -853,244 +756,64 @@ class AttackPlanner {
     });
   }
 
-  editBackgroundMap(field, data, component, fieldId) {
-    if (this.attackPlannerMode === AttackPlannerMode.EDIT_MAP) {
-      this.setSelectMode();
+  editBackgroundMap() {
+    if (this.activeMode instanceof MapMode) {
+      this.setMode(new SelectMode(this));
       return;
     }
-
-    console.log('EDIT MAP MODE');
-
-    this.attackPlannerMode = AttackPlannerMode.EDIT_MAP;
-    const bgMapComponent = this.mapComponentList.find(mc => mc.id === 'background-map');
-    this.mapFieldsUtils.displayComponent(bgMapComponent);
-    this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.EDIT_MAP));
-
-    const bindMapHoverCursor = () => {
-      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-        if (this.attackPlannerMode !== AttackPlannerMode.EDIT_MAP) return;
-        const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-        const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(this.getComponentData(bgMapComponent), this.backgroundImageObject);
-        const halfW = this.backgroundImageObject.width * scale / 2;
-        const halfH = this.backgroundImageObject.height * scale / 2;
-        const cos = Math.cos(rotation), sin = Math.sin(rotation);
-        const corner = (lx, ly) => ({ x: x + lx * cos - ly * sin, y: y + lx * sin + ly * cos });
-
-        this.updateCursor(pos.x, pos.y, [{ points: [corner(-halfW, -halfH), corner(+halfW, -halfH), corner(+halfW, +halfH), corner(-halfW, +halfH)] }]);
-      });
-    };
-    bindMapHoverCursor();
-
-    $(this.attackPlannerCanvas).off('wheel').on('wheel', (event) => {
-      event.preventDefault();
-      const bgData = this.getComponentData(bgMapComponent) || {};
-
-      const transform = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
-      bgData.x = transform.x;
-      bgData.y = transform.y;
-
-      if (event.originalEvent.altKey) {
-        bgData.scale = transform.scale;
-        bgData.rotation = transform.rotation + (event.originalEvent.deltaY < 0 ? -0.025 : 0.025);
-      } else {
-        bgData.scale = Math.max(0.01, transform.scale * (event.originalEvent.deltaY < 0 ? 1.025 : 1 / 1.025));
-        bgData.rotation = transform.rotation;
-      }
-
-      this.saveComponentData(bgMapComponent, bgData);
-      this.drawBackgroundMap();
-      this.update();
-    });
-
-    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
-      this.attackPlannerMode = AttackPlannerMode.DRAG_MAP;
-      $(this.attackPlannerCanvas).css('cursor', 'grabbing');
-
-      const bgData = this.getComponentData(bgMapComponent) || {};
-
-      const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const transform = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
-      const dragOffset = { x: clickPos.x - transform.x, y: clickPos.y - transform.y };
-
-      $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-        console.log('DRAG MAP MODE');
-
-        const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-        bgData.x = pos.x - dragOffset.x;
-        bgData.y = pos.y - dragOffset.y;
-        bgData.scale = bgData.scale ?? transform.scale;
-        bgData.rotation = bgData.rotation ?? transform.rotation;
-        this.saveComponentData(bgMapComponent, bgData);
-        this.drawBackgroundMap();
-        this.update();
-      });
-
-      $(this.attackPlannerCanvas).off('mouseup').on('mouseup', (event) => {
-        $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
-        this.attackPlannerMode = AttackPlannerMode.EDIT_MAP;
-
-        bindMapHoverCursor();
-
-        const bgData = this.getComponentData(bgMapComponent) || {};
-
-        const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-        const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(bgData, this.backgroundImageObject);
-        const halfW = this.backgroundImageObject.width * scale / 2;
-        const halfH = this.backgroundImageObject.height * scale / 2;
-        const cos = Math.cos(rotation), sin = Math.sin(rotation);
-        const corner = (lx, ly) => ({ x: x + lx * cos - ly * sin, y: y + lx * sin + ly * cos });
-        this.updateCursor(pos.x, pos.y, [{ points: [corner(-halfW, -halfH), corner(+halfW, -halfH), corner(+halfW, +halfH), corner(-halfW, +halfH)] }]);
-      });
-    });
-
-    this.update();
+    this.setMode(new MapMode(this));
   }
 
-  editBackgroundScale(field, data, component, fieldId) {
-    if (this.attackPlannerMode === AttackPlannerMode.EDIT_RULER) {
-      this.setSelectMode();
+  editBackgroundScale() {
+    if (this.activeMode instanceof RulerMode) {
+      this.setMode(new SelectMode(this));
       return;
     }
-
-    this.attackPlannerMode = AttackPlannerMode.EDIT_RULER;
-    const bgMapComponent = this.mapComponentList.find(mc => mc.id === 'background-map');
-    this.mapFieldsUtils.displayComponent(bgMapComponent);
-    this.mapFieldsUtils.showEditInstructions(this.attackPlannerUtils.getInstructionText(AttackPlannerMode.EDIT_RULER));
-    const bgData = this.getComponentData(bgMapComponent) || {};
-
-    // Initialize the points to their default positions.
-    if (!bgData['ruler-point-1'] || !bgData['ruler-point-2']) {
-      bgData['ruler-point-1'] = bgData['ruler-point-1'] ?? this.attackPlannerUtils.canvasToImage(this.width / 2, this.height / 2 - 50);
-      bgData['ruler-point-2'] = bgData['ruler-point-2'] ?? this.attackPlannerUtils.canvasToImage(this.width / 2, this.height / 2 + 50);
-
-      this.saveComponentData(bgMapComponent, bgData);
-    }
-
-    $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-      if (this.attackPlannerMode !== AttackPlannerMode.EDIT_RULER) return;
-      const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-      const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-      const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
-
-      this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
-    });
-
-    $(this.attackPlannerCanvas).off('mousedown').on('mousedown', (event) => {
-      const clickPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-      const hitPoint = this.attackPlannerUtils.getRulerPointHit(clickPos.x, clickPos.y, bgData['ruler-point-1'], bgData['ruler-point-2']);
-
-      let lastCanvasPos = { x: clickPos.x, y: clickPos.y };
-
-      if (hitPoint) {
-        this.attackPlannerMode = AttackPlannerMode.DRAG_RULER;
-
-        console.log('DRAG RULER MODE');
-
-        $(this.attackPlannerCanvas).css('cursor', 'grabbing');
-
-        $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-          const canvasPos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-          const curr = this.attackPlannerUtils.canvasToImage(canvasPos.x, canvasPos.y);
-          const last = this.attackPlannerUtils.canvasToImage(lastCanvasPos.x, lastCanvasPos.y);
-
-          const precision = event.altKey ? 0.1 : 1;
-          if (hitPoint === 1) {
-            bgData['ruler-point-1'].x += (curr.x - last.x) * precision;
-            bgData['ruler-point-1'].y += (curr.y - last.y) * precision;
-          } else {
-            bgData['ruler-point-2'].x += (curr.x - last.x) * precision;
-            bgData['ruler-point-2'].y += (curr.y - last.y) * precision;
-          }
-
-          lastCanvasPos = canvasPos;
-
-          this.saveComponentData(bgMapComponent, bgData);
-
-          this.update();
-        });
-
-        $(this.attackPlannerCanvas).off('mouseup').on('mouseup', (event) => {
-          $(this.attackPlannerCanvas).off('mousemove').off('mouseup');
-          this.attackPlannerMode = AttackPlannerMode.EDIT_RULER;
-
-          bgData['nm-per-image-pixel'] = this.attackPlannerUtils.computeRulerCalibration(bgData['ruler-point-1'], bgData['ruler-point-2'], bgData['rule-scale']);
-
-          this.saveComponentData(bgMapComponent, bgData);
-
-          this.update();
-
-          const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-          const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-          const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
-          this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
-
-          $(this.attackPlannerCanvas).off('mousemove').on('mousemove', (event) => {
-            if (this.attackPlannerMode !== AttackPlannerMode.EDIT_RULER) return;
-            const pos = this.utils.getCanvasClickPosition(event.clientX, event.clientY, $(this.attackPlannerCanvas)[0]);
-
-            const ruler1CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-1'].x, bgData['ruler-point-1'].y);
-            const ruler2CanvasPosition = this.attackPlannerUtils.imageToCanvas(bgData['ruler-point-2'].x, bgData['ruler-point-2'].y);
-
-            this.updateCursor(pos.x, pos.y, [{ ...ruler1CanvasPosition, size: 12 }, { ...ruler2CanvasPosition, size: 12 }]);
-          });
-        });
-      }
-    });
-
-    this.update();
+    this.setMode(new RulerMode(this, this.mapDrawUtils));
   }
 
   placeNavPoint(field, data, component, fieldId) {
-    if (this.attackPlannerMode != AttackPlannerMode.SELECT) {
-      return;
-    }
+    this.setMode(new PlaceMode(this, {
+      place: (imagePos) => {
+        const navPointsField = component.fields.find(f => f.id === 'nav-points');
+        if (!navPointsField) return;
 
-    console.log('PLACE MODE');
+        const mapComponent = this.mapComponentList.find(mc => mc.id === fieldId.split('.')[0]);
 
-    this.attackPlannerMode = AttackPlannerMode.PLACE;
+        const dataFieldId = fieldId.split('.');
+        dataFieldId.pop();
+        dataFieldId.push('nav-points');
 
-    $(this.attackPlannerCanvas).css('cursor', 'pointer');
+        const flightPlanIndex = $(`[data-field-id= '${dataFieldId.join('.')}']`).parent('.multiple-field-item').attr('data-index');
 
-    $(this.attackPlannerCanvas).off('click').on('click', (event) => {
-      $(this.attackPlannerCanvas).off('click');
+        this.mapFieldsUtils.addField(
+          mapComponent,
+          navPointsField,
+          [component.id, flightPlanIndex, 'nav-points'],
+          { x: imagePos.x, y: imagePos.y, size: 30 }
+        );
 
-      $(this.attackPlannerCanvas).css('cursor', 'default');
+        this.mapFieldsUtils.displayComponent(mapComponent);
+      }
+    }));
+  }
 
-      const clickPosition = this.utils.getCanvasClickPosition(
-        event.clientX,
-        event.clientY,
-        $(this.attackPlannerCanvas)[0]
-      );
+  placeComponentItem(field, data, component) {
+    this.setMode(new PlaceMode(this, {
+      place: (imagePos) => {
+        const itemField = component.fields.find(f => f.id === component.id);
+        if (!itemField) return;
 
-      const imageRelativePosition = this.attackPlannerUtils.canvasToImage(clickPosition.x, clickPosition.y)
+        this.mapFieldsUtils.addField(
+          component,
+          itemField,
+          [component.id],
+          { x: imagePos.x, y: imagePos.y }
+        );
 
-      const navPointsField = component.fields.find(f => f.id === 'nav-points');
-      if (!navPointsField) return;
-
-      const mapComponent = this.mapComponentList.find(mc => mc.id === fieldId.split('.')[0]);
-
-      const dataFieldId = fieldId.split('.');
-      dataFieldId.pop();
-      dataFieldId.push('nav-points');
-
-      // Find the index of the current flight plan
-      const flightPlanIndex = $(`[data-field-id= '${dataFieldId.join('.')}']`).parent('.multiple-field-item').attr('data-index');
-
-      this.mapFieldsUtils.addField(
-        mapComponent,
-        navPointsField,
-        [component.id, flightPlanIndex, 'nav-points'],
-        { x: imageRelativePosition.x, y: imageRelativePosition.y, size: 30 }
-      );
-
-      this.mapFieldsUtils.displayComponent(mapComponent);
-
-      this.setSelectMode();
-    });
+        this.mapFieldsUtils.displayComponent(component);
+      }
+    }));
   }
 
   drawBackgroundMap() {
@@ -1098,21 +821,6 @@ class AttackPlanner {
     if (this.backgroundImageObject) {
       const { x, y, scale, rotation } = this.attackPlannerUtils.getBackgroundTransform(this.getComponentData(this.mapComponentList.find(mc => mc.id === 'background-map')), this.backgroundImageObject);
       this.backgroundMapDrawUtils.drawImage(this.backgroundImageObject, x, y, scale, rotation);
-    }
-  }
-
-  drawRuler(rulerPoint1, rulerPoint2) {
-    if (rulerPoint1 && rulerPoint2) {
-      this.mapDrawUtils.drawLine(rulerPoint1.x, rulerPoint1.y, rulerPoint2.x, rulerPoint2.y, 'white', 6);
-      this.mapDrawUtils.drawLine(rulerPoint1.x, rulerPoint1.y, rulerPoint2.x, rulerPoint2.y, 'black', 3);
-    }
-    if (rulerPoint1) {
-      this.mapDrawUtils.drawCircle(rulerPoint1.x, rulerPoint1.y, 20, 6, 'white', true);
-      this.mapDrawUtils.drawCircle(rulerPoint1.x, rulerPoint1.y, 20, 3, 'black');
-    }
-    if (rulerPoint2) {
-      this.mapDrawUtils.drawCircle(rulerPoint2.x, rulerPoint2.y, 20, 6, 'white', true);
-      this.mapDrawUtils.drawCircle(rulerPoint2.x, rulerPoint2.y, 20, 3, 'black');
     }
   }
 
@@ -1134,6 +842,8 @@ class AttackPlanner {
     const flightPlansData = this.getComponentData(component);
     if (!flightPlansData?.['flight-plans']?.length) return;
 
+    const color = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0]
+
     flightPlansData['flight-plans'].forEach((flightPlanData, fpIdx) => {
       const navPoints = flightPlanData['nav-points'];
       if (!navPoints?.length) return;
@@ -1147,52 +857,165 @@ class AttackPlanner {
         const nextNavPoint = navPoints[i + 1];
         const navPointCanvasPosition = this.attackPlannerUtils.imageToCanvas(navPoint.x, navPoint.y);
 
+        this.interactiveTargets.push(this.attackPlannerUtils.makeNavPointTarget(navPoint, ['flight-plans', 'flight-plans', fpIdx, 'nav-points', i]));
+
         if (nextNavPoint) {
           const nextNavPointCanvasPosition = this.attackPlannerUtils.imageToCanvas(nextNavPoint.x, nextNavPoint.y);
           const legStart = turnTangents[i] ? turnTangents[i].T2 : navPointCanvasPosition;
           const legEnd = turnTangents[i + 1] ? turnTangents[i + 1].T1 : nextNavPointCanvasPosition;
-          this.flightPlanUtils.drawLeg(legStart, legEnd);
+          this.flightPlanUtils.drawLeg(legStart, legEnd, color);
           if (nextNavPoint['show-leg-heading']) {
             const headingText = this.flightPlanUtils.computeLegHeadingText(legStart, legEnd, mapOrientation, magneticDeclination, trueNorth);
             if (headingText) {
-              this.pendingLabels.push({
-                type: 'heading-label',
-                legStart: { x: legStart.x, y: legStart.y },
-                legEnd: { x: legEnd.x, y: legEnd.y },
-                headingText,
-                navPoint: nextNavPoint,
-                componentPath: ['flight-plans', 'flight-plans', fpIdx, 'nav-points', i + 1],
-              });
+              this.interactiveTargets.push(this.attackPlannerUtils.makeHeadingLabelTarget(
+                nextNavPoint,
+                ['flight-plans', 'flight-plans', fpIdx, 'nav-points', i + 1],
+                { x: legStart.x, y: legStart.y },
+                { x: legEnd.x, y: legEnd.y },
+                headingText
+              ));
             }
           }
           const effectiveTarget = this.flightPlanUtils.getEffectiveLegTarget(navPoints, turnTangents, i, this.nmPerImagePixel, scale);
-          this.flightPlanUtils.drawLegInfo(legStart, legEnd, navPoints, i, turnTangents, this.nmPerImagePixel, scale, effectiveTarget);
+          this.flightPlanUtils.drawLegInfo(legStart, legEnd, navPoints, i, turnTangents, this.nmPerImagePixel, scale, effectiveTarget, color);
         }
 
         switch (navPoint.type) {
           case NavPointType.TURN:
-            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
+            this.flightPlanUtils.drawTurnArc(turnTangents[i], color);
+            if (this.showTurnPoints) {
+              this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TURNING_POINT, 12, 3, color);
+            }
             break;
           case NavPointType.TURNING_POINT:
-            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
-            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TURNING_POINT, navPoint.size, 4, 'black');
+            this.flightPlanUtils.drawTurnArc(turnTangents[i], color);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TURNING_POINT, navPoint.size, 4, color);
             break;
           case NavPointType.INITIAL_POINT:
-            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
-            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.INITIAL_POINT, navPoint.size, 4, 'black');
+            this.flightPlanUtils.drawTurnArc(turnTangents[i], color);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.INITIAL_POINT, navPoint.size, 4, color);
             break;
           case NavPointType.TARGET_POINT:
-            this.flightPlanUtils.drawTurnArc(turnTangents[i]);
-            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TARGET_POINT, navPoint.size, 4, 'black');
+            this.flightPlanUtils.drawTurnArc(turnTangents[i], color);
+            this.mapDrawUtils.drawNavPoint(navPointCanvasPosition.x, navPointCanvasPosition.y, NavPointType.TARGET_POINT, navPoint.size, 4, color);
             break;
         }
 
         if (navPoint.type !== NavPointType.TURN && navPoint.name) {
-          this.pendingLabels.push({ x: navPointCanvasPosition.x, y: navPointCanvasPosition.y, navPoint });
+          this.interactiveTargets.push(this.attackPlannerUtils.makeNameLabelTarget(navPoint, ['flight-plans', 'flight-plans', fpIdx, 'nav-points', i]));
         }
       }
 
       this.mapDrawUtils.unclipCanvas();
+    });
+  }
+
+  drawPopupPlan(component, mapOrientation, magneticDeclination, trueNorth) {
+    const popupPlansData = this.getComponentData(component);
+    if (!popupPlansData?.['popup-plan']?.length) return;
+
+    const color = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
+
+    popupPlansData['popup-plan'].forEach((popupPlan, index) => {
+      // Skip un-placed entries (e.g. the empty placeholder the form re-inserts
+      // after the last item is deleted) — only draw plans with a position.
+      if (popupPlan.x === undefined || popupPlan.y === undefined) return;
+
+      this.interactiveTargets.push(this.attackPlannerUtils.makePopupPlanTarget(popupPlan, ['popup-plan', 'popup-plan', index]));
+
+      const origin = this.attackPlannerUtils.imageToCanvas(popupPlan.x, popupPlan.y);
+      this.mapDrawUtils.drawPopupPlan(origin.x, origin.y, {
+        offsetTurnDistance: popupPlan['offset-turn-distance'],
+        initiatePopupDistance: popupPlan['initiate-popup-distance'],
+        startAltitude: popupPlan['start-altitude'],
+        rollOverAltitude: popupPlan['roll-over-altitude'],
+        apogeeAltitude: popupPlan['apogee-altitude'],
+        designateMinAltitude: popupPlan['designate-minimum-altitude'],
+        minReleaseAltitude: popupPlan['minimum-release-altitude'],
+      }, color);
+    });
+  }
+
+  drawBlastIndicator(component, mapOrientation, magneticDeclination, trueNorth) {
+    const blastIndicatorData = this.getComponentData(component);
+    if (!blastIndicatorData?.['blast-indicator']?.length) return;
+
+    const color = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
+
+    blastIndicatorData['blast-indicator'].forEach((blastIndicator, index) => {
+      // Skip un-placed entries (e.g. the empty placeholder the form re-inserts
+      // after the last item is deleted) — only draw plans with a position.
+      if (blastIndicator.x === undefined || blastIndicator.y === undefined) return;
+
+      this.interactiveTargets.push(this.attackPlannerUtils.makeBlastIndicatorTarget(blastIndicator, ['blast-indicator', 'blast-indicator', index]));
+
+      const origin = this.attackPlannerUtils.imageToCanvas(blastIndicator.x, blastIndicator.y);
+      this.mapDrawUtils.drawBlastIndicator(origin.x, origin.y, blastIndicator['weapon-name'], blastIndicator['blast-height'], blastIndicator['blast-radius'], color);
+    });
+  }
+
+  drawFuelPlan(component, mapOrientation, magneticDeclination, trueNorth) {
+    const fuelPlanData = this.getComponentData(component);
+    if (!fuelPlanData?.['fuel-plan']?.length) return;
+
+    const color = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
+
+    fuelPlanData['fuel-plan'].forEach((fuelPlan, index) => {
+      if (fuelPlan.x === undefined || fuelPlan.y === undefined) return;
+
+      this.interactiveTargets.push(this.attackPlannerUtils.makeFuelPlanTarget(fuelPlan, ['fuel-plan', 'fuel-plan', index]));
+
+      const origin = this.attackPlannerUtils.imageToCanvas(fuelPlan.x, fuelPlan.y);
+      this.mapDrawUtils.drawFuelPlan(origin.x, origin.y, fuelPlan['estimated-fuel'], fuelPlan['minimum-fuel'], color);
+    });
+  }
+
+  placeArrow(field, data, component, fieldId) {
+    this.setMode(new PlaceMode(this, {
+      place: (imagePos) => {
+        const arrowField = component.fields.find(f => f.id === 'arrow');
+        if (!arrowField) return;
+        this.mapFieldsUtils.addField(
+          component,
+          arrowField,
+          [component.id],
+          { 'x-start': imagePos.x - 100, 'y-start': imagePos.y, 'x-end': imagePos.x + 100, 'y-end': imagePos.y }
+        );
+        this.mapFieldsUtils.displayComponent(component);
+      }
+    }));
+  }
+
+  drawArrow(component, mapOrientation, magneticDeclination, trueNorth) {
+    const arrowData = this.getComponentData(component);
+    if (!arrowData?.['arrow']?.length) return;
+
+    const color = this.darkMode ? this.defaultLineColor[1] : this.defaultLineColor[0];
+
+    arrowData['arrow'].forEach((arrow, index) => {
+      if (arrow['x-start'] === undefined || arrow['y-start'] === undefined ||
+        arrow['x-end'] === undefined || arrow['y-end'] === undefined) return;
+
+      this.interactiveTargets.push(this.attackPlannerUtils.makeArrowEndpointTarget(arrow, ['arrow', 'arrow', index], 'start'));
+      this.interactiveTargets.push(this.attackPlannerUtils.makeArrowEndpointTarget(arrow, ['arrow', 'arrow', index], 'end'));
+
+      const start = this.attackPlannerUtils.imageToCanvas(arrow['x-start'], arrow['y-start']);
+      const end = this.attackPlannerUtils.imageToCanvas(arrow['x-end'], arrow['y-end']);
+
+      let distanceLabel = null;
+      if (arrow.type?.includes('distance') && this.nmPerImagePixel) {
+        const dist = Math.hypot(arrow['x-end'] - arrow['x-start'], arrow['y-end'] - arrow['y-start']) * this.nmPerImagePixel;
+        distanceLabel = dist < 100 ? `${dist.toFixed(1)} NM` : `${Math.round(dist)} NM`;
+      }
+
+      this.mapDrawUtils.drawMapArrow(start.x, start.y, end.x, end.y, arrow.type ?? 'double-arrow', distanceLabel, color);
+
+      const selectedPath = this.resolveSelectedTarget()?.componentPath;
+      const arrowSelected = selectedPath?.[0] === 'arrow' && selectedPath?.[2] === index;
+      if (this.showArrowPoints || arrowSelected) {
+        this.mapDrawUtils.drawNavPoint(start.x, start.y, NavPointType.TURNING_POINT, 12, 3, color);
+        this.mapDrawUtils.drawNavPoint(end.x, end.y, NavPointType.TURNING_POINT, 12, 3, color);
+      }
     });
   }
 
@@ -1228,7 +1051,7 @@ class AttackPlanner {
   }
 
   saveComponentData(mapComponent, componentData) {
-    // Persist into a single object under 'bullseye-map-data'
+    // Persist into a single object under 'attack-planner-data'
     let store = {};
     try {
       store = JSON.parse(localStorage.getItem(this.attackPlannerDataKey)) || {};
@@ -1247,6 +1070,8 @@ class AttackPlanner {
     const attackPlannerData = await this.utils.importData();
 
     if (attackPlannerData) {
+      this.mapFieldsUtils.displayComponentListButtons();
+
       const { mapData, backgroundData } = attackPlannerData;
 
       localStorage.setItem(this.attackPlannerDataKey, mapData);
@@ -1342,48 +1167,6 @@ class AttackPlanner {
     }
   }
 
-  getObjectBounds(object) {
-    const points = []
-
-    const canvasRelativePosition = this.attackPlannerUtils.imageToCanvas(object.x, object.y)
-
-    switch (object.type) {
-      case MapObjectType.TURN:
-      case MapObjectType.TURNING_POINT:
-      case MapObjectType.INITIAL_POINT:
-      case MapObjectType.TARGET_POINT:
-        const radius = object.size / 2;
-        points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y - radius });
-        points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y - radius });
-        points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y + radius });
-        points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y + radius });
-        break;
-    }
-
-    return points
-  }
-
-  getMapComponents(components) {
-    const objects = [];
-    const recurse = (value, path) => {
-      if (Array.isArray(value)) {
-        value.forEach((item, index) => {
-          recurse(item, [...path, index]);
-        });
-      } else if (value && typeof value === 'object') {
-        if (Object.values(NavPointType).includes(value.type)) {
-          objects.push({ path: [...path], component: value });
-        }
-        for (const [key, child] of Object.entries(value)) {
-          recurse(child, [...path, key]);
-        }
-      }
-    };
-    recurse(components, []);
-
-    return objects;
-  }
-
   syncBankAngleLoadFactor(value, navPointData, fieldId, target) {
     const parsed = parseFloat(value);
     if (isNaN(parsed)) return;
@@ -1399,17 +1182,5 @@ class AttackPlanner {
       navPointData['bank-angle'] = bankAngle;
       navPointItem.find('[id$=".bank-angle"]').val(bankAngle);
     }
-  }
-
-  getComponentLabelOffsetAngle(component) {
-    return ((component['name-position'] ?? 270) - 90) * Math.PI / 180;
-  }
-
-  getComponentLabelBounds(component) {
-    if (!component.name) return [];
-    const pos = this.attackPlannerUtils.imageToCanvas(component.x, component.y);
-    const offsetAngle = this.getComponentLabelOffsetAngle(component);
-    const offsetDistance = (component.size ?? 30) / 2 + 12;
-    return this.mapDrawUtils.getTextBounds(pos.x, pos.y, component.name, 18, offsetDistance, offsetAngle, 2);
   }
 }

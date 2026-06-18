@@ -76,22 +76,200 @@ class AttackPlannerUtils {
         );
     }
 
-    getInstructionText(mode) {
-        switch (mode) {
-            case AttackPlannerMode.EDIT_MAP:
-            case AttackPlannerMode.DRAG_MAP:
-                return 'Drag to move the map. Scroll to zoom, Alt+Scroll to rotate.';
-            case AttackPlannerMode.EDIT_RULER:
-            case AttackPlannerMode.DRAG_RULER:
-                return 'Drag an endpoint to set the scale reference.';
-            case AttackPlannerMode.EDIT:
-            case AttackPlannerMode.DRAG:
-                return 'Drag to move the nav point.';
-            case AttackPlannerMode.EDIT_LABEL:
-            case AttackPlannerMode.DRAG_LABEL:
-                return 'Drag to reposition the label around the nav point.';
-            default:
-                return null;
+    getObjectBounds(object) {
+        const points = []
+
+        const canvasRelativePosition = this.imageToCanvas(object.x, object.y)
+
+        switch (object.type) {
+            case MapObjectType.TURN:
+            case MapObjectType.TURNING_POINT:
+            case MapObjectType.INITIAL_POINT:
+            case MapObjectType.TARGET_POINT:
+                const radius = object.size / 2;
+                points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y - radius });
+                points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y - radius });
+                points.push({ x: canvasRelativePosition.x + radius, y: canvasRelativePosition.y + radius });
+                points.push({ x: canvasRelativePosition.x - radius, y: canvasRelativePosition.y + radius });
+                break;
         }
+
+        return points
+    }
+
+    getComponentLabelOffsetAngle(component) {
+        return ((component['name-position'] ?? 270) - 90) * Math.PI / 180;
+    }
+
+    getComponentLabelBounds(component) {
+        if (!component.name) return [];
+        const pos = this.imageToCanvas(component.x, component.y);
+        const offsetAngle = this.getComponentLabelOffsetAngle(component);
+        const offsetDistance = (component.size ?? 30) / 2 + 12;
+        return this.mapDrawUtils.getTextBounds(pos.x, pos.y, component.name, 18, offsetDistance, offsetAngle, 2);
+    }
+
+    createBoundingBox(center, halfW, halfH) {
+        return [
+            { x: center.x - halfW, y: center.y - halfH },
+            { x: center.x + halfW, y: center.y - halfH },
+            { x: center.x + halfW, y: center.y + halfH },
+            { x: center.x - halfW, y: center.y + halfH },
+        ];
+    }
+
+    makeDragHandlers(object, xKey = 'x', yKey = 'y') {
+        const apu = this;
+        return {
+            onDragStart(pos) { this.lastCanvas = pos; },
+            applyDrag(pos, event) {
+                const curr = apu.canvasToImage(pos.x, pos.y);
+                const last = apu.canvasToImage(this.lastCanvas.x, this.lastCanvas.y);
+                const precision = event.altKey ? 0.1 : 1;
+                object[xKey] += (curr.x - last.x) * precision;
+                object[yKey] += (curr.y - last.y) * precision;
+                this.lastCanvas = pos;
+            },
+        };
+    }
+
+    getPopupPlanBounds(popupPlan) {
+        if (popupPlan.x === undefined || popupPlan.y === undefined) return [];
+        const center = this.imageToCanvas(popupPlan.x, popupPlan.y);
+        return this.createBoundingBox({ x: center.x - 12, y: center.y }, 65, 30);
+    }
+
+    getBlastIndicatorBounds(blastIndicator) {
+        if (blastIndicator.x === undefined || blastIndicator.y === undefined) return [];
+        const center = this.imageToCanvas(blastIndicator.x, blastIndicator.y);
+        return this.createBoundingBox({ x: center.x, y: center.y - 12 }, 60, 30);
+    }
+
+    getArrowEndpointBounds(arrow, endpoint) {
+        const xKey = endpoint === 'start' ? 'x-start' : 'x-end';
+        const yKey = endpoint === 'start' ? 'y-start' : 'y-end';
+        if (arrow[xKey] === undefined || arrow[yKey] === undefined) return [];
+        const p = this.imageToCanvas(arrow[xKey], arrow[yKey]);
+        return this.createBoundingBox(p, 10, 10);
+    }
+
+    getFuelPlanBounds(fuelPlan) {
+        if (fuelPlan.x === undefined || fuelPlan.y === undefined) return [];
+        const center = this.imageToCanvas(fuelPlan.x, fuelPlan.y);
+        return this.createBoundingBox(center, 55, 30);
+    }
+
+    makeNavPointTarget(navPoint, componentPath) {
+        const apu = this;
+        return {
+            kind: 'nav-point',
+            componentPath,
+            navPoint,
+            outlineWidth: 4,
+            outlineFilled: true,
+            instructions: 'Click and drag to move the nav-point. Use ALT for finer adjustments.',
+            getBounds: () => apu.getObjectBounds(navPoint),
+            ...apu.makeDragHandlers(navPoint),
+        };
+    }
+
+    makeMovableTarget(kind, navPoint, componentPath, boundsGetter) {
+        const apu = this;
+        return {
+            kind,
+            componentPath,
+            navPoint,
+            outlineWidth: 2,
+            outlineFilled: false,
+            instructions: 'Click and drag to move. Use ALT for finer adjustments.',
+            getBounds: boundsGetter,
+            ...apu.makeDragHandlers(navPoint),
+        };
+    }
+
+    makePopupPlanTarget(popupPlan, componentPath) {
+        return this.makeMovableTarget('popup-plan', popupPlan, componentPath, () => this.getPopupPlanBounds(popupPlan));
+    }
+
+    makeBlastIndicatorTarget(blastIndicator, componentPath) {
+        return this.makeMovableTarget('blast-indicator', blastIndicator, componentPath, () => this.getBlastIndicatorBounds(blastIndicator));
+    }
+
+    makeFuelPlanTarget(fuelPlan, componentPath) {
+        return this.makeMovableTarget('fuel-plan', fuelPlan, componentPath, () => this.getFuelPlanBounds(fuelPlan));
+    }
+
+    makeArrowEndpointTarget(arrow, componentPath, endpoint) {
+        const apu = this;
+        const xKey = endpoint === 'start' ? 'x-start' : 'x-end';
+        const yKey = endpoint === 'start' ? 'y-start' : 'y-end';
+        return {
+            kind: endpoint === 'start' ? 'arrow-start' : 'arrow-end',
+            componentPath,
+            navPoint: arrow,
+            outlineWidth: 2,
+            outlineFilled: false,
+            instructions: 'Click and drag to move the arrow endpoints. Use ALT for finer adjustments.',
+            getBounds: () => apu.getArrowEndpointBounds(arrow, endpoint),
+            ...apu.makeDragHandlers(arrow, xKey, yKey),
+        };
+    }
+
+    makeNameLabelTarget(navPoint, componentPath) {
+        const apu = this;
+        return {
+            kind: 'name-label',
+            componentPath,
+            navPoint,
+            outlineWidth: 2,
+            outlineFilled: false,
+            instructions: 'Click and drag to move the label around the nav point.',
+            getBounds: () => apu.getComponentLabelBounds(navPoint),
+            applyDrag(pos) {
+                const center = apu.imageToCanvas(navPoint.x, navPoint.y);
+                const angle = Math.atan2(pos.y - center.y, pos.x - center.x);
+                navPoint['name-position'] = ((angle * 180 / Math.PI) + 90 + 360) % 360;
+            },
+            draw() {
+                const center = apu.imageToCanvas(navPoint.x, navPoint.y);
+                const offsetAngle = apu.getComponentLabelOffsetAngle(navPoint);
+                const offsetDistance = (navPoint.size ?? 30) / 2 + 12;
+                const fillColor = apu.attackPlanner.darkMode ? apu.attackPlanner.backgroundColor[1] : apu.attackPlanner.backgroundColor[0];
+                const textColor = apu.attackPlanner.darkMode ? apu.attackPlanner.backgroundColor[0] : apu.attackPlanner.backgroundColor[1];
+                const borderColor = textColor;
+                apu.mapDrawUtils.drawText(center.x, center.y, navPoint.name, 'square', 18, offsetDistance, offsetAngle, 0, 2, fillColor, textColor, borderColor);
+            },
+        };
+    }
+
+    makeHeadingLabelTarget(navPoint, componentPath, legStart, legEnd, headingText) {
+        const apu = this;
+        const position = () => navPoint['leg-heading-position'] ?? 0.5;
+        const side = () => navPoint['leg-heading-side'] ?? 1;
+        return {
+            kind: 'heading-label',
+            componentPath,
+            navPoint,
+            outlineWidth: 2,
+            outlineFilled: false,
+            instructions: 'Click and drag to move the leg heading along the leg.',
+            getBounds: () => apu.mapDrawUtils.getLegHeadingBounds(legStart.x, legStart.y, legEnd.x, legEnd.y, headingText, position(), side()),
+            applyDrag(pos) {
+                const dx = legEnd.x - legStart.x;
+                const dy = legEnd.y - legStart.y;
+                const legLen = Math.hypot(dx, dy);
+                if (legLen === 0) return;
+                const ux = dx / legLen;
+                const uy = dy / legLen;
+                const mx = pos.x - legStart.x;
+                const my = pos.y - legStart.y;
+                navPoint['leg-heading-position'] = Math.max(0.05, Math.min(0.95, (mx * ux + my * uy) / legLen));
+                navPoint['leg-heading-side'] = (mx * uy - my * ux) >= 0 ? 1 : -1;
+            },
+            draw() {
+                const lineColor = apu.attackPlanner.darkMode ? apu.attackPlanner.defaultLineColor[1] : apu.attackPlanner.defaultLineColor[0];
+                apu.mapDrawUtils.drawLegHeading(legStart.x, legStart.y, legEnd.x, legEnd.y, headingText, position(), side(), lineColor);
+            },
+        };
     }
 }

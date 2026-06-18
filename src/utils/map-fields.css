@@ -184,9 +184,15 @@ body .container .tabs-container .tabs {
             display: none;
           }
 
-          .sidebar-edit-instructions-text {
-            padding: 10px 5px;
-            line-height: 1.5;
+          .sidebar-edit-instructions-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .sidebar-edit-instructions-text {
+              padding: 10px 5px;
+              line-height: 1.5;
+            }
           }
         }
       }

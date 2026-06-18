@@ -169,6 +169,7 @@ class AttackPlannerFlightPlanUtils {
     // This is used to phase-shift the time bar so it reads as a continuous count from the origin.
     getAccumulatedTimeFromOrigin(navPoints, turnTangents, legIndex, nmPerImagePixel, scale) {
         if (!nmPerImagePixel) return 0;
+        if (legIndex === 0) return 0;
         const nmToCanvasPx = scale / nmPerImagePixel;
 
         // Walk backward to find the last non-TURN nav point before legIndex
@@ -210,13 +211,13 @@ class AttackPlannerFlightPlanUtils {
         return accTimeSec;
     }
 
-    drawLeg(legStart, legEnd) {
-        this.mapDrawUtils.drawLine(legStart.x, legStart.y, legEnd.x, legEnd.y, 'black', 4);
+    drawLeg(legStart, legEnd, color = 'black') {
+        this.mapDrawUtils.drawLine(legStart.x, legStart.y, legEnd.x, legEnd.y, color, 4);
     }
 
     // navPoints and legIndex are required to support the continuation time bar and
     // the accumulated-time phase-shift across TURN legs.
-    drawLegInfo(legStart, legEnd, navPoints, legIndex, turnTangents, nmPerImagePixel, scale, effectiveTarget = null) {
+    drawLegInfo(legStart, legEnd, navPoints, legIndex, turnTangents, nmPerImagePixel, scale, effectiveTarget, color = 'black') {
         const navPoint = navPoints[legIndex];
         const nextNavPoint = navPoints[legIndex + 1];
         const turnTangentCurr = turnTangents[legIndex];
@@ -228,9 +229,9 @@ class AttackPlannerFlightPlanUtils {
         const nmToCanvasPx = scale / nmPerImagePixel;
         const sliderValue = parseInt(nextNavPoint['leg-information-scale'] ?? 50);
         const targetPxPerTick = 300 * Math.pow(20 / 300, sliderValue / 100);
-        const showDistance = ['distance', 'both'].includes(nextNavPoint['leg-information']);
-        const showTime = ['time', 'both'].includes(nextNavPoint['leg-information']);
-
+        const showDistance = ['distance', 'distance-time', 'distance-duration'].includes(nextNavPoint['leg-information']);
+        const showTime = ['time', 'distance-time'].includes(nextNavPoint['leg-information']);
+        const showDuration = ['duration', 'distance-duration'].includes(nextNavPoint['leg-information']);
         const startArcNm = turnTangentCurr
             ? this.arcLengthNm(turnTangentCurr, nmToCanvasPx) * (turnTangentCurr.overfly ? 1 : 0.5)
             : 0;
@@ -249,9 +250,26 @@ class AttackPlannerFlightPlanUtils {
         const endSymbolMarginPx = (nextNavPoint?.size ?? 0) / 2 + symbolPad;
 
         if (showDistance) {
+            const showTurnInit = !!turnTangentNext && nextNavPoint.type == NavPointType.TURN;
+            const turnInitMarginPx = showTurnInit ? 15 : 0;
+
             const idealStepNm = targetPxPerTick / nmToCanvasPx;
             const stepNm = this.attackPlannerUtils.nearestStep(DISTANCE_STEPS_NM, idealStepNm);
             const stepPx = stepNm * nmToCanvasPx;
+
+            if (showTurnInit) {
+                const turnInitDistNm = effectiveTarget
+                    ? Math.hypot(legEnd.x - effectiveTarget.canvasPos.x, legEnd.y - effectiveTarget.canvasPos.y) / nmToCanvasPx
+                    : turnTangentNext.tangentLengthIn / nmToCanvasPx;
+                const turnInitLabel = turnInitDistNm < 100
+                    ? turnInitDistNm.toFixed(1)
+                    : `${Math.round(turnInitDistNm)}`;
+                this.mapDrawUtils.drawLegMarkerAt(
+                    legStart.x, legStart.y, legEnd.x, legEnd.y,
+                    legEnd.x, legEnd.y,
+                    turnInitLabel, color, 1
+                );
+            }
 
             if (effectiveTarget) {
                 // Ticks placed at exact positions on the leg where straight-line distance
@@ -263,7 +281,7 @@ class AttackPlannerFlightPlanUtils {
                     legEnd.x, legEnd.y,
                     effectiveTarget.canvasPos.x, effectiveTarget.canvasPos.y,
                     stepNm, nmToCanvasPx,
-                    'black', +1, startSymbolMarginPx, 0
+                    color, +1, startSymbolMarginPx, turnInitMarginPx
                 );
             } else {
                 const distOffsetPx = endArcNm * nmToCanvasPx;
@@ -273,7 +291,7 @@ class AttackPlannerFlightPlanUtils {
                     legStart.x, legStart.y,
                     stepPx,
                     (i) => `${i * stepNm}`,
-                    'black', -1, distOffsetPx, startSymbolMarginPx
+                    color, -1, distOffsetPx + turnInitMarginPx, startSymbolMarginPx
                 );
             }
         }
@@ -285,6 +303,8 @@ class AttackPlannerFlightPlanUtils {
                 const stepSec = this.attackPlannerUtils.nearestStep(TIME_STEPS_SEC, idealStepSec);
                 const stepNm = stepSec * groundSpeed / 3600;
                 const stepPx = stepNm * nmToCanvasPx;
+                // legEnd is T1 when next point is a TURN — no symbol lives there, so no margin.
+                const timeEndMarginPx = turnTangentNext ? 0 : endSymbolMarginPx;
 
                 if (navPoint.type === NavPointType.TURN) {
                     // This is a leg between two TURN points.  The time bar continues from
@@ -301,7 +321,7 @@ class AttackPlannerFlightPlanUtils {
                         legEnd.x, legEnd.y,
                         stepPx,
                         (i) => this.utils.formatTimeLabel((i + k0t) * stepSec),
-                        'black', -1, totalSkipPx, endSymbolMarginPx
+                        color, -1, totalSkipPx, timeEndMarginPx
                     );
                 } else {
                     // Normal time bar (also used for the first leg entering a TURN sequence).
@@ -312,9 +332,18 @@ class AttackPlannerFlightPlanUtils {
                         legEnd.x, legEnd.y,
                         stepPx,
                         (i) => this.utils.formatTimeLabel(i * stepSec),
-                        'black', -1, timeOffsetPx, endSymbolMarginPx
+                        color, -1, timeOffsetPx, timeEndMarginPx
                     );
                 }
+            }
+        }
+        if (showDuration) {
+            const groundSpeed = parseFloat(nextNavPoint['ground-speed']);
+            if (groundSpeed > 0) {
+                const legLenNm = legLenPx / nmToCanvasPx;
+                const durationSec = Math.round(legLenNm / groundSpeed * 3600);
+                const durationText = this.utils.formatTimeLabel(durationSec);
+                this.mapDrawUtils.drawLegDuration(legStart.x, legStart.y, legEnd.x, legEnd.y, durationText, color);
             }
         }
     }
@@ -331,9 +360,9 @@ class AttackPlannerFlightPlanUtils {
         return String(headingRounded).padStart(3, '0');
     }
 
-    drawTurnArc(turnTangent) {
+    drawTurnArc(turnTangent, color = 'black') {
         if (!turnTangent) return;
         const { center, R, startAngle, endAngle, clockwise } = turnTangent;
-        this.mapDrawUtils.drawTurnArc(center.x, center.y, R, startAngle, endAngle, clockwise, 'black', 4);
+        this.mapDrawUtils.drawTurnArc(center.x, center.y, R, startAngle, endAngle, clockwise, color, 4);
     }
 }

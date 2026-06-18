@@ -54,8 +54,12 @@ class MapFieldsUtils {
         $(this.componentHeader).find('.sidebar-component-name').text(mapComponent.label);
         $(this.componentHeader).find('.sidebar-component-back-button')
             .off('click')
-            .on('click', () => this.displayComponentListButtons());
+            .on('click', () => {
+                mapComponent.pageToggleFunction?.(false);
+                this.displayComponentListButtons();
+            });
         $(this.componentDescription).text(mapComponent.description ?? '');
+        mapComponent.pageToggleFunction?.(true);
 
         // Clear previous content
         $(this.componentContainer).find('.sidebar-component-fields-container, .sidebar-sub-components-container').remove();
@@ -253,6 +257,8 @@ class MapFieldsUtils {
 
                     for (let i = 0; i < pathParts.length - 1; i++) {
                         const part = pathParts[i];
+                        if (!isNaN(part)) continue;
+
                         if (!target[part]) target[part] = [];
 
                         if (Array.isArray(target[part])) {
@@ -322,7 +328,7 @@ class MapFieldsUtils {
             itemContainer.append(dragHandle);
         }
 
-        this.renderFields(itemContainer, field, data, fieldId);
+        this.renderFields(itemContainer, field, data, `${fieldId}.${index}`);
 
         if (field.options?.repeatable || field.options?.deletable) {
             const deleteButton = $('<button class="delete-button">−</button>');
@@ -398,6 +404,7 @@ class MapFieldsUtils {
 
         for (let i = 0; i < pathParts.length; i++) {
             const pathPart = pathParts[i];
+            if (!isNaN(pathPart)) continue;
             currentFieldDef = currentFieldDef.fields.find(f => f.id === pathPart);
 
             if (currentFieldDef?.type === 'multiple') {
@@ -477,6 +484,7 @@ class MapFieldsUtils {
 
             for (let i = 0; i < pathParts.length - 1; i++) {
                 const part = pathParts[i];
+                if (!isNaN(part)) continue;
 
                 if (Array.isArray(target)) {
                     // target is already an array, index into it
@@ -517,8 +525,10 @@ class MapFieldsUtils {
                 $(el).data('index', idx);
             });
 
-            // If wrapper is now empty, insert a default item
-            if (wrapper.find('> .multiple-field-item').length === 0) {
+            // If wrapper is now empty, insert a default item — but only when this
+            // tab keeps at least one empty item (emptyComponents). Otherwise the
+            // array is left genuinely empty rather than re-seeding a blank entry.
+            if (this.emptyComponents && wrapper.find('> .multiple-field-item').length === 0) {
                 const field = this.findFieldByPath(mapComponent, fieldId);
 
                 let newItemData = {};
@@ -568,6 +578,7 @@ class MapFieldsUtils {
                 fieldId += '.' + field;
                 component = component.find(`.multiple-field-wrapper[data-field-id='${fieldId}']`)
             } else if (typeof field == 'number') {
+                fieldId += '.' + field;
                 component = component.find(`.multiple-field-item[data-index='${field}']`)
             }
         });

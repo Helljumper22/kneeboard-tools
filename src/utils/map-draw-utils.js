@@ -713,6 +713,459 @@ class MapDrawUtils {
     this.ctx.restore();
   }
 
+  drawLegDuration(legStartX, legStartY, legEndX, legEndY, durationText, color = 'black', side = -1) {
+    const dx = legEndX - legStartX;
+    const dy = legEndY - legStartY;
+    const legLenPx = Math.hypot(dx, dy);
+    if (legLenPx < 20) return;
+
+    const ux = dx / legLenPx;
+    const uy = dy / legLenPx;
+    const rx = uy * side;
+    const ry = -ux * side;
+
+    // Same text-angle orientation rules as drawLegMarkers, but applied to the leg
+    // direction (ux, uy) so the label reads along the arrow, not perpendicular to it.
+    let textAngle = Math.atan2(uy, ux);
+    if (textAngle > Math.PI / 2) textAngle -= Math.PI;
+    else if (textAngle < -Math.PI / 2) textAngle += Math.PI;
+
+    const offsetPx = 20;
+    const arrowSize = 10;
+    const ax1 = legStartX + rx * offsetPx;
+    const ay1 = legStartY + ry * offsetPx;
+    const ax2 = legEndX + rx * offsetPx;
+    const ay2 = legEndY + ry * offsetPx;
+    const mx = (ax1 + ax2) / 2;
+    const my = (ay1 + ay2) / 2;
+
+    this.ctx.save();
+    this.ctx.font = '20px sans-serif';
+    const textWidth = this.ctx.measureText(durationText).width;
+    const halfClear = textWidth / 2 + 5;
+
+    if (legLenPx < halfClear * 2 + arrowSize * 2 + 4) { this.ctx.restore(); return; }
+
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+
+    // Line body runs between the two arrow bases so tips land exactly at ax1/ax2.
+    const legAngle = Math.atan2(uy, ux);
+    this.ctx.beginPath();
+    this.ctx.moveTo(ax1 + ux * arrowSize, ay1 + uy * arrowSize);
+    this.ctx.lineTo(ax2 - ux * arrowSize, ay2 - uy * arrowSize);
+    this.ctx.stroke();
+
+    // Erase the centre section so the text reads clearly against the arrow line.
+    this.ctx.save();
+    this.ctx.translate(mx, my);
+    this.ctx.rotate(textAngle);
+    this.ctx.clearRect(-halfClear, -12, halfClear * 2, 24);
+    this.ctx.restore();
+
+    // Arrowhead at legEnd end — tip at ax2 (same filled-triangle pattern as drawLegHeading).
+    this.ctx.save();
+    this.ctx.translate(ax2, ay2);
+    this.ctx.rotate(legAngle);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 0);
+    this.ctx.lineTo(-arrowSize, -arrowSize * 0.5);
+    this.ctx.lineTo(-arrowSize, arrowSize * 0.5);
+    this.ctx.closePath();
+    this.ctx.fill();
+    this.ctx.restore();
+
+    // Arrowhead at legStart end — tip at ax1 (flipped 180°).
+    this.ctx.save();
+    this.ctx.translate(ax1, ay1);
+    this.ctx.rotate(legAngle + Math.PI);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 0);
+    this.ctx.lineTo(-arrowSize, -arrowSize * 0.5);
+    this.ctx.lineTo(-arrowSize, arrowSize * 0.5);
+    this.ctx.closePath();
+    this.ctx.fill();
+    this.ctx.restore();
+
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+    this.ctx.save();
+    this.ctx.translate(mx, my);
+    this.ctx.rotate(textAngle);
+    this.ctx.fillText(durationText, 0, 0);
+    this.ctx.restore();
+
+    this.ctx.restore();
+  }
+
+  drawLegMarkerAt(legStartX, legStartY, legEndX, legEndY, markerX, markerY, label, color = 'black', side = 1) {
+    const dx = legEndX - legStartX;
+    const dy = legEndY - legStartY;
+    const legLenPx = Math.hypot(dx, dy);
+    if (legLenPx < 1) return;
+
+    const ux = dx / legLenPx;
+    const uy = dy / legLenPx;
+    const rx = uy * side;
+    const ry = -ux * side;
+
+    const tickLength = 15;
+    let labelOffset = 19;
+    let textAngle = Math.atan2(ry, rx);
+    let textAlign = 'left';
+    const P4 = Math.PI / 4;
+    if (Math.abs(textAngle) > 3 * P4) {
+      textAngle -= Math.PI; textAlign = 'right';
+    } else if (textAngle > P4) {
+      textAngle -= Math.PI / 2; textAlign = 'center'; labelOffset = 26;
+    } else if (textAngle > -P4) {
+      textAlign = 'left';
+    } else {
+      textAngle += Math.PI / 2; textAlign = 'center'; labelOffset = 26;
+    }
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.font = '20px sans-serif';
+    this.ctx.fillStyle = color;
+    this.ctx.textAlign = textAlign;
+    this.ctx.textBaseline = 'middle';
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(markerX, markerY);
+    this.ctx.lineTo(markerX + rx * tickLength, markerY + ry * tickLength);
+    this.ctx.stroke();
+
+    this.ctx.save();
+    this.ctx.translate(markerX + rx * labelOffset, markerY + ry * labelOffset);
+    this.ctx.rotate(textAngle);
+    this.ctx.fillText(label, 0, 0);
+    this.ctx.restore();
+
+    this.ctx.restore();
+  }
+
+  // values = { offsetTurnDistance, initiatePopupDistance, startAltitude, rollOverAltitude,
+  //            apogeeAltitude, designateMinAltitude, minReleaseAltitude }
+  drawPopupPlan(x, y, values, color = 'black') {
+    const apex = { x: x + 10, y: y - 30 };
+    const leftFoot = { x: x - 30, y: y + 10 };
+    const rightFoot = { x: x + 45, y: y + 5 };
+    const bracketLeft = { x: x - 78, y: y + 10 };
+    const bracketRight = leftFoot; // popup-initiate point coincides with the tent's left foot
+
+    const fmt = (v) => (v === undefined || v === null || v === '') ? '' : `${v}`;
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.font = `${15}px sans-serif`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    // Left measurement bracket.
+    this.ctx.beginPath();
+    this.ctx.moveTo(bracketLeft.x, bracketLeft.y);
+    this.ctx.lineTo(bracketRight.x, bracketRight.y);
+    this.ctx.moveTo(bracketLeft.x + 8, bracketLeft.y + 5);
+    this.ctx.lineTo(bracketLeft.x + 8, bracketLeft.y + 10);
+    this.ctx.moveTo(bracketRight.x, bracketRight.y + 5);
+    this.ctx.lineTo(bracketRight.x, bracketRight.y + 10);
+    this.ctx.stroke();
+
+    // Tent.
+    this.ctx.beginPath();
+    this.ctx.moveTo(leftFoot.x, leftFoot.y);
+    this.ctx.lineTo(apex.x, apex.y);
+    this.ctx.lineTo(rightFoot.x, rightFoot.y);
+    this.ctx.stroke();
+
+    // Ground
+    this.ctx.beginPath();
+    this.ctx.moveTo(bracketLeft.x - 1, bracketLeft.y + 15);
+    this.ctx.lineTo(rightFoot.x + 9, bracketLeft.y + 15);
+    for (let i = (rightFoot.x + 8 - bracketLeft.x) / 8; i < (rightFoot.x + 8 - bracketLeft.x); i += (rightFoot.x + 8 - bracketLeft.x) / 8) {
+      this.ctx.moveTo(bracketLeft.x + i, bracketLeft.y + 15);
+      this.ctx.lineTo(bracketLeft.x + i - 7, bracketLeft.y + 22);
+    }
+    this.ctx.stroke();
+
+    // Roll over altitude tick
+    this.ctx.beginPath();
+    this.ctx.moveTo(leftFoot.x + ((apex.x - leftFoot.x) / 1.75), leftFoot.y + ((apex.y - leftFoot.y) / 1.75));
+    this.ctx.lineTo(leftFoot.x + ((apex.x - leftFoot.x) / 1.75) - 8, leftFoot.y + ((apex.y - leftFoot.y) / 1.75));
+    this.ctx.stroke();
+
+    // Min designation altitude tick
+    this.ctx.beginPath();
+    this.ctx.moveTo(apex.x + ((rightFoot.x - apex.x) / 2), apex.y + ((rightFoot.y - apex.y) / 2));
+    this.ctx.lineTo(apex.x + ((rightFoot.x - apex.x) / 2) + 8, apex.y + ((rightFoot.y - apex.y) / 2));
+    this.ctx.stroke();
+
+    // Min release altitude tick
+    this.ctx.beginPath();
+    this.ctx.moveTo(rightFoot.x, rightFoot.y);
+    this.ctx.lineTo(rightFoot.x + 8, rightFoot.y);
+    this.ctx.stroke();
+
+    // Distance labels under the bracket ends.
+    this.ctx.fillText(fmt(values.offsetTurnDistance), bracketLeft.x + 8, bracketLeft.y + 32);
+    this.ctx.fillText(fmt(values.initiatePopupDistance), bracketRight.x, bracketRight.y + 32);
+
+    // Start altitude.
+    this.ctx.fillText(fmt(values.startAltitude), bracketLeft.x - 16, bracketLeft.y);
+
+    // Roll-over altitude.
+    this.ctx.fillText(fmt(values.rollOverAltitude), leftFoot.x + ((apex.x - leftFoot.x) / 1.75) - 25, leftFoot.y + ((apex.y - leftFoot.y) / 1.75));
+
+    // Apex altitude.
+    this.ctx.fillText(fmt(values.apogeeAltitude), apex.x, apex.y - 10);
+
+    // Designate altitude.
+    this.ctx.fillText(fmt(values.designateMinAltitude), apex.x + ((rightFoot.x - apex.x) / 2) + 25, apex.y + ((rightFoot.y - apex.y) / 2));
+
+    // Release altitude.
+    this.ctx.fillText(fmt(values.minReleaseAltitude), rightFoot.x + 25, rightFoot.y);
+
+    this.ctx.restore();
+  }
+
+  drawBlastIndicator(x, y, weaponName, blastHeight, blastRadius, color = 'black') {
+    const impactPoint = { x: x, y: y + 15 };
+    const height = { x: x, y: y - 35 };
+    const radiusLeft = { x: x - 50, y: y + 15 };
+    const radiusRight = { x: x + 50, y: y + 15 };
+
+    const fmt = (v, addFt = false) => (v === undefined || v === null || v === '') ? '' : addFt ? `${v} ft` : `${v}`;
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+    this.ctx.font = `12px sans-serif`;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    // Scale.
+    this.ctx.beginPath();
+    this.ctx.moveTo(impactPoint.x, impactPoint.y);
+    this.ctx.lineTo(height.x, height.y);
+    this.ctx.moveTo(radiusLeft.x, radiusLeft.y);
+    this.ctx.lineTo(radiusRight.x, radiusRight.y);
+    this.ctx.stroke();
+
+    // Top arrow
+    this.ctx.beginPath();
+    this.ctx.moveTo(height.x - 4, height.y);
+    this.ctx.lineTo(height.x + 4, height.y);
+    this.ctx.lineTo(height.x, height.y - 7);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    // Left arrow
+    this.ctx.beginPath();
+    this.ctx.moveTo(radiusLeft.x, radiusLeft.y - 4);
+    this.ctx.lineTo(radiusLeft.x, radiusLeft.y + 4);
+    this.ctx.lineTo(radiusLeft.x - 7, radiusLeft.y);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    // Right arrow
+    this.ctx.beginPath();
+    this.ctx.moveTo(radiusRight.x, radiusRight.y - 4);
+    this.ctx.lineTo(radiusRight.x, radiusRight.y + 4);
+    this.ctx.lineTo(radiusRight.x + 7, radiusRight.y);
+    this.ctx.closePath();
+    this.ctx.fill();
+
+    // Arcs
+    const arcHalfAngle = 40 * (Math.PI / 180);
+    const arcDistance = 45;
+    for (let i = 3 * (Math.PI / 2); i < 2 * Math.PI; i += (Math.PI / 2) / 4) {
+      const midAngle = i + (11.25 * (Math.PI / 180));
+
+      const arcXLeft = x + arcDistance * Math.sin(midAngle)
+      const arcXRight = x - arcDistance * Math.sin(midAngle)
+      const arcY = impactPoint.y - arcDistance * Math.cos(midAngle)
+
+      const arcMidAngleLeft = midAngle - (Math.PI / 2);
+      const arcMidAngleRight = 3 * Math.PI / 2 - midAngle;
+      this.ctx.beginPath();
+      this.ctx.arc(arcXLeft, arcY, 10, arcMidAngleLeft - arcHalfAngle, arcMidAngleLeft + arcHalfAngle)
+      this.ctx.stroke();
+
+      this.ctx.beginPath();
+      this.ctx.arc(arcXRight, arcY, 10, arcMidAngleRight - arcHalfAngle, arcMidAngleRight + arcHalfAngle)
+      this.ctx.stroke();
+    }
+
+    // Bomb name.
+    this.ctx.fillText(fmt(weaponName), height.x - 25, height.y - 14);
+
+    // Blast height.
+    this.ctx.fillText(fmt(blastHeight, true), impactPoint.x - 22, impactPoint.y - 25);
+
+    // Blast radius.
+    this.ctx.fillText(fmt(blastRadius, true), impactPoint.x + 25, impactPoint.y - 8);
+
+    this.ctx.restore();
+  }
+
+  drawFuelPlan(x, y, estimatedFuel, minimumFuel, color = 'black') {
+    y += 30
+    const cellW = 55;
+    const cellH = 20;
+    const tableW = cellW * 2;
+    const tableH = cellH * 3;
+    const left = x - tableW / 2;
+    const top = y - tableH;
+
+    const fmt = (v) => (v === undefined || v === null || v === '') ? '' : `${v}`;
+
+    this.ctx.save();
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 1.5;
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    // Outer border
+    this.ctx.strokeRect(left, top, tableW, tableH);
+
+    // Row dividers
+    this.ctx.beginPath();
+    this.ctx.moveTo(left, top + cellH);
+    this.ctx.lineTo(left + tableW, top + cellH);
+    this.ctx.moveTo(left, top + cellH * 2);
+    this.ctx.lineTo(left + tableW, top + cellH * 2);
+    this.ctx.stroke();
+
+    // Vertical divider for rows 2 and 3
+    this.ctx.beginPath();
+    this.ctx.moveTo(left + cellW, top + cellH);
+    this.ctx.lineTo(left + cellW, top + tableH);
+    this.ctx.stroke();
+
+    // Row 1: "FUEL"
+    this.ctx.font = 'bold 16px sans-serif';
+    this.ctx.fillText('FUEL', x, top + cellH / 1.75);
+
+    // Row 2: headers
+    this.ctx.font = 'bold 14px sans-serif';
+    this.ctx.fillText('EST.', left + cellW / 2, top + cellH * 1.55);
+    this.ctx.fillText('MIN.', left + cellW * 1.5, top + cellH * 1.55);
+
+    // Row 3: values
+    this.ctx.font = '12px sans-serif';
+    this.ctx.fillText(fmt(estimatedFuel), left + cellW / 2, top + cellH * 2.55);
+    this.ctx.fillText(fmt(minimumFuel), left + cellW * 1.5, top + cellH * 2.55);
+
+    this.ctx.restore();
+  }
+
+  drawMapArrow(x1, y1, x2, y2, type, distanceLabel, color = 'black') {
+    const padding = 4;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const legLenPx = Math.hypot(dx, dy);
+    if (legLenPx < 20) return;
+
+    const ux = dx / legLenPx;
+    const uy = dy / legLenPx;
+    const rx = uy;
+    const ry = -ux;
+
+    // Same text-angle orientation rules as drawLegMarkers, but applied to the leg
+    // direction (ux, uy) so the label reads along the arrow, not perpendicular to it.
+    let textAngle = Math.atan2(uy, ux);
+    if (textAngle > Math.PI / 2) textAngle -= Math.PI;
+    else if (textAngle < -Math.PI / 2) textAngle += Math.PI;
+
+    const arrowSize = 10;
+    // padding pulls each tip inward along the shaft; label stays centred on the full span
+    const ax1 = x1 + ux * padding + rx;
+    const ay1 = y1 + uy * padding + ry;
+    const ax2 = x2 - ux * padding + rx;
+    const ay2 = y2 - uy * padding + ry;
+    const mx = (ax1 + ax2) / 2;
+    const my = (ay1 + ay2) / 2;
+
+    this.ctx.save();
+    this.ctx.font = '15px sans-serif';
+    let textWidth = this.ctx.measureText(distanceLabel).width;
+    let halfClear = textWidth / 2 + 4;
+
+    const effectiveLenPx = legLenPx - 2 * padding;
+    if (effectiveLenPx < halfClear * 2 + arrowSize * 2 + 4) {
+      distanceLabel = distanceLabel.slice(0, -3)
+      textWidth = this.ctx.measureText(distanceLabel).width;
+      halfClear = textWidth / 2 + 5;
+    }
+
+    if (effectiveLenPx < halfClear * 2 + arrowSize * 2) {
+      distanceLabel = null;
+    }
+
+    this.ctx.strokeStyle = color;
+    this.ctx.fillStyle = color;
+    this.ctx.lineWidth = 2;
+
+    // Line body runs between the two arrow bases so tips land exactly at ax1/ax2.
+    const legAngle = Math.atan2(uy, ux);
+    this.ctx.beginPath();
+    this.ctx.moveTo(ax1 + ux * arrowSize, ay1 + uy * arrowSize);
+    this.ctx.lineTo(ax2 - ux * arrowSize, ay2 - uy * arrowSize);
+    this.ctx.stroke();
+
+    if (type == 'double-arrow' || type == 'double-arrow-distance') {
+      // Arrowhead at end/ax2.
+      this.ctx.save();
+      this.ctx.translate(ax2, ay2);
+      this.ctx.rotate(legAngle);
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, 0);
+      this.ctx.lineTo(-arrowSize, -arrowSize * 0.5);
+      this.ctx.lineTo(-arrowSize, arrowSize * 0.5);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.restore();
+    }
+
+    // Arrowhead at start/ax1.
+    this.ctx.save();
+    this.ctx.translate(ax1, ay1);
+    this.ctx.rotate(legAngle + Math.PI);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 0);
+    this.ctx.lineTo(-arrowSize, -arrowSize * 0.5);
+    this.ctx.lineTo(-arrowSize, arrowSize * 0.5);
+    this.ctx.closePath();
+    this.ctx.fill();
+    this.ctx.restore();
+
+    if (distanceLabel && (type == 'single-arrow-distance' || type == 'double-arrow-distance')) {
+      // Erase the centre section so the text reads clearly against the arrow line.
+      this.ctx.save();
+      this.ctx.translate(mx, my);
+      this.ctx.rotate(textAngle);
+      this.ctx.clearRect(-halfClear, -12, halfClear * 2, 24);
+      this.ctx.restore();
+
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      this.ctx.save();
+      this.ctx.translate(mx, my);
+      this.ctx.rotate(textAngle);
+      this.ctx.fillText(distanceLabel, 0, 0);
+      this.ctx.restore();
+    }
+
+    this.ctx.restore();
+  }
+
   _legHeadingGeometry(legStartX, legStartY, legEndX, legEndY, t, side) {
     const dx = legEndX - legStartX;
     const dy = legEndY - legStartY;
@@ -732,7 +1185,7 @@ class MapDrawUtils {
 
     const lx = legStartX + t * dx;
     const ly = legStartY + t * dy;
-    const offsetDist = 26;
+    const offsetDist = 30;
     const px = lx + rx * offsetDist;
     const py = ly + ry * offsetDist;
 
@@ -743,7 +1196,7 @@ class MapDrawUtils {
     const g = this._legHeadingGeometry(legStartX, legStartY, legEndX, legEndY, t, side);
     if (!g) return [];
 
-    const fontSize = 20;
+    const fontSize = 22;
     const pad = 4;
 
     this.ctx.save();
@@ -1343,7 +1796,7 @@ class MapDrawUtils {
     this.ctx.restore();
   }
 
-  drawSelectionOutline(bounds, strokeWidth = 3, color = '#4af', drawAimingCross = false) {
+  drawSelectionOutline(bounds, strokeWidth = 3, color = '#4af', drawAimingCross = false, aimingCrossColor = 'black') {
     bounds = bounds.slice(0, 4);
     const pixelBounds = bounds.map(bound => ({
       x: (bound.x * this.nmToPixels) + this.centerX,
@@ -1376,7 +1829,7 @@ class MapDrawUtils {
     this.ctx.setLineDash([0]);
 
     if (drawAimingCross) {
-      this.ctx.strokeStyle = 'black';
+      this.ctx.strokeStyle = aimingCrossColor;
       this.ctx.lineWidth = 1;
 
       this.ctx.beginPath();
