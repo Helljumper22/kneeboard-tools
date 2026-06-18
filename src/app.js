@@ -9,6 +9,8 @@ class App {
     const kneeboardGCI = new KneeboardGCI();
     const kneeboardMIR_F1_FRM = new KneeboardMIR_F1_FRM();
 
+    this.attackPlannerMap = new AttackPlanner();
+
     this.kneeboardTemplates = {};
     this.kneeboardTemplates[kneeboardM2000C_OCA.kneeboardId] = kneeboardM2000C_OCA;
     this.kneeboardTemplates[kneeboardGCI.kneeboardId] = kneeboardGCI;
@@ -25,11 +27,13 @@ class App {
 
   runTabs() {
     const activeTab = localStorage.getItem(this.activeTabKey);
-    if (activeTab) {
-      $(`.tab-button[attr-tab="${activeTab}"], .tab[attr-tab="${activeTab}"]`).addClass('selected');
-    } else {
-      $(`.tab-button[attr-tab="bullseye-map-tab"], .tab[attr-tab="bullseye-map-tab"]`).addClass('selected');
+    if (!activeTab) {
+      activeTab = 'bullseye-map-tab';
     }
+
+    $(`.tab-button[attr-tab="${activeTab}"], .tab[attr-tab="${activeTab}"]`).addClass('selected');
+
+    this.tabSelect($(`.tab-button[attr-tab="${activeTab}"]`).index())
 
     $('.tab-button').click((event) => {
       $('.tab-button, .tab').removeClass('selected');
@@ -38,6 +42,17 @@ class App {
       $(`.tab-button[attr-tab="${tabName}"], .tab[attr-tab="${tabName}"]`).addClass('selected');
 
       localStorage.setItem(this.activeTabKey, tabName);
+
+      this.tabSelect($(event.target).index())
+    });
+  }
+
+  tabSelect(selectedIndex) {
+    const tabButtons = $('.tab-button');
+    const total = tabButtons.length;
+    tabButtons.each((index, tabButton) => {
+      const distance = Math.abs(index - selectedIndex);
+      $(tabButton).css("z-index", distance == 0 ? 101 : total - distance);
     });
   }
 

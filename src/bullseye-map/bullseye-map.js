@@ -661,12 +661,12 @@ class BullseyeMap {
 
     this.mapFieldsUtils.displayComponentListButtons();
 
-    this.updateMap();
+    this.update();
 
     $('.import-map-button').off('click').on('click', async () => this.importData());
     $('.show-export-map-modal-button').off('click').on('click', () => this.showExportModal());
     $('.show-download-map-modal-button').off('click').on('click', () => this.showDownloadModal());
-    $('.reset-map-map-button').off('click').on('click', () => this.resetMap());
+    $('.reset-map-button').off('click').on('click', () => this.resetMap());
   }
 
   getDarkMode() {
@@ -674,7 +674,7 @@ class BullseyeMap {
     $('.bullseye-dark-mode').prop('checked', this.darkMode);
   }
 
-  updateMap() {
+  update() {
     this.furthestPoint = 0;
 
     $('.map-canvas').css('background', this.darkMode ? this.backgroundColor[1] : this.backgroundColor[0])
@@ -887,7 +887,7 @@ class BullseyeMap {
       localStorage.setItem(this.bullseyeMapDataKey, JSON.stringify(allData));
 
       // Update map
-      this.updateMap();
+      this.update();
     }
 
     this.mapFieldsUtils.displayComponentListButtons();
@@ -1458,7 +1458,7 @@ class BullseyeMap {
 
     localStorage.setItem(this.bullseyeDarkModeKey, this.darkMode);
 
-    this.updateMap();
+    this.update();
   }
 
   getComponentData(mapComponent) {
@@ -1504,7 +1504,7 @@ class BullseyeMap {
     if (mapData) {
       localStorage.setItem(this.bullseyeMapDataKey, JSON.stringify(mapData));
 
-      this.updateMap();
+      this.update();
     }
   }
 
@@ -1531,7 +1531,7 @@ class BullseyeMap {
   }
 
   showDownloadModal() {
-    const downloadModal = $('.download-options-modal');
+    const downloadModal = $('.download-bullseye-map-modal');
 
     $(downloadModal).find('.format-a4').prop('checked', false);
     $(downloadModal).find('.transparent-background').prop('checked', false);
@@ -1549,7 +1549,7 @@ class BullseyeMap {
         this.mapDrawUtils.canvas.width = 800;
         this.mapDrawUtils.canvas.height = 1131;
 
-        this.updateMap();
+        this.update();
       }
 
       if (!$(downloadModal).find('.transparent-background').is(':checked')) {
@@ -1564,7 +1564,7 @@ class BullseyeMap {
       this.mapDrawUtils.canvas.width = 800;
       this.mapDrawUtils.canvas.height = 800;
 
-      this.updateMap();
+      this.update();
     });
   }
 
@@ -1574,7 +1574,7 @@ class BullseyeMap {
 
       localStorage.removeItem(this.bullseyeMapDataKey);
 
-      this.updateMap();
+      this.update();
     }
   }
 }

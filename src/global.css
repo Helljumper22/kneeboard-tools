@@ -52,7 +52,7 @@ body {
           bottom: 0;
           left: 0;
           border-bottom: 1px solid #DDDD;
-          z-index: 1;
+          z-index: 100;
         }
 
         .tab-button {
@@ -131,7 +131,6 @@ body {
       .tabs {
         display: flex;
         overflow: hidden;
-        z-index: 3;
         height: 100%;
 
         .tab {
@@ -149,6 +148,7 @@ body {
           .tab-content {
             display: flex;
             flex: auto;
+            z-index: 100;
 
             .sidebar {
               display: flex;

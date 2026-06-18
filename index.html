@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="./src/bullseye-map/bullseye-map.css">
   <!---- Kneeboard ---->
   <link rel="stylesheet" href="./src/kneeboard/kneeboard.css">
+  <!---- Attack planner ---->
+  <link rel="stylesheet" href="./src/attack-planner/attack-planner.css">
+  <!---- Utils ---->
+  <link rel="stylesheet" href="./src/utils/map-fields.css">
 
 
   <!-- Library scripts -->
@@ -41,6 +45,11 @@
   <script src="./src/kneeboard/kneeboard-M2000C-OCA.js"></script>
   <script src="./src/kneeboard/kneeboard-GCI.js"></script>
   <script src="./src/kneeboard/kneeboard-MIR-F1-FRM.js"></script>
+  <!---- Attack planner ---->
+  <script src="./src/attack-planner/attack-planner-utils.js"></script>
+  <script src="./src/attack-planner/attack-planner-flight-plan-utils.js"></script>
+  <script src="./src/attack-planner/attack-planner-modes.js"></script>
+  <script src="./src/attack-planner/attack-planner.js"></script>
   <!---- Utils ---->
   <script src="./src/utils/utils.js"></script>
   <script src="./src/utils/kneeboard-draw-utils.js"></script>
@@ -58,6 +67,7 @@
       <div class="tabs-button-container">
         <div class="tab-button" attr-tab="bullseye-map-tab">Bullseye Map</div>
         <div class="tab-button" attr-tab="kneeboard-tab">Kneeboard</div>
+        <div class="tab-button" attr-tab="attack-planner-tab">Attack Planner</div>
         <div class="disclaimer">
           <span>This app is <b>not responsive</b> and <b>doesn't work on smartphone
               display</b>.</span>
@@ -86,19 +96,19 @@
                   <button class="import-map-button">Import map</button>
                   <button class="show-export-map-modal-button">Export map</button>
                   <button class="show-download-map-modal-button">Download map</button>
-                  <button class="reset-map-map-button">Reset map</button>
+                  <button class="reset-map-button">Reset map</button>
                 </div>
               </header>
-              <div class="bullseye-map-component-list-container">
+              <div class="sidebar-component-list-container">
                 <div class="component-list-buttons">
                 </div>
               </div>
-              <div class="bullseye-map-component-container hide">
-                <div class="bullseye-map-component-header">
-                  <button class="bullseye-map-component-back-button">Back</button>
-                  <span class="bullseye-map-component-name"></span>
+              <div class="sidebar-component-container hide">
+                <div class="sidebar-component-header">
+                  <button class="sidebar-component-back-button">Back</button>
+                  <span class="sidebar-component-name"></span>
                 </div>
-                <div class="bullseye-map-component-description"></div>
+                <div class="sidebar-component-description"></div>
               </div>
             </div>
             <div class="map-container">
@@ -106,7 +116,7 @@
             </div>
           </div>
 
-          <div class="download-options-modal modal">
+          <div class="download-bullseye-map-modal modal">
             <div class="modal-content">
               <div class="close-button">&#10006;</div>
               <div class="modal-inner-content">
@@ -186,6 +196,128 @@
                   <input type="text" class="file-name" />
                 </div>
                 <button class="download-kneeboard-button modal-button">Download</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ========== Attack Planner ========== -->
+        <!-- <div class="tab" attr-tab="attack-planner-tab">
+          <div class="tab-content">
+            <div class="sidebar">
+              <header class="sidebar-header">
+                <h1 class="sidebar-title">Attack Planner</h1>
+                <div class="header-options">
+                  <div class="field">
+                    <label>Dark mode</label>
+                    <input type="checkbox" class="attack-planner-dark-mode" />
+                  </div>
+                </div>
+                <div class="header-buttons">
+                  <button class="import-attack-planner-button">Import attack planner data</button>
+                  <button class="show-export-attack-planner-modal-button">Export attack planner data</button>
+                  <button class="show-download-attack-planner-modal-button">Download attack planner</button>
+                  <button class="reset-attack-planner-fields-button">Reset planner</button>
+                </div>
+              </header>
+              <div class="attack-planner-content-container">
+                <div class="attack-planner-mode-tip hide">
+                  <button class="attack-planner-tip-back-button">Cancel</button>
+                  <span class="attack-planner-tip-content"></span>
+                </div>
+                <div class="component-list-buttons">
+                  <button class="add-turning-point-component-button">Add turning point</button>
+                  <button class="add-initial-point-component-button">Add initial point</button>
+                  <button class="add-initial-point-component-button">Add target point</button>
+                  <button class="add-background-image-button">Add background</button>
+                </div>
+                <div class="attack-planner-component-container">
+                  <div class="attack-planner-component-header">
+                    <span class="attack-planner-component-name">Flight plan</span>
+                  </div>
+                  <form class="attack-planner-object-container flight-plan-object-container">
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="attack-planner-container">
+              <canvas class="attack-planner-canvas" height="800" width="800"></canvas>
+            </div>
+          </div>
+
+          <div class="download-attack-planner-modal modal">
+            <div class="modal-content">
+              <div class="close-button">&#10006;</div>
+              <div class="modal-inner-content">
+                <div class="field">
+                  <label>File name</label>
+                  <input type="text" class="file-name" />
+                </div>
+                <button class="download-attack-planner-button modal-button">Download</button>
+              </div>
+            </div>
+          </div>
+        </div> -->
+        <!-- ========== Attack Planner ========== -->
+        <div class="tab" attr-tab="attack-planner-tab">
+          <div class="tab-content">
+            <div class="sidebar">
+              <header class="sidebar-header">
+                <h1 class="sidebar-title">Attack Planner</h1>
+                <div class="header-options">
+                  <div class="field">
+                    <label>Dark mode</label>
+                    <input type="checkbox" class="attack-planner-dark-mode" />
+                  </div>
+                </div>
+                <div class="header-buttons">
+                  <button class="import-attack-planner-button">Import attack planner data</button>
+                  <button class="show-export-attack-planner-modal-button">Export attack planner data</button>
+                  <button class="show-download-attack-planner-modal-button">Download attack planner</button>
+                  <button class="reset-attack-planner-button">Reset planner</button>
+                </div>
+              </header>
+              <div class="sidebar-component-list-container">
+                <div class="component-list-buttons">
+                </div>
+              </div>
+              <div class="sidebar-component-container hide">
+                <div class="sidebar-component-header">
+                  <button class="sidebar-component-back-button">Back</button>
+                  <span class="sidebar-component-name"></span>
+                </div>
+                <div class="sidebar-component-description"></div>
+              </div>
+              <div class="sidebar-edit-instructions-container hide">
+                <div class="sidebar-component-header">
+                  <button class="sidebar-edit-instructions-back-button">Back</button>
+                </div>
+                <div class="sidebar-edit-instructions-text-container">
+                  <p class="sidebar-edit-instructions-text"></p>
+                </div>
+              </div>
+            </div>
+            <div class="attack-planner-container">
+              <div class="attack-planner-canvas-wrapper">
+                <canvas class="attack-planner-background-canvas" height="1056" width="760"></canvas>
+                <canvas class="attack-planner-canvas" height="1056" width="760"></canvas>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="download-attack-planner-modal modal">
+            <div class="modal-content">
+              <div class="close-button">&#10006;</div>
+              <div class="modal-inner-content">
+                <div class="field">
+                  <label>Keep background</label>
+                  <input type="checkbox" class="keep-background" />
+                </div>
+                <div class="field">
+                  <label>File name</label>
+                  <input type="text" class="file-name" />
+                </div>
+                <button class="download-attack-planner-button modal-button">Download</button>
               </div>
             </div>
           </div>

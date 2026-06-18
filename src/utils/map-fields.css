@@ -1,0 +1,265 @@
+body .container .tabs-container .tabs {
+
+  .tab[attr-tab="bullseye-map-tab"],
+  .tab[attr-tab="attack-planner-tab"] {
+    .tab-content {
+      height: 100%;
+
+      .sidebar {
+        height: 100%;
+
+        .sidebar-component-list-container,
+        .sidebar-component-container,
+        .sidebar-edit-instructions-container {
+          background: #2b2b2b;
+          padding: 10px 20px;
+          height: 100%;
+        }
+
+        .sidebar-component-list-container {
+          &.hide {
+            display: none;
+          }
+
+          .component-list-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+          }
+        }
+
+        .sidebar-component-container {
+          &.hide {
+            display: none;
+          }
+
+          .sidebar-component-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+            height: 40px;
+            padding-bottom: 10px;
+
+            .sidebar-component-back-button {
+              position: absolute;
+              left: 0;
+            }
+
+            .sidebar-component-button {
+              position: absolute;
+              right: 0;
+            }
+
+            .sidebar-component-name {
+              width: 100%;
+              text-align: center;
+              white-space: normal;
+              font-weight: bold;
+            }
+          }
+
+          .sidebar-component-description:not(:empty) {
+            padding: 0 5px 10px 5px;
+          }
+
+          .sidebar-component-fields-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+
+            .multiple-field-wrapper {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              position: relative;
+              margin: 10px 20px 10px 20px;
+              width: calc(100% - 40px);
+              border: 1px solid #2b2b2b;
+              border-radius: 10px;
+              overflow: hidden;
+
+              &.multiple-field-wrapper:not(.multiple-field-item .multiple-field-wrapper) {
+                border-radius: 0;
+                margin: 10px 0 10px 0;
+                width: 100%
+              }
+
+              .multiple-field-item {
+                position: relative;
+                padding: 10px 20px;
+                /*border: 1px solid white;*/
+                background: #1e1e1e;
+                display: flex;
+                flex-direction: column;
+                border-radius: 10px;
+
+                &.selected {
+                  background-color: #132339
+                }
+
+                .drag-handle {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  bottom: 0;
+                  width: 20px;
+                  background: #000000;
+                  cursor: move;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  /*border-right: 1px solid white;*/
+                }
+
+                .delete-button {
+                  position: absolute;
+                  padding: 0;
+                  right: 0;
+                  top: 0;
+                  bottom: 0;
+                  width: 20px;
+                  background: #000000;
+                  /*border-left: 1px solid white;*/
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 16px;
+                  line-height: 16px;
+                  cursor: pointer;
+                  border-radius: 0;
+
+                  &:hover {
+                    background: #3b3b3b;
+                  }
+                }
+
+                .field {
+                  margin: 0 10px 0 10px;
+                }
+              }
+
+              .add-button {
+                width: 100%;
+                padding: 0;
+                height: 20px;
+                background: #000000;
+                /*border: 1px solid white;*/
+                color: white;
+                cursor: pointer;
+                font-size: 16px;
+                line-height: 16px;
+                border-radius: 0;
+
+                &:hover {
+                  background: #3b3b3b;
+                }
+              }
+
+              .multiple-field-item.dragging {
+                opacity: 0.5;
+                border: 1px dashed white;
+              }
+
+              .ui-sortable-placeholder {
+                visibility: visible !important;
+                height: 40px;
+                background: #3b3b3b;
+                border: 1px dashed white;
+                margin: 5px 0;
+              }
+            }
+
+            .component-button,
+            .show-sub-component-button {
+              margin: 10px 0 10px 0;
+            }
+          }
+        }
+
+        .sidebar-edit-instructions-container {
+          &.hide {
+            display: none;
+          }
+
+          .sidebar-edit-instructions-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .sidebar-edit-instructions-text {
+              padding: 10px 5px;
+              line-height: 1.5;
+            }
+          }
+        }
+      }
+
+      .field {
+        display: flex;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+
+        label {
+          display: inline-block;
+          width: 150px;
+          font-size: 14px;
+        }
+
+        input,
+        select {
+          width: 140px;
+          padding: 5px;
+          font-size: 14px;
+          margin: 5px 0;
+
+          &[type=checkbox] {
+            width: 155px;
+          }
+
+          &[type="range"] {
+            cursor: pointer;
+            height: 16px;
+            padding: 0 5px;
+            border-radius: 1px;
+            border: 1px solid rgb(118, 118, 118);
+            background: white;
+            outline: none;
+            appearance: none;
+
+            &::-webkit-slider-thumb {
+              cursor: pointer;
+              appearance: none;
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: #005CC8;
+            }
+
+            &::-moz-range-thumb {
+              cursor: pointer;
+              width: 14px;
+              height: 14px;
+              border-radius: 50%;
+              background: #005CC8;
+            }
+          }
+        }
+
+        select {
+          width: 154px;
+        }
+
+        .color-picker {
+          width: 155px;
+          height: 30px;
+          margin: 5px 0;
+          border-radius: 1px;
+        }
+      }
+    }
+  }
+}

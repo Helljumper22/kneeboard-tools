@@ -1,20 +1,24 @@
 class MapFieldsUtils {
-    constructor(bullseyeMap, tab) {
-        this.bullseyeMap = bullseyeMap;
+    constructor(tabConstructor, tab, emptyComponents = true) {
+        this.tabConstructor = tabConstructor;
+        this.emptyComponents = emptyComponents;
 
-        this.menuContainer = $(tab).find('.bullseye-map-component-list-container');
+        this.menuContainer = $(tab).find('.sidebar-component-list-container');
         this.componentListButtons = $(this.menuContainer).find('.component-list-buttons')
-        this.componentContainer = $(tab).find('.bullseye-map-component-container');
-        this.componentHeader = $(tab).find('.bullseye-map-component-header');
-        this.componentDescription = $(tab).find('.bullseye-map-component-description');
+        this.componentContainer = $(tab).find('.sidebar-component-container');
+        this.componentHeader = $(tab).find('.sidebar-component-header');
+        this.componentDescription = $(tab).find('.sidebar-component-description');
+        this.editInstructionsContainer = $(tab).find('.sidebar-edit-instructions-container');
     }
 
     displayComponentListButtons() {
         $(this.menuContainer).removeClass('hide');
         $(this.componentContainer).addClass('hide');
 
+        $('.sidebar-component-button').remove();
+
         $(this.componentListButtons).empty();
-        this.bullseyeMap.mapComponentList.forEach(mapComponent => {
+        this.tabConstructor.mapComponentList.forEach(mapComponent => {
             const componentButton = $(`<button class="show-${mapComponent.id}-component-button">${mapComponent.label}</button>`);
             $(componentButton).off('click').on('click', () => this.displayComponent(mapComponent));
 
@@ -22,25 +26,46 @@ class MapFieldsUtils {
         });
     }
 
+    showEditInstructions(text) {
+        $(this.menuContainer).addClass('hide');
+        $(this.componentContainer).addClass('hide');
+        $(this.editInstructionsContainer).removeClass('hide');
+        $(this.editInstructionsContainer).find('.sidebar-edit-instructions-text').text(text);
+        $(this.editInstructionsContainer).find('.sidebar-edit-instructions-back-button')
+            .off('click')
+            .on('click', () => this.tabConstructor.setSelectMode());
+    }
+
+    hideEditInstructions() {
+        if ($(this.editInstructionsContainer).hasClass('hide')) return;
+        $(this.editInstructionsContainer).addClass('hide');
+        $(this.menuContainer).addClass('hide');
+        $(this.componentContainer).removeClass('hide');
+    }
+
     displayComponent(mapComponent) {
-        const componentData = this.bullseyeMap.getComponentData(mapComponent);
+        const componentData = this.tabConstructor.getComponentData(mapComponent);
 
         // Toggle visibility
         $(this.menuContainer).addClass('hide');
         $(this.componentContainer).removeClass('hide');
 
         // Update header and setup back button
-        $(this.componentHeader).find('.bullseye-map-component-name').text(mapComponent.label);
-        $(this.componentHeader).find('.bullseye-map-component-back-button')
+        $(this.componentHeader).find('.sidebar-component-name').text(mapComponent.label);
+        $(this.componentHeader).find('.sidebar-component-back-button')
             .off('click')
-            .on('click', () => this.displayComponentListButtons());
+            .on('click', () => {
+                mapComponent.pageToggleFunction?.(false);
+                this.displayComponentListButtons();
+            });
         $(this.componentDescription).text(mapComponent.description ?? '');
+        mapComponent.pageToggleFunction?.(true);
 
         // Clear previous content
-        $(this.componentContainer).find('.bullseye-map-component-fields-container, .bullseye-map-sub-components-container').remove();
+        $(this.componentContainer).find('.sidebar-component-fields-container, .sidebar-sub-components-container').remove();
 
         // Create and append form container
-        const formContainer = $('<form class="bullseye-map-component-fields-container"></form>')
+        const formContainer = $('<form class="sidebar-component-fields-container"></form>')
             .on('input', 'input, select', (e) => this.handleFieldChange(e, mapComponent))
             .on('change', '.color-picker', (e) => this.handleFieldChange(e, mapComponent))
             .on('click', '.add-button', (e) => this.handleAddField(e, mapComponent))
@@ -58,8 +83,8 @@ class MapFieldsUtils {
         $(this.componentContainer).removeClass('hide');
 
         // Update header and setup back button
-        $(this.componentHeader).find('.bullseye-map-component-name').text(subComponent.label);
-        $(this.componentHeader).find('.bullseye-map-component-back-button')
+        $(this.componentHeader).find('.sidebar-component-name').text(subComponent.label);
+        $(this.componentHeader).find('.sidebar-component-back-button')
             .off('click')
             .on('click', () => {
                 this.displayComponent(parentComponent)
@@ -67,12 +92,12 @@ class MapFieldsUtils {
         $(this.componentDescription).text(subComponent.description ?? '');
 
         // Clear previous content
-        $(this.componentContainer).find('.bullseye-map-component-fields-container, .bullseye-map-sub-components-container').remove();
+        $(this.componentContainer).find('.sidebar-component-fields-container, .sidebar-sub-components-container').remove();
 
         /// TODO: Handle sub-component field change
 
         // Create and append form container
-        const formContainer = $('<form class="bullseye-map-component-fields-container"></form>')
+        const formContainer = $('<form class="sidebar-component-fields-container"></form>')
             .on('input', 'input, select', (e) => this.handleFieldChange(e, subComponent))
             .on('change', '.color-picker', (e) => this.handleFieldChange(e, subComponent))
             .on('click', '.add-button', (e) => this.handleAddField(e, subComponent))
@@ -88,6 +113,26 @@ class MapFieldsUtils {
         component.fields.forEach(field => {
             const fieldId = `${componentId}.${field.id}`;
 
+            if (field.options) {
+                if (field.options.addSubComponentButton) {
+                    const headerButton = $(`<button class="sidebar-component-button" id="${fieldId}">${field.options.addSubComponentButton}</button>`);
+                    $(headerButton).off('click').on('click', (e) => {
+                        e.preventDefault();
+
+                        const wrapper = $(event.target).parent('.sidebar-component-header').siblings('.sidebar-component-fields-container').children('.multiple-field-wrapper');
+                        const fieldPath = [fieldId.split('.')[0]];
+
+                        const newItemData = this.addField(component, field, fieldPath);
+
+                        const index = wrapper.children('.multiple-field-item').length;
+                        const itemContainer = this.createMultipleFieldItem(field, newItemData, fieldId, index);
+                        wrapper.append(itemContainer);
+                    });
+
+                    $(container).siblings('.sidebar-component-header').append(headerButton);
+                }
+            }
+
             switch (field.type) {
                 case 'button':
                     this.renderButton(container, field, data, component, fieldId);
@@ -97,6 +142,9 @@ class MapFieldsUtils {
                     break;
                 case 'multiple':
                     this.renderMultipleField(container, field, data, component, fieldId);
+                    break;
+                case 'hidden':
+                    // Nothing !
                     break;
                 default:
                     this.renderSingleField(container, field, data, fieldId);
@@ -158,7 +206,7 @@ class MapFieldsUtils {
                 items = [fieldData];
             } else {
                 // No data, create default item
-                items = [{}];
+                items = this.emptyComponents ? [{}] : [];
             }
         }
 
@@ -195,7 +243,7 @@ class MapFieldsUtils {
                     const itemsInOrder = wrapper.find('> .multiple-field-item').toArray();
 
                     // Persist reordered data into the top-level component storage
-                    let componentData = this.bullseyeMap.getComponentData(componentId);
+                    let componentData = this.tabConstructor.getComponentData(componentId);
 
                     const pathParts = fieldId.split('.').slice(1); // e.g. ['line','points']
 
@@ -209,6 +257,8 @@ class MapFieldsUtils {
 
                     for (let i = 0; i < pathParts.length - 1; i++) {
                         const part = pathParts[i];
+                        if (!isNaN(part)) continue;
+
                         if (!target[part]) target[part] = [];
 
                         if (Array.isArray(target[part])) {
@@ -259,9 +309,9 @@ class MapFieldsUtils {
                         $(el).data('index', idx);
                     });
 
-                    this.bullseyeMap.saveComponentData(componentId, componentData);
+                    this.tabConstructor.saveComponentData(componentId, componentData);
 
-                    this.bullseyeMap.updateMap();
+                    this.tabConstructor.update();
                 }
             });
         }
@@ -278,9 +328,9 @@ class MapFieldsUtils {
             itemContainer.append(dragHandle);
         }
 
-        this.renderFields(itemContainer, field, data, fieldId);
+        this.renderFields(itemContainer, field, data, `${fieldId}.${index}`);
 
-        if (field.options?.repeatable) {
+        if (field.options?.repeatable || field.options?.deletable) {
             const deleteButton = $('<button class="delete-button">−</button>');
             itemContainer.append(deleteButton);
         }
@@ -333,7 +383,7 @@ class MapFieldsUtils {
         const fieldId = field.attr('id');
         const value = field.attr('type') === 'checkbox' ? field.is(':checked') : field.val();
 
-        let componentData = this.bullseyeMap.getComponentData(mapComponent);
+        let componentData = this.tabConstructor.getComponentData(mapComponent);
         const fieldPath = fieldId.split('.');
         const componentId = fieldPath.shift(); // Remove component id
 
@@ -354,6 +404,7 @@ class MapFieldsUtils {
 
         for (let i = 0; i < pathParts.length; i++) {
             const pathPart = pathParts[i];
+            if (!isNaN(pathPart)) continue;
             currentFieldDef = currentFieldDef.fields.find(f => f.id === pathPart);
 
             if (currentFieldDef?.type === 'multiple') {
@@ -382,9 +433,18 @@ class MapFieldsUtils {
             currentData[fieldName] = value;
         }
 
-        this.bullseyeMap.saveComponentData(mapComponent, componentData);
+        if (this.tabConstructor.onFieldChange) {
+            this.tabConstructor.onFieldChange(fieldId, fieldName, currentData);
+        }
 
-        this.bullseyeMap.updateMap();
+        const fieldDef = this.findFieldByPath(mapComponent, fieldId);
+        if (fieldDef?.onChangeFunction) {
+            fieldDef.onChangeFunction(value, currentData, fieldId, event.target);
+        }
+
+        this.tabConstructor.saveComponentData(mapComponent, componentData);
+
+        this.tabConstructor.update();
     }
 
     handleAddField(event, mapComponent) {
@@ -395,57 +455,11 @@ class MapFieldsUtils {
         const fieldPath = fieldId.split('.').slice(1); // Remove component id
         const field = this.findFieldByPath(mapComponent, fieldId);
 
-        // Get current data
-        let componentData = this.bullseyeMap.getComponentData(mapComponent);
-        if (!componentData) {
-            componentData = mapComponent.type === 'multiple' ? [] : {};
-        }
+        const newItemData = this.addField(mapComponent, field, fieldPath);
 
         const index = wrapper.children('.multiple-field-item').length;
-
-        // Traverse to the correct location in the data structure
-        let currentData = componentData;
-        for (let i = 0; i < fieldPath.length - 1; i++) {
-            const pathPart = fieldPath[i];
-            if (!currentData[pathPart]) {
-                currentData[pathPart] = Array.isArray(currentData) ? {} : [];
-            }
-            currentData = currentData[pathPart];
-        }
-
-        // Create new item with proper structure
-        let newItemData = {};
-        if (field.fields) {
-            field.fields.forEach(subField => {
-                if (subField.type === 'multiple') {
-                    // For nested multiple fields, create a single empty child so
-                    // there is always at least one child (e.g. points in a line)
-                    const childDefault = {};
-                    if (subField.fields) {
-                        subField.fields.forEach(grandChild => {
-                            childDefault[grandChild.id] = grandChild.default ?? '';
-                        });
-                    }
-                    newItemData[subField.id] = [childDefault];
-                } else {
-                    newItemData[subField.id] = subField.default ?? '';
-                }
-            });
-        }
-
-        // Add the new item
-        const lastPath = fieldPath[fieldPath.length - 1];
-        if (!currentData[lastPath]) {
-            currentData[lastPath] = [];
-        }
-        currentData[lastPath].push(newItemData);
-
         const itemContainer = this.createMultipleFieldItem(field, newItemData, fieldId, index);
         wrapper.children('.add-button').before(itemContainer);
-
-        this.bullseyeMap.saveComponentData(mapComponent, componentData);
-
-        this.bullseyeMap.updateMap();
     }
 
     handleDeleteField(event, mapComponent) {
@@ -457,7 +471,7 @@ class MapFieldsUtils {
         const pathParts = fieldId.split('.').slice(1); // Remove component id
         const index = item.data('index');
 
-        let componentData = this.bullseyeMap.getComponentData(mapComponent);
+        let componentData = this.tabConstructor.getComponentData(mapComponent);
 
         try {
             // Collect parent indices from outermost to innermost (.multiple-field-item ancestors of the wrapper, not the item itself)
@@ -470,6 +484,7 @@ class MapFieldsUtils {
 
             for (let i = 0; i < pathParts.length - 1; i++) {
                 const part = pathParts[i];
+                if (!isNaN(part)) continue;
 
                 if (Array.isArray(target)) {
                     // target is already an array, index into it
@@ -510,8 +525,10 @@ class MapFieldsUtils {
                 $(el).data('index', idx);
             });
 
-            // If wrapper is now empty, insert a default item
-            if (wrapper.find('> .multiple-field-item').length === 0) {
+            // If wrapper is now empty, insert a default item — but only when this
+            // tab keeps at least one empty item (emptyComponents). Otherwise the
+            // array is left genuinely empty rather than re-seeding a blank entry.
+            if (this.emptyComponents && wrapper.find('> .multiple-field-item').length === 0) {
                 const field = this.findFieldByPath(mapComponent, fieldId);
 
                 let newItemData = {};
@@ -543,12 +560,91 @@ class MapFieldsUtils {
                 }
             }
 
-            this.bullseyeMap.saveComponentData(mapComponent, componentData);
-            this.bullseyeMap.updateMap();
+            this.tabConstructor.saveComponentData(mapComponent, componentData);
+            this.tabConstructor.update();
 
         } catch (err) {
             console.error('Error deleting item:', err);
         }
+    }
+
+    selectField(fieldPath) {
+        const [fieldIdFirst, ...remainingPath] = fieldPath;
+        let fieldId = fieldIdFirst;
+
+        let component = $(this.componentContainer).find('.sidebar-component-fields-container');
+        remainingPath.forEach(field => {
+            if (typeof field == 'string') {
+                fieldId += '.' + field;
+                component = component.find(`.multiple-field-wrapper[data-field-id='${fieldId}']`)
+            } else if (typeof field == 'number') {
+                fieldId += '.' + field;
+                component = component.find(`.multiple-field-item[data-index='${field}']`)
+            }
+        });
+
+        $(component).addClass('selected');
+        component[0]?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+
+    addField(mapComponent, field, fieldPath, data = null) {
+        let componentData = this.tabConstructor.getComponentData(mapComponent);
+        if (!componentData) {
+            componentData = mapComponent.type === 'multiple' ? [] : {};
+        }
+
+        // Build new item with defaults
+        let newItemData = {};
+        if (field.fields) {
+            field.fields.forEach(subField => {
+                if (subField.type === 'button' || subField.type === 'hidden') return;
+                if (subField.type === 'multiple') {
+                    newItemData[subField.id] = this.emptyComponents ? [{}] : [];
+                } else {
+                    newItemData[subField.id] = subField.default ?? '';
+                }
+            });
+        }
+
+        // Merge provided data over defaults
+        if (data) {
+            if (typeof data === 'object') {
+                Object.keys(data).forEach(k => {
+                    newItemData[k] = data[k];
+                });
+            } else {
+                newItemData = data
+            }
+        }
+
+        // Traverse to the correct location and push
+        let currentData = componentData;
+        for (let i = 0; i < fieldPath.length - 1; i++) {
+            const pathPart = fieldPath[i];
+            if (!isNaN(pathPart)) {
+                // numeric index — traverse into the array
+                currentData = currentData[parseInt(pathPart)];
+            } else {
+                if (!currentData[pathPart]) currentData[pathPart] = [];
+                currentData = currentData[pathPart];
+            }
+        }
+
+        const lastPath = fieldPath[fieldPath.length - 1];
+        if (!currentData[lastPath]) currentData[lastPath] = [];
+        if (field.type == 'multiple') {
+            currentData[lastPath].push(newItemData);
+        } else {
+            currentData[lastPath] = newItemData;
+        }
+
+        this.tabConstructor.saveComponentData(mapComponent, componentData);
+        this.tabConstructor.update();
+
+        return newItemData;
     }
 
     findFieldByPath(mapComponent, fieldId) {
@@ -556,6 +652,8 @@ class MapFieldsUtils {
         let current = { fields: mapComponent.fields };
 
         for (const part of path) {
+            if (!isNaN(part)) continue; // skip array indices
+            if (!current.fields) return null;
             current = current.fields.find(f => f.id === part);
             if (!current) return null;
         }
