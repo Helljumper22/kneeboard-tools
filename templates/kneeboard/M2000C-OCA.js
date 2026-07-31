@@ -5,7 +5,7 @@ const M2000C_OCA_takeoffOptions = ['VFR 1', 'VFR 2', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_formationOptions = ['ECHL L', 'ECHL R', 'F4 L', 'F4 R', 'FW L', 'FW R', 'WEDGE L', 'WEDGE R', 'BTL L', 'BTL R', 'BTL 4 L', 'BTL 4 R', 'CARD L', 'CARD R', 'FL 4 L', 'FL 4 R'];
 const M2000C_OCA_recoveryOptions = ['SKY CLR', 'CLD BRK', 'IFR 1', 'IFR 2', 'IFR 3'];
 const M2000C_OCA_landingOptions = ['INDIV', 'FORM'];
-const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8A', '6+8F', '6+8B', '6+8K', '6+8+8F', '6+8+14A', '6+8+14F', '6+8B+4x250 kg'];
+const M2000C_OCA_confOptions = ['6A', '6F', '6B', '6K', '6+8A', '6+8F', '6+8B', '6+8K', '6+8+8F', '6+8+14A', '6+8+14F', '6+8+20F', '6+8+20B', '6+8B+4x250 kg'];
 const M2000C_OCA_targetingOptions = ['L/S/H', 'T/S/L', 'L/X/H', 'T/X/L'];
 const M2000C_OCA_sortingOptions = ['L/S/H', 'T/S/L', 'T/S/H', 'L/S/L'];
 const M2000C_OCA_riskLevelOptions = ['LOW', 'MEDIUM', 'HIGH'];
@@ -2335,6 +2335,7 @@ const M2000C_OCA_1 = {
             type: 'linked-select',
             _description: 'Performance data CONF field',
             options: M2000C_OCA_confOptions,
+            selectColumns: 2,
             dropdownSide: 'left',
             linkedFields: [
                 'perf-data-jx',
@@ -2385,6 +2386,8 @@ const M2000C_OCA_1 = {
                 '0.57', // 6+8+8F
                 '0.61', // 6+8+14A
                 '0.56', // 6+8+14F
+                '0.56', // 6+8+20F
+                '0.45', // 6+8+20B
                 '0.45', // 6+8B+4x250 kg
             ],
             position: [27, 28, 1, 2],
@@ -2408,6 +2411,8 @@ const M2000C_OCA_1 = {
                 '475 - 0.87', // 6+8+8F
                 '480 - 0.88', // 6+8+14A
                 '465 - 0.85', // 6+8+14F
+                '465 - 0.85', // 6+8+20F
+                '445 - 0.83', // 6+8+20B
                 '445 - 0.83', // 6+8B+4x250 kg
             ],
             position: [27, 28, 4, 6],
@@ -2441,6 +2446,8 @@ const M2000C_OCA_1 = {
                 '141', // 6+8+8F
                 '144', // 6+8+14A
                 '139', // 6+8+14F
+                '139', // 6+8+20F
+                '128', // 6+8+20B
                 '128', // 6+8B+4x250 kg
             ],
             position: [28, 29, 1, 2],
@@ -2465,6 +2472,8 @@ const M2000C_OCA_1 = {
                 '565 - 0.90', // 6+8+8F
                 '565 - 0.90', // 6+8+14A
                 '560 - 0.89', // 6+8+14F
+                '560 - 0.89', // 6+8+20F
+                '555 - 0.87', // 6+8+20B
                 '555 - 0.87', // 6+8B+4x250 kg
             ],
             position: [28, 29, 4, 6],
@@ -2489,6 +2498,8 @@ const M2000C_OCA_1 = {
                 '1800 kg', // 6+8+8F
                 '1500 kg', // 6+8+14A
                 '1400 kg', // 6+8+14F
+                '1400 kg', // 6+8+20F
+                '700 kg', // 6+8+20B
                 '700 kg', // 6+8B+4x250 kg
             ],
             position: [28, 29, 6, 9],
@@ -2521,6 +2532,8 @@ const M2000C_OCA_1 = {
                 '122', // 6+8+8F
                 '120', // 6+8+14A
                 '124', // 6+8+14F
+                '124', // 6+8+20F
+                '149', // 6+8+20B
                 '149', // 6+8B+4x250 kg
             ],
             position: [29, 30, 1, 2],
@@ -2544,6 +2557,8 @@ const M2000C_OCA_1 = {
                 '0.88 - FL400', // 6+8+8F
                 '0.89 - FL400', // 6+8+14A
                 '0.84 - FL360', // 6+8+14F
+                '0.84 - FL360', // 6+8+20F
+                '0.81 - FL300', // 6+8+20B
                 '0.81 - FL300', // 6+8B+4x250 kg
             ],
             position: [29, 30, 4, 6],
@@ -2578,6 +2593,8 @@ const M2000C_OCA_1 = {
                 '154', // 6+8+8F
                 '153', // 6+8+14A
                 '155', // 6+8+14F
+                '155', // 6+8+20F
+                '173', // 6+8+20B
                 '173', // 6+8B+4x250 kg
             ],
             position: [30, 31, 1, 2],
@@ -2602,6 +2619,8 @@ const M2000C_OCA_1 = {
                 '380', // 6+8+8F
                 '380', // 6+8+14A
                 '365', // 6+8+14F
+                '365', // 6+8+20F
+                '380', // 6+8+20B
                 '380', // 6+8B+4x250 kg
             ],
             position: [30, 31, 4, 6],
@@ -2626,6 +2645,8 @@ const M2000C_OCA_1 = {
                 '2100 kg', // 6+8+8F
                 '2300 kg', // 6+8+14A
                 '2100 kg', // 6+8+14F
+                '2100 kg', // 6+8+20F
+                '1700 kg', // 6+8+20B
                 '1700 kg', // 6+8B+4x250 kg
             ],
             position: [30, 31, 6, 9],
