@@ -26,7 +26,7 @@ class App {
   }
 
   runTabs() {
-    const activeTab = localStorage.getItem(this.activeTabKey);
+    let activeTab = localStorage.getItem(this.activeTabKey);
     if (!activeTab) {
       activeTab = 'bullseye-map-tab';
     }
